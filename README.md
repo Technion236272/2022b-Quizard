@@ -4,8 +4,7 @@
 
 ## Motivation
 
-Describe the problem your project solves, and why it is important. Write a short paragraph. Example:
-* *For many people in Israel, ordering takeout food or going out to eat is not a cheap treat. For many others, cooking for themselves and their family at home is not a privilege. We want to change the way people think about home-made food, using an on-demand service platform, similar to Uber and Airbnb.* **(Taken from [Cookoo](https://github.com/Technion236503/2019b-Cookoo))**
+In the modern time, many peaople attracted to habbits which don't contribute to the brain (and that's understatement). With Quizard, you can get more knowledge about anything in the world - with so much fun and in a socialize way.
 
 ## Core Features
 
