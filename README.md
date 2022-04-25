@@ -1,6 +1,6 @@
-# \<PROJECT NAME>
+# Quizard
 
-> This is the project description. Give a consice decription of no more than 2-3 lines.
+> The best social quiz game to play with all your friends and family! In this game everyone compete with each other and not just by getting the right answer, but also by entering false answer: the more participants choose your false answer, the more points you get per round! You can choose to play only with your buddies, or to play globally and try to get to the top by getting as much winnings as you can.
 
 ## Motivation
 
