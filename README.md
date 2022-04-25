@@ -10,12 +10,18 @@ In the modern time, many peaople attracted to habbits which don't contribute to 
 
 Describe the core features of your project, which contribute the most to its value. Example:
 
-* [ ] View stores around your location.
-* [ ] Filter neraby stores by distance, rating and keywords.
+* [ ] Signup and login with Email.
+* [ ] Create and save a game of your own questions.
+* [ ] Choose a public/private game.
+* [ ] Score is updated every round.
+* [ ] Kick a participant.
+
 
 ## Complementary features
 
 Describe extra features of your project, which contribute significant value to the user. Example:
 
 * [ ] Signup and login with Google and Facebook.
-* [ ] Save you favorite stores for later in a favorites list.
+* [ ] Participants leaderboard.
+* [ ] Group chat.
+* [ ] Game room settings(Appearance, Language, etc..).
