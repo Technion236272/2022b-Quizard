@@ -8,18 +8,14 @@ In the modern time, many peaople attracted to habbits which don't contribute to 
 
 ## Core Features
 
-Describe the core features of your project, which contribute the most to its value. Example:
-
 * [ ] Signup and login with Email.
-* [ ] Create and save a game of your own questions.
+* [ ] Create and save your own questions.
 * [ ] Choose a public/private game.
 * [ ] Score is updated every round.
 * [ ] Kick a participant.
 
 
 ## Complementary features
-
-Describe extra features of your project, which contribute significant value to the user. Example:
 
 * [ ] Signup and login with Google and Facebook.
 * [ ] Participants leaderboard.
