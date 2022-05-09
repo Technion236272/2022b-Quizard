@@ -29,46 +29,49 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         body: Padding(
       padding: const EdgeInsets.all(12),
-      child:
-          Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-        Row(
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const <Widget>[
-            InkWell(
-              child: Icon(
-                Icons.language,
-                color: defaultColor,
-                size: 32.0,
-              ),
-              onTap: null, // TODO: Go to Change Language screen
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const <Widget>[
+                InkWell(
+                  child: Icon(
+                    Icons.language,
+                    color: defaultColor,
+                    size: 32.0,
+                  ),
+                  onTap: null, // TODO: Go to Change Language screen
+                ),
+                InkWell(
+                  child: Icon(
+                    Icons.info_outline,
+                    color: defaultColor,
+                    size: 32.0,
+                  ),
+                  onTap: null, // TODO: Go to Rules screen
+                )
+              ],
             ),
-            InkWell(
-              child: Icon(
-                Icons.info_outline,
-                color: defaultColor,
-                size: 32.0,
-              ),
-              onTap: null, // TODO: Go to Rules screen
-            )
-          ],
-        ),
-        const Image(image: AssetImage('images/titles/quizard.png')),
-        Text(
-          'Welcome, ${loginModel.emailController.text}!',
-          style: const TextStyle(fontSize: 18),
-        ),
-        ElevatedButton(
-          child: const Text('Log out', style: TextStyle(color: defaultColor)),
-          onPressed: () async {
-            await AuthModel.instance().signOut();
-            loginModel.logOut();
-            // Hide StatusBar, Show navigation buttons
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                overlays: [SystemUiOverlay.bottom]);
-            Navigator.of(context).pop();
-          },
-        ),
-      ]),
+            const Image(image: AssetImage('images/titles/quizard.png')),
+            Text(
+              'Welcome, ${loginModel.emailController.text}!',
+              style: const TextStyle(fontSize: 18),
+            ),
+            ElevatedButton(
+              child:
+                  const Text('Log out', style: TextStyle(color: defaultColor)),
+              onPressed: () async {
+                await AuthModel.instance().signOut();
+                loginModel.logOut();
+                // Hide StatusBar, Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+                Navigator.of(context).pop();
+              },
+            ),
+            Container()
+          ]),
     ));
   }
 }

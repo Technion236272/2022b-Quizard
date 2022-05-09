@@ -1,4 +1,5 @@
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
@@ -58,24 +59,64 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget build(BuildContext context) {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
     void _loginNow() {
+      // Tyring to log in as it's an email
       loginModel.toggleLogging();
       AuthModel.instance()
           .signIn(loginModel.emailController.text,
               loginModel.passwordController.text)
           .then((result) async {
         if (result == true) {
+          // it's a valid email! logging in...
           loginModel.logIn();
           loginModel.toggleLogging();
           Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (context) => const HomePage()));
         } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(
-                content: Text('There was an error logging into the app'),
-              ))
-              .closed
-              .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
-          loginModel.toggleLogging();
+          // Might be a user name? trying to get email by username...
+          FirebaseFirestore fireStore = FirebaseFirestore.instance;
+          fireStore
+              .collection('users')
+              .doc(loginModel.emailController.text)
+              .get()
+              .then((snapshot) {
+            if (snapshot.data() != null) {
+              // User found! trying to log in with
+              // corresponding email and entered password
+              AuthModel.instance()
+                  .signIn(snapshot.data()?["email"],
+                      loginModel.passwordController.text)
+                  .then((result) async {
+                if (result == true) {
+                  // It was a valid username and found the right email.
+                  // logging in...
+                  loginModel.logIn();
+                  loginModel.toggleLogging();
+                  Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (context) => const HomePage()));
+                } else {
+                  // Else it wasn't a valid password
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(
+                        content: Text('Wrong password'),
+                      ))
+                      .closed
+                      .then((value) =>
+                          ScaffoldMessenger.of(context).clearSnackBars());
+                  loginModel.toggleLogging();
+                }
+              });
+            } else {
+              // Else it wasn't a valid username / email
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(
+                    content: Text('Wrong Email / Username'),
+                  ))
+                  .closed
+                  .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
+              loginModel.toggleLogging();
+            }
+          });
         }
       });
     }
