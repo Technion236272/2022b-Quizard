@@ -25,19 +25,19 @@ class MyApp extends StatelessWidget {
           colorScheme:
               Theme.of(context).colorScheme.copyWith(primary: Colors.white),
           scaffoldBackgroundColor: backgroundColor),
-      home: const MyHomePage(),
+      home: const WelcomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class WelcomePage extends StatefulWidget {
+  const WelcomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<WelcomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
