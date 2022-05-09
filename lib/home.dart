@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import 'auth_model.dart';
 import 'colors.dart';
+import 'login_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,6 +24,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+
     return Scaffold(
         body: Padding(
       padding: const EdgeInsets.all(12),
@@ -48,13 +53,18 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         const Image(image: AssetImage('images/titles/quizard.png')),
-        const Text(
-          'Logged in successfully!',
-          style: TextStyle(fontSize: 18),
+        Text(
+          'Welcome, ${loginModel.emailController.text}!',
+          style: const TextStyle(fontSize: 18),
         ),
         ElevatedButton(
-          child: const Text('Go back', style: TextStyle(color: defaultColor)),
-          onPressed: () {
+          child: const Text('Log out', style: TextStyle(color: defaultColor)),
+          onPressed: () async {
+            await AuthModel.instance().signOut();
+            loginModel.logOut();
+            // Hide StatusBar, Show navigation buttons
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: [SystemUiOverlay.bottom]);
             Navigator.of(context).pop();
           },
         ),

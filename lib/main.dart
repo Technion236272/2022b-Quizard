@@ -1,9 +1,11 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'auth_model.dart';
 import 'firebase_options.dart';
 import 'colors.dart';
 import 'home.dart';
@@ -54,103 +56,122 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      return Scaffold(
-          body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const <Widget>[
-                  InkWell(
-                    child: Icon(
-                      Icons.language,
-                      color: defaultColor,
-                      size: 32.0,
-                    ),
-                    onTap: null, // TODO: Go to Change Language screen
-                  )
-                ],
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+
+    void _loginNow() {
+      loginModel.toggleLogging();
+      AuthModel.instance()
+          .signIn(loginModel.emailController.text,
+              loginModel.passwordController.text)
+          .then((result) async {
+        if (result == true) {
+          loginModel.logIn();
+          Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (context) => const HomePage()));
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(
+                content: Text('There was an error logging into the app'),
+              ))
+              .closed
+              .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+          loginModel.toggleLogging();
+        }
+      });
+    }
+
+    return Scaffold(
+        body: Padding(
+      padding: const EdgeInsets.all(12),
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <
+              Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const <Widget>[
+            InkWell(
+              child: Icon(
+                Icons.language,
+                color: defaultColor,
+                size: 32.0,
               ),
-              const Image(image: AssetImage('images/titles/quizard.png')),
-              const Text(
-                'Please login to your account',
-                style: TextStyle(fontSize: 18),
-              ),
-              Column(children: <Widget>[
-                Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: TextFormField(
-                        cursorColor: defaultColor,
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: textFieldBackgroundColor,
-                          border: OutlineInputBorder(),
-                          hintText: 'Username / Email',
-                        ))),
-                Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: TextFormField(
-                        cursorColor: defaultColor,
-                        obscureText: true,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: textFieldBackgroundColor,
-                          border: OutlineInputBorder(),
-                          hintText: 'Password',
-                        ))),
-              ]),
-              ElevatedButton(
-                child:
-                    const Text('Log in', style: TextStyle(color: defaultColor)),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (context) => const HomePage()));
-                }, //TODO: Login with Email
-              ),
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(children: const <Widget>[
-                    // OR Divider
-                    Expanded(child: Divider(color: defaultColor)),
-                    Text("  OR  "),
-                    Expanded(child: Divider(color: defaultColor)),
-                  ])),
-              Column(
-                children: <Widget>[
-                  ElevatedButton.icon(
-                    onPressed: () {}, //TODO: Continue with Google
-                    label: const Text('Continue with Google',
-                        style: TextStyle(color: defaultColor)),
-                    icon: const FaIcon(FontAwesomeIcons.google,
-                        color: defaultColor),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {}, //TODO: Continue with Facebook
-                    label: const Text('Continue with Facebook',
-                        style: TextStyle(color: defaultColor)),
-                    icon: const FaIcon(FontAwesomeIcons.facebook,
-                        color: defaultColor),
-                  ),
-                ],
-              ),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const <Widget>[
-                    Text("Don't have an account? "),
-                    InkWell(
-                      child: Text('Sign Up'),
-                      onTap: null, //TODO: Go to Sign Up screen
-                    )
-                  ])
-            ]),
-      ));
-    });
+              onTap: null, // TODO: Go to Change Language screen
+            )
+          ],
+        ),
+        const Image(image: AssetImage('images/titles/quizard.png')),
+        const Text(
+          'Please login to your account',
+          style: TextStyle(fontSize: 18),
+        ),
+        Column(children: <Widget>[
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: TextFormField(
+                  controller: loginModel.emailController,
+                  cursorColor: defaultColor,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: textFieldBackgroundColor,
+                    border: OutlineInputBorder(),
+                    hintText: 'Username / Email',
+                  ))),
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: TextFormField(
+                  controller: loginModel.passwordController,
+                  cursorColor: defaultColor,
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: textFieldBackgroundColor,
+                    border: OutlineInputBorder(),
+                    hintText: 'Password',
+                  ))),
+        ]),
+        ElevatedButton(
+          child: const Text('Log in', style: TextStyle(color: defaultColor)),
+          onPressed: loginModel.isLoggingIn
+              ? null
+              : _loginNow, //TODO: Login with Email
+        ),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(children: const <Widget>[
+              // OR Divider
+              Expanded(child: Divider(color: defaultColor)),
+              Text("  OR  "),
+              Expanded(child: Divider(color: defaultColor)),
+            ])),
+        Column(
+          children: <Widget>[
+            ElevatedButton.icon(
+              onPressed: () {}, //TODO: Continue with Google
+              label: const Text('Continue with Google',
+                  style: TextStyle(color: defaultColor)),
+              icon: const FaIcon(FontAwesomeIcons.google, color: defaultColor),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {}, //TODO: Continue with Facebook
+              label: const Text('Continue with Facebook',
+                  style: TextStyle(color: defaultColor)),
+              icon:
+                  const FaIcon(FontAwesomeIcons.facebook, color: defaultColor),
+            ),
+          ],
+        ),
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              Text("Don't have an account? "),
+              InkWell(
+                child: Text('Sign Up'),
+                onTap: null, //TODO: Go to Sign Up screen
+              )
+            ])
+      ]),
+    ));
   }
 }
