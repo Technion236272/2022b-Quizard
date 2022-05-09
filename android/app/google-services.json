@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "510806764101",
+    "project_id": "quizard-10",
+    "storage_bucket": "quizard-10.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510806764101:android:e565dacf5698a0e5d0512c",
+        "android_client_info": {
+          "package_name": "com.technion.quizard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWSIGP48jsqdswame9s_Aar9eHqK8BQSE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
