@@ -58,18 +58,23 @@ class _HomePageState extends State<HomePage> {
               'Welcome, ${loginModel.emailController.text}!',
               style: const TextStyle(fontSize: 18),
             ),
-            ElevatedButton(
-              child:
-                  const Text('Log out', style: TextStyle(color: defaultColor)),
-              onPressed: () async {
-                await AuthModel.instance().signOut();
-                loginModel.logOut();
-                // Hide StatusBar, Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-                Navigator.of(context).pop();
-              },
-            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: secondaryColor,
+                      minimumSize: const Size.fromHeight(50)), // max width
+                  child: const Text('Log out',
+                      style: TextStyle(color: defaultColor)),
+                  onPressed: () async {
+                    await AuthModel.instance().signOut();
+                    loginModel.logOut();
+                    // Hide StatusBar, Show navigation buttons
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                        overlays: [SystemUiOverlay.bottom]);
+                    Navigator.of(context).pop();
+                  },
+                )),
             Container()
           ]),
     ));
