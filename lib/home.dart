@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
 
     InkWell _playOptionButton(String imgPath) {
       return InkWell(
-        onTap: () {}, // TODO: Support games
+        onTap: () {}, // TODO: Support games!
         child: Padding(
             padding: const EdgeInsets.all(5),
             child: Container(
