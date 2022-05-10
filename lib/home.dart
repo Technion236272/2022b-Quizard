@@ -76,8 +76,8 @@ class _HomePageState extends State<HomePage> {
         final previousIndex = _selectedIndex;
         final currentIndex = index;
 
-        // Tapped on Profile from somewhere else
-        if (currentIndex == 0 && previousIndex != 0) {
+        // Tapped on Profile from anywhere
+        if (currentIndex == 0) {
           loginModel.profileSheetController
               .snapToPosition(const SnappingPosition.factor(
             positionFactor: 1, // Sheet goes all the way up to AppBar
@@ -195,13 +195,14 @@ class _HomeContentState extends State<HomeContent> {
                       minimumSize: const Size.fromHeight(50)), // max width
                   child: const Text('Log out',
                       style: TextStyle(color: defaultColor)),
-                  onPressed: () async {
-                    await AuthModel.instance().signOut();
-                    loginModel.logOut();
-                    // Hide StatusBar, Show navigation buttons
-                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                        overlays: [SystemUiOverlay.bottom]);
-                    Navigator.of(context).pop();
+                  onPressed: () {
+                    AuthModel.instance().signOut().then((value) {
+                      loginModel.logOut();
+                      // Hide StatusBar, Show navigation buttons
+                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                          overlays: [SystemUiOverlay.bottom]);
+                      Navigator.of(context).pop();
+                    });
                   },
                 )),
             Container()

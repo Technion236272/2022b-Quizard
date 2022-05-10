@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
@@ -11,6 +12,7 @@ class ProfileSnappingSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(MediaQuery.of(context).size.height);
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
         body: SnappingSheet(
@@ -29,14 +31,11 @@ class ProfileSnappingSheet extends StatelessWidget {
           grabbingHeight: 100,
           grabbing: const GrabbingWidget(),
           sheetBelow: SnappingSheetContent(
-              draggable: false,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: secondaryColor,
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+            draggable: false,
+            child: SingleChildScrollView(
+                child: SizedBox(
+                    height: MediaQuery.of(context).size.height - 214,
+                    child: Column(children: [
                       Expanded(
                           child: DefaultTabController(
                         length: 3,
@@ -74,9 +73,9 @@ class ProfileSnappingSheet extends StatelessWidget {
                             ],
                           ),
                         ),
-                      )),
-                    ]),
-              )),
+                      ))
+                    ]))),
+          ),
           child: const HomeContent(),
         ),
       );
