@@ -3,3 +3,4 @@ import 'package:flutter/material.dart';
 const backgroundColor = Color.fromRGBO(222, 203, 57, 1);
 const defaultColor = Colors.black;
 const secondaryColor = Colors.white;
+const playOptionColor = Color.fromRGBO(250, 220, 70, 1);

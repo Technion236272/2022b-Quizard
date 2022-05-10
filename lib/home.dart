@@ -26,6 +26,25 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
 
+    InkWell _playOptionButton(String imgPath) {
+      return InkWell(
+        onTap: () {}, // TODO: Support games
+        child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: playOptionColor,
+                  boxShadow: const [
+                    BoxShadow(color: defaultColor, spreadRadius: 2),
+                  ],
+                ),
+                child: Image(image: AssetImage(imgPath)))),
+      );
+    }
+
     return Scaffold(
         body: Padding(
       padding: const EdgeInsets.all(12),
@@ -57,6 +76,24 @@ class _HomePageState extends State<HomePage> {
             Text(
               'Welcome, ${loginModel.emailController.text}!',
               style: const TextStyle(fontSize: 18),
+            ),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _playOptionButton('images/titles/quick_play.png'),
+                    _playOptionButton('images/titles/create_public.png'),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _playOptionButton('images/titles/join_existing.png'),
+                    _playOptionButton('images/titles/create_private.png'),
+                  ],
+                ),
+              ],
             ),
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
