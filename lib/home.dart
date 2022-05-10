@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'auth_model.dart';
@@ -14,6 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 1;
+
   @override
   void initState() {
     super.initState();
@@ -26,57 +29,124 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
 
-    return Scaffold(
-        body: Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const <Widget>[
-                InkWell(
-                  child: Icon(
-                    Icons.language,
-                    color: defaultColor,
-                    size: 32.0,
-                  ),
-                  onTap: null, // TODO: Go to Change Language screen
+    InkWell _playOptionButton(String imgPath) {
+      return InkWell(
+        splashColor: defaultColor,
+        onTap: () {}, // TODO: Support games!
+        child: Padding(
+            padding: const EdgeInsets.all(7),
+            child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: playOptionColor,
+                  boxShadow: const [
+                    BoxShadow(color: defaultColor, spreadRadius: 2),
+                  ],
                 ),
-                InkWell(
-                  child: Icon(
-                    Icons.info_outline,
-                    color: defaultColor,
-                    size: 32.0,
-                  ),
-                  onTap: null, // TODO: Go to Rules screen
-                )
-              ],
+                child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Image(image: AssetImage(imgPath))))),
+      );
+    }
+
+    void _onOptionTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+
+    return Scaffold(
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
-            const Image(image: AssetImage('images/titles/quizard.png')),
-            Text(
-              'Welcome, ${loginModel.emailController.text}!',
-              style: const TextStyle(fontSize: 18),
+            BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.gamepad),
+              label: 'Play',
             ),
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: secondaryColor,
-                      minimumSize: const Size.fromHeight(50)), // max width
-                  child: const Text('Log out',
-                      style: TextStyle(color: defaultColor)),
-                  onPressed: () async {
-                    await AuthModel.instance().signOut();
-                    loginModel.logOut();
-                    // Hide StatusBar, Show navigation buttons
-                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                        overlays: [SystemUiOverlay.bottom]);
-                    Navigator.of(context).pop();
-                  },
-                )),
-            Container()
-          ]),
-    ));
+            BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.crown),
+              label: 'Leaderboard',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          backgroundColor: defaultColor,
+          selectedItemColor: backgroundColor,
+          unselectedItemColor: secondaryColor,
+          onTap: _onOptionTapped,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const <Widget>[
+                    InkWell(
+                      child: Icon(
+                        Icons.language,
+                        color: defaultColor,
+                        size: 32.0,
+                      ),
+                      onTap: null, // TODO: Go to Change Language screen
+                    ),
+                    InkWell(
+                      child: Icon(
+                        Icons.info_outline,
+                        color: defaultColor,
+                        size: 32.0,
+                      ),
+                      onTap: null, // TODO: Go to Rules screen
+                    )
+                  ],
+                ),
+                const Image(image: AssetImage('images/titles/quizard.png')),
+                Text(
+                  'Welcome, ${loginModel.emailController.text}!',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _playOptionButton('images/titles/quick_play.png'),
+                        _playOptionButton('images/titles/create_public.png'),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _playOptionButton('images/titles/join_existing.png'),
+                        _playOptionButton('images/titles/create_private.png'),
+                      ],
+                    ),
+                  ],
+                ),
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: secondaryColor,
+                          minimumSize: const Size.fromHeight(50)), // max width
+                      child: const Text('Log out',
+                          style: TextStyle(color: defaultColor)),
+                      onPressed: () async {
+                        await AuthModel.instance().signOut();
+                        loginModel.logOut();
+                        // Hide StatusBar, Show navigation buttons
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                            overlays: [SystemUiOverlay.bottom]);
+                        Navigator.of(context).pop();
+                      },
+                    )),
+                Container()
+              ]),
+        ));
   }
 }
