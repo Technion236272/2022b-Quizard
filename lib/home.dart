@@ -81,15 +81,15 @@ class _HomePageState extends State<HomePage> {
           loginModel.profileSheetController
               .snapToPosition(const SnappingPosition.factor(
             positionFactor: 1, // Sheet goes all the way up to AppBar
-            grabbingContentOffset: GrabbingContentOffset.top,
+            grabbingContentOffset: GrabbingContentOffset.bottom,
           ));
         }
 
         // Left Profile to somewhere else
         if (currentIndex != 0 && previousIndex == 0) {
           loginModel.profileSheetController
-              .snapToPosition(const SnappingPosition.factor(
-            positionFactor: 0.0,
+              .snapToPosition(const SnappingPosition.pixels(
+            positionPixels: -100,
             grabbingContentOffset: GrabbingContentOffset.top,
           ));
         }
@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
           unselectedItemColor: secondaryColor,
           onTap: _onOptionTapped,
         ),
-        body: const ProfileSnappingSheet());
+        body: ProfileSnappingSheet());
   }
 }
 
