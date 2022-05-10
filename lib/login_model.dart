@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:snapping_sheet/snapping_sheet.dart';
 
 class LoginModel extends ChangeNotifier {
   LoginModel();
@@ -9,10 +10,13 @@ class LoginModel extends ChangeNotifier {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final _profileSheetController = SnappingSheetController();
+
   bool get isLoggingIn => _isLoggingIn;
   bool get isLoggedIn => _isLoggedIn;
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
+  SnappingSheetController get profileSheetController => _profileSheetController;
 
   void logIn() {
     _isLoggedIn = true;
