@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-import 'auth_model.dart';
 import 'firebase_options.dart';
-import 'colors.dart';
+import 'consts.dart';
 import 'home.dart';
-import 'login_model.dart';
+import 'providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +19,7 @@ void main() async {
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
+    ChangeNotifierProvider(create: (context) => NavModel())
   ], child: const MyApp()));
 }
 
@@ -69,7 +70,12 @@ class _WelcomePageState extends State<WelcomePage> {
       loginModel.toggleLogging(); // Enable log in button back
     }
 
-    void _goToHomePage() {
+    Future<void> _goToHomePage() async {
+      final username = loginModel.username;
+      final ref = FirebaseStorage.instance.ref('images/profiles/$username.jpg');
+      final url = await ref.getDownloadURL();
+      loginModel.setUserImageUrl(url);
+      loginModel.getUserImage(); // Cache it
       loginModel.logIn();
       loginModel.toggleLogging();
       Navigator.of(context).push(
@@ -80,7 +86,7 @@ class _WelcomePageState extends State<WelcomePage> {
       loginModel.toggleLogging();
       FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
 
-      if (loginModel.emailController.text.isEmpty ||
+      if (loginModel.emailOrUsernameController.text.isEmpty ||
           loginModel.passwordController.text.isEmpty) {
         _wrongCerts();
         return;
@@ -88,18 +94,28 @@ class _WelcomePageState extends State<WelcomePage> {
 
       // Tyring to log in as it's an email
       AuthModel.instance()
-          .signIn(loginModel.emailController.text,
+          .signIn(loginModel.emailOrUsernameController.text,
               loginModel.passwordController.text)
           .then((result) {
         if (result == true) {
-          // it's a valid email! logging in...
-          _goToHomePage();
+          // it's a valid email! Gathering data and logging in...
+          FirebaseFirestore fireStore = FirebaseFirestore.instance;
+          fireStore.collection('users').get().then((users) {
+            for (var user in users.docs) {
+              if (user["email"] == loginModel.emailOrUsernameController.text) {
+                loginModel.setEmail(loginModel.emailOrUsernameController.text);
+                loginModel.setUsername(user.id);
+                loginModel.setWins(user["wins"]);
+                _goToHomePage();
+              }
+            }
+          });
         } else {
           // Might be a user name? trying to get email by username...
           FirebaseFirestore fireStore = FirebaseFirestore.instance;
           fireStore
               .collection('users')
-              .doc(loginModel.emailController.text)
+              .doc(loginModel.emailOrUsernameController.text)
               .get()
               .then((snapshot) {
             if (snapshot.data() != null) {
@@ -112,6 +128,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 if (result == true) {
                   // It was a valid username and found the right email.
                   // logging in...
+                  loginModel
+                      .setUsername(loginModel.emailOrUsernameController.text);
+                  loginModel.setEmail(snapshot.data()?["email"]);
+                  loginModel.setWins(snapshot.data()?["wins"]);
                   _goToHomePage();
                 } else {
                   // It was a valid username but wasn't a valid password
@@ -128,6 +148,7 @@ class _WelcomePageState extends State<WelcomePage> {
       });
     }
 
+    // Consumer for disabling button while logging in
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -158,7 +179,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 8),
                         child: TextFormField(
-                            controller: loginModel.emailController,
+                            controller: loginModel.emailOrUsernameController,
                             decoration: const InputDecoration(
                               filled: true,
                               fillColor: secondaryColor,
