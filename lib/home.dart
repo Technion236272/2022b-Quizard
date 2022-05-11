@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
           ));
         }
 
-        navModel.setIndex(index);
+        navModel.setIndex(currentIndex);
       });
     }
 
@@ -83,19 +83,19 @@ class _HomePageState extends State<HomePage> {
             unselectedItemColor: secondaryColor,
             onTap: _onOptionTapped,
           ),
-          body: const ProfileSnappingSheet());
+          body: ProfileSnappingSheet());
     });
   }
 }
 
-class HomeContent extends StatefulWidget {
-  const HomeContent({Key? key}) : super(key: key);
+class Play extends StatefulWidget {
+  const Play({Key? key}) : super(key: key);
 
   @override
-  _HomeContentState createState() => _HomeContentState();
+  _PlayState createState() => _PlayState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _PlayState extends State<Play> {
   @override
   Widget build(BuildContext context) {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
@@ -171,5 +171,30 @@ class _HomeContentState extends State<HomeContent> {
             Container()
           ]),
     );
+  }
+}
+
+class Leaderboard extends StatefulWidget {
+  const Leaderboard({Key? key}) : super(key: key);
+
+  @override
+  _LeaderboardState createState() => _LeaderboardState();
+}
+
+class _LeaderboardState extends State<Leaderboard> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      Container(
+          child: const Center(
+              child: Text(
+            "Coming soon.",
+            style: TextStyle(fontSize: 24, color: backgroundColor),
+          )),
+          decoration: const BoxDecoration(
+              color: defaultColor,
+              borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(boxRadiusConst))))
+    ]);
   }
 }

@@ -12,7 +12,7 @@ const wrongAnswerColor = Color.fromRGBO(249, 51, 36, 1);
 
 // Numbers
 const grabbingHeightConst = 100.0;
-const grabbingRadiusConst = 30.0;
+const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
