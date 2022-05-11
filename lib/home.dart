@@ -5,11 +5,68 @@ import 'package:provider/provider.dart';
 import 'package:quizard/profile.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 
-import 'auth_model.dart';
 import 'consts.dart';
-import 'login_model.dart';
-import 'appbar.dart';
-import 'nav_model.dart';
+import 'providers.dart';
+
+class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
+  QuizardAppBar({Key? key, required this.inverted}) : super(key: key);
+
+  bool inverted = false;
+
+  void setInvertBar(bool invert) {
+    inverted = invert;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color barColor = backgroundColor;
+    Color iconsColor = defaultColor;
+
+    return Consumer<NavModel>(builder: (context, navModel, child) {
+      if (navModel.currentIndex == 2 || navModel.previousIndex == 2) {
+        inverted = true;
+      }
+      if (navModel.currentIndex == 1) {
+        inverted = false;
+      }
+
+      if (inverted) {
+        barColor = defaultColor;
+        iconsColor = backgroundColor;
+      }
+
+      return Scaffold(
+          body: Container(
+              color: barColor,
+              child: Padding(
+                  padding: const EdgeInsets.all(appbarPadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      InkWell(
+                        child: Icon(
+                          Icons.language,
+                          color: iconsColor,
+                          size: appbarIconSize,
+                        ),
+                        onTap: null, // TODO: Go to Change Language screen
+                      ),
+                      InkWell(
+                        child: Icon(
+                          Icons.info_outline,
+                          color: iconsColor,
+                          size: appbarIconSize,
+                        ),
+                        onTap: null, // TODO: Go to Rules screen
+                      )
+                    ],
+                  ))));
+    });
+  }
+
+  @override
+  Size get preferredSize => const Size(0, appbarSize);
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -98,8 +155,6 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   @override
   Widget build(BuildContext context) {
-    final loginModel = Provider.of<LoginModel>(context, listen: false);
-
     InkWell _playOptionButton(String imgPath) {
       return InkWell(
         splashColor: defaultColor,
@@ -122,55 +177,57 @@ class _PlayState extends State<Play> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const Image(image: AssetImage('images/titles/quizard.png')),
-            Text(
-              'Welcome, ${loginModel.emailController.text}!',
-              style: const TextStyle(fontSize: 18),
-            ),
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _playOptionButton('images/titles/quick_play.png'),
-                    _playOptionButton('images/titles/create_public.png'),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _playOptionButton('images/titles/join_existing.png'),
-                    _playOptionButton('images/titles/create_private.png'),
-                  ],
-                ),
-              ],
-            ),
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: secondaryColor,
-                      minimumSize: const Size.fromHeight(50)), // max width
-                  child: const Text('Log out',
-                      style: TextStyle(color: defaultColor)),
-                  onPressed: () {
-                    AuthModel.instance().signOut().then((value) {
-                      loginModel.logOut();
-                      // Hide StatusBar, Show navigation buttons
-                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                          overlays: [SystemUiOverlay.bottom]);
-                      Navigator.of(context).pop();
-                    });
-                  },
-                )),
-            Container()
-          ]),
-    );
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      return Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Image(image: AssetImage('images/titles/quizard.png')),
+              Text(
+                'Good luck, ${loginModel.username}!',
+                style: const TextStyle(fontSize: 18),
+              ),
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _playOptionButton('images/titles/quick_play.png'),
+                      _playOptionButton('images/titles/create_public.png'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _playOptionButton('images/titles/join_existing.png'),
+                      _playOptionButton('images/titles/create_private.png'),
+                    ],
+                  ),
+                ],
+              ),
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: secondaryColor,
+                        minimumSize: const Size.fromHeight(50)), // max width
+                    child: const Text('Log out',
+                        style: TextStyle(color: defaultColor)),
+                    onPressed: () {
+                      AuthModel.instance().signOut().then((value) {
+                        loginModel.logOut();
+                        // Hide StatusBar, Show navigation buttons
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                            overlays: [SystemUiOverlay.bottom]);
+                        Navigator.of(context).pop();
+                      });
+                    },
+                  )),
+              Container()
+            ]),
+      );
+    });
   }
 }
 
