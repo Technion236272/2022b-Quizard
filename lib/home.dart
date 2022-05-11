@@ -6,43 +6,9 @@ import 'package:quizard/profile.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 
 import 'auth_model.dart';
-import 'colors.dart';
+import 'consts.dart';
 import 'login_model.dart';
-
-class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
-  const CustomAppBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const <Widget>[
-                InkWell(
-                  child: Icon(
-                    Icons.language,
-                    color: defaultColor,
-                    size: 32.0,
-                  ),
-                  onTap: null, // TODO: Go to Change Language screen
-                ),
-                InkWell(
-                  child: Icon(
-                    Icons.info_outline,
-                    color: defaultColor,
-                    size: 32.0,
-                  ),
-                  onTap: null, // TODO: Go to Rules screen
-                )
-              ],
-            )));
-  }
-
-  @override
-  Size get preferredSize => const Size(0, 56);
-}
+import 'appbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -89,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         if (currentIndex != 0 && previousIndex == 0) {
           loginModel.profileSheetController
               .snapToPosition(const SnappingPosition.pixels(
-            positionPixels: -100,
+            positionPixels: -grabbingHeightConst,
             grabbingContentOffset: GrabbingContentOffset.top,
           ));
         }
@@ -99,7 +65,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-        appBar: const CustomAppBar(),
+        appBar: QuizardAppBar(inverted: false),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -121,7 +87,7 @@ class _HomePageState extends State<HomePage> {
           unselectedItemColor: secondaryColor,
           onTap: _onOptionTapped,
         ),
-        body: ProfileSnappingSheet());
+        body: const ProfileSnappingSheet());
   }
 }
 

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'auth_model.dart';
 import 'firebase_options.dart';
-import 'colors.dart';
+import 'consts.dart';
 import 'home.dart';
 import 'login_model.dart';
 

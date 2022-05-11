@@ -1,18 +1,16 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
-import 'colors.dart';
+
+import 'consts.dart';
 import 'home.dart';
 import 'login_model.dart';
 
 class ProfileSnappingSheet extends StatelessWidget {
-  ProfileSnappingSheet({Key? key}) : super(key: key);
+  const ProfileSnappingSheet({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).size.height);
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
         body: SnappingSheet(
@@ -20,7 +18,7 @@ class ProfileSnappingSheet extends StatelessWidget {
           lockOverflowDrag: true,
           snappingPositions: const [
             SnappingPosition.pixels(
-              positionPixels: -100,
+              positionPixels: (-grabbingHeightConst),
               grabbingContentOffset: GrabbingContentOffset.top,
             ),
             SnappingPosition.factor(
@@ -28,7 +26,7 @@ class ProfileSnappingSheet extends StatelessWidget {
               grabbingContentOffset: GrabbingContentOffset.bottom,
             ),
           ],
-          grabbingHeight: 100,
+          grabbingHeight: grabbingHeightConst,
           grabbing: const GrabbingWidget(),
           sheetBelow: SnappingSheetContent(
             draggable: false,
@@ -91,7 +89,8 @@ class GrabbingWidget extends StatelessWidget {
     return Container(
         decoration: const BoxDecoration(
       color: secondaryColor,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(grabbingRadiusConst)),
     ));
   }
 }
