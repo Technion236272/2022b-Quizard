@@ -10,6 +10,7 @@ import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'login_model.dart';
+import 'nav_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
+    ChangeNotifierProvider(create: (context) => NavModel())
   ], child: const MyApp()));
 }
 

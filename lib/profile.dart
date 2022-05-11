@@ -5,12 +5,15 @@ import 'package:snapping_sheet/snapping_sheet.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'login_model.dart';
+import 'nav_model.dart';
 
 class ProfileSnappingSheet extends StatelessWidget {
   const ProfileSnappingSheet({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final navModel = Provider.of<NavModel>(context, listen: false);
+
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
         body: SnappingSheet(
@@ -26,6 +29,11 @@ class ProfileSnappingSheet extends StatelessWidget {
               grabbingContentOffset: GrabbingContentOffset.bottom,
             ),
           ],
+          onSnapCompleted: (data, pos) {
+            if (data.pixels < 0) {
+              navModel.returnToPrev();
+            }
+          },
           grabbingHeight: grabbingHeightConst,
           grabbing: const GrabbingWidget(),
           sheetBelow: SnappingSheetContent(

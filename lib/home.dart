@@ -9,6 +9,7 @@ import 'auth_model.dart';
 import 'consts.dart';
 import 'login_model.dart';
 import 'appbar.dart';
+import 'nav_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,13 +19,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  /*
-  * 0 - Profile
-  * 1 - Play
-  * 2 - Leaderboard
-  */
-  int _selectedIndex = 1;
-
   @override
   void initState() {
     super.initState();
@@ -36,10 +30,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
+    final navModel = Provider.of<NavModel>(context, listen: false);
 
     void _onOptionTapped(int index) {
       setState(() {
-        final previousIndex = _selectedIndex;
+        final previousIndex = navModel.currentIndex;
         final currentIndex = index;
 
         // Tapped on Profile from anywhere
@@ -60,34 +55,36 @@ class _HomePageState extends State<HomePage> {
           ));
         }
 
-        _selectedIndex = index;
+        navModel.setIndex(index);
       });
     }
 
-    return Scaffold(
-        appBar: QuizardAppBar(inverted: false),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.gamepad),
-              label: 'Play',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.crown),
-              label: 'Leaderboard',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          backgroundColor: defaultColor,
-          selectedItemColor: backgroundColor,
-          unselectedItemColor: secondaryColor,
-          onTap: _onOptionTapped,
-        ),
-        body: const ProfileSnappingSheet());
+    return Consumer<NavModel>(builder: (context, navModel, child) {
+      return Scaffold(
+          appBar: QuizardAppBar(inverted: false),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.gamepad),
+                label: 'Play',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.crown),
+                label: 'Leaderboard',
+              ),
+            ],
+            currentIndex: navModel.currentIndex,
+            backgroundColor: defaultColor,
+            selectedItemColor: backgroundColor,
+            unselectedItemColor: secondaryColor,
+            onTap: _onOptionTapped,
+          ),
+          body: const ProfileSnappingSheet());
+    });
   }
 }
 

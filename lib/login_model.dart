@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 
 class LoginModel extends ChangeNotifier {
-  LoginModel();
-
   bool _isLoggedIn = false;
   bool _isLoggingIn = false;
 
