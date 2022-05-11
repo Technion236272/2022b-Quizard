@@ -112,8 +112,89 @@ class GrabbingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: const BoxDecoration(
-      color: secondaryColor,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(boxRadiusConst)),
-    ));
+          color: secondaryColor,
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(boxRadiusConst)),
+        ),
+        child: SingleChildScrollView(
+            child: SizedBox(
+          height: grabbingHeightConst,
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Padding(
+                padding: EdgeInsets.all(10),
+                child: CircleAvatar(
+                    //backgroundImage: loginModel.getUserImage(),
+                    backgroundColor: secondProfileColor,
+                    radius: 40)),
+            Flexible(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 10, 15, 5),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            "Username", //TODO: Fix OVERFLOW
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
+                          ),
+                          Text(
+                            "17 WINS",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          )
+                        ])),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 5, 15, 0),
+                  child: LinearProgressIndicator(
+                    value: 0.7,
+                    color: firstProfileColor,
+                    backgroundColor: secondProfileColor,
+                    semanticsLabel: 'Linear progress indicator',
+                  ),
+                ),
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 5, 15, 5),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            "Amateur",
+                            style: TextStyle(
+                              color: secondProfileColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            "Expert",
+                            style: TextStyle(
+                              color: secondProfileColor,
+                              fontSize: 12,
+                            ),
+                          )
+                        ])),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 15, 5),
+                  child: Text(
+                    "user@mail.com",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              ],
+            ))
+          ]),
+        )));
   }
 }

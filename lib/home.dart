@@ -186,11 +186,13 @@ class _LeaderboardState extends State<Leaderboard> {
   Widget build(BuildContext context) {
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Container(
-          child: const Center(
-              child: Text(
-            "Coming soon.",
-            style: TextStyle(fontSize: 24, color: backgroundColor),
-          )),
+          child: const Padding(
+              padding: EdgeInsets.all(50),
+              child: Center(
+                  child: Text(
+                "Coming soon.",
+                style: TextStyle(fontSize: 24, color: backgroundColor),
+              ))),
           decoration: const BoxDecoration(
               color: defaultColor,
               borderRadius: BorderRadius.vertical(
