@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -78,7 +77,6 @@ class LoginModel extends ChangeNotifier {
 
   final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _profileSheetController = SnappingSheetController();
 
   bool get isLoggingIn => _isLoggingIn;
   bool get isLoggedIn => _isLoggedIn;
@@ -88,7 +86,6 @@ class LoginModel extends ChangeNotifier {
   TextEditingController get emailOrUsernameController =>
       _emailOrUsernameController;
   TextEditingController get passwordController => _passwordController;
-  SnappingSheetController get profileSheetController => _profileSheetController;
 
   void logIn() {
     _isLoggedIn = true;
@@ -121,14 +118,6 @@ class LoginModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resetData() {
-    _username = '';
-    _email = '';
-    _wins = 0;
-    _userImageUrl = '';
-    notifyListeners();
-  }
-
   void setUserImageUrl(String url) {
     _userImageUrl = url;
     notifyListeners();
@@ -140,34 +129,5 @@ class LoginModel extends ChangeNotifier {
     } else {
       return NetworkImage(_userImageUrl);
     }
-  }
-}
-
-class NavModel extends ChangeNotifier {
-  /*
-  * 0 - Profile
-  * 1 - Play
-  * 2 - Leaderboard
-  */
-  int _previousIndex = 1;
-  int _currentIndex = 1;
-  bool onSettingIndex = false;
-
-  int get currentIndex => _currentIndex;
-  int get previousIndex => _previousIndex;
-
-  void setIndex(int index) {
-    onSettingIndex = true;
-    _previousIndex = _currentIndex;
-    _currentIndex = index;
-    notifyListeners();
-    onSettingIndex = false;
-  }
-
-  void returnToPrev() {
-    if (_previousIndex != 0 && onSettingIndex == false) {
-      _currentIndex = _previousIndex;
-    }
-    notifyListeners();
   }
 }

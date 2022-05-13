@@ -17,10 +17,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => LoginModel()),
-    ChangeNotifierProvider(create: (context) => NavModel())
-  ], child: const MyApp()));
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => LoginModel())],
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

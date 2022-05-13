@@ -3,65 +3,41 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:quizard/profile.dart';
-import 'package:snapping_sheet/snapping_sheet.dart';
 
 import 'consts.dart';
 import 'providers.dart';
 
 class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
-  QuizardAppBar({Key? key, required this.inverted}) : super(key: key);
-
-  bool inverted = false;
-
-  void setInvertBar(bool invert) {
-    inverted = invert;
-  }
+  QuizardAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color barColor = backgroundColor;
-    Color iconsColor = defaultColor;
-
-    return Consumer<NavModel>(builder: (context, navModel, child) {
-      if (navModel.currentIndex == 2 || navModel.previousIndex == 2) {
-        inverted = true;
-      }
-      if (navModel.currentIndex == 1) {
-        inverted = false;
-      }
-
-      if (inverted) {
-        barColor = defaultColor;
-        iconsColor = backgroundColor;
-      }
-
-      return Scaffold(
-          body: Container(
-              color: barColor,
-              child: Padding(
-                  padding: const EdgeInsets.all(appbarPadding),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      InkWell(
-                        child: Icon(
-                          Icons.language,
-                          color: iconsColor,
-                          size: appbarIconSize,
-                        ),
-                        onTap: null, // TODO: Go to Change Language screen
+    return Scaffold(
+        body: Container(
+            color: backgroundColor,
+            child: Padding(
+                padding: const EdgeInsets.all(appbarPadding),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const <Widget>[
+                    InkWell(
+                      child: Icon(
+                        Icons.language,
+                        color: defaultColor,
+                        size: appbarIconSize,
                       ),
-                      InkWell(
-                        child: Icon(
-                          Icons.info_outline,
-                          color: iconsColor,
-                          size: appbarIconSize,
-                        ),
-                        onTap: null, // TODO: Go to Rules screen
-                      )
-                    ],
-                  ))));
-    });
+                      onTap: null, // TODO: Go to Change Language screen
+                    ),
+                    InkWell(
+                      child: Icon(
+                        Icons.info_outline,
+                        color: defaultColor,
+                        size: appbarIconSize,
+                      ),
+                      onTap: null, // TODO: Go to Rules screen
+                    )
+                  ],
+                ))));
   }
 
   @override
@@ -76,6 +52,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final profileScreen = Profile();
+  final playScreen = const Play();
+  final leaderboardScreen = const Leaderboard();
+
+  int _currentIndex = 1;
+
   @override
   void initState() {
     super.initState();
@@ -86,62 +68,46 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final loginModel = Provider.of<LoginModel>(context, listen: false);
-    final navModel = Provider.of<NavModel>(context, listen: false);
-
     void _onOptionTapped(int index) {
       setState(() {
-        final previousIndex = navModel.currentIndex;
-        final currentIndex = index;
-
-        // Tapped on Profile from anywhere
-        if (currentIndex == 0) {
-          loginModel.profileSheetController
-              .snapToPosition(const SnappingPosition.factor(
-            positionFactor: 1, // Sheet goes all the way up to AppBar
-            grabbingContentOffset: GrabbingContentOffset.bottom,
-          ));
-        }
-
-        // Left Profile to somewhere else
-        if (currentIndex != 0 && previousIndex == 0) {
-          loginModel.profileSheetController
-              .snapToPosition(const SnappingPosition.pixels(
-            positionPixels: -grabbingHeightConst,
-            grabbingContentOffset: GrabbingContentOffset.top,
-          ));
-        }
-
-        navModel.setIndex(currentIndex);
+        _currentIndex = index;
       });
     }
 
-    return Consumer<NavModel>(builder: (context, navModel, child) {
-      return Scaffold(
-          appBar: QuizardAppBar(inverted: false),
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(FontAwesomeIcons.gamepad),
-                label: 'Play',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(FontAwesomeIcons.crown),
-                label: 'Leaderboard',
-              ),
-            ],
-            currentIndex: navModel.currentIndex,
-            backgroundColor: defaultColor,
-            selectedItemColor: backgroundColor,
-            unselectedItemColor: secondaryColor,
-            onTap: _onOptionTapped,
-          ),
-          body: ProfileSnappingSheet());
-    });
+    Widget _chooseWidget() {
+      if (_currentIndex == 1) {
+        return playScreen;
+      }
+      if (_currentIndex == 2) {
+        return leaderboardScreen;
+      }
+      return profileScreen;
+    }
+
+    return Scaffold(
+        appBar: QuizardAppBar(),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.gamepad),
+              label: 'Play',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.crown),
+              label: 'Leaderboard',
+            ),
+          ],
+          currentIndex: _currentIndex,
+          backgroundColor: defaultColor,
+          selectedItemColor: backgroundColor,
+          unselectedItemColor: secondaryColor,
+          onTap: _onOptionTapped,
+        ),
+        body: _chooseWidget());
   }
 }
 
@@ -241,19 +207,24 @@ class Leaderboard extends StatefulWidget {
 class _LeaderboardState extends State<Leaderboard> {
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      Container(
-          child: const Padding(
-              padding: EdgeInsets.all(50),
-              child: Center(
-                  child: Text(
-                "Coming soon.",
-                style: TextStyle(fontSize: 24, color: backgroundColor),
-              ))),
-          decoration: const BoxDecoration(
-              color: defaultColor,
-              borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(boxRadiusConst))))
-    ]);
+    final screenHeight = MediaQuery.of(context).size.height - 114;
+
+    return Container(
+        color: secondaryBackgroundColor,
+        height: screenHeight,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+              child: const Padding(
+                  padding: EdgeInsets.all(50),
+                  child: Center(
+                      child: Text(
+                    "Coming soon.",
+                    style: TextStyle(fontSize: 24, color: defaultColor),
+                  ))),
+              decoration: const BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(boxRadiusConst))))
+        ]));
   }
 }
