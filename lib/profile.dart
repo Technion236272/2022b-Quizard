@@ -104,14 +104,7 @@ class _QuestionsState extends State<Questions> {
   }
 }
 
-class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
-
-  @override
-  State<Profile> createState() => _ProfileState();
-}
-
-class _ProfileState extends State<Profile> {
+class Profile extends StatelessWidget {
   int _lastTab = 0;
 
   void _onTapTab(int index) {
@@ -138,7 +131,8 @@ class _ProfileState extends State<Profile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding:
+                                  const EdgeInsets.fromLTRB(30, 10, 10, 10),
                               child: CircleAvatar(
                                   backgroundImage: loginModel.getUserImage(),
                                   backgroundColor: secondProfileColor,
