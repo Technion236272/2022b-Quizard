@@ -130,4 +130,8 @@ class LoginModel extends ChangeNotifier {
       return NetworkImage(_userImageUrl);
     }
   }
+
+  void notifyAddedQuestion() {
+    notifyListeners();
+  }
 }
