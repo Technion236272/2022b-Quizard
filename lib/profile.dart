@@ -66,13 +66,15 @@ class _QuestionsState extends State<Questions> {
       for (int i = 0; i < questions.length; i++) {
         Row currentRow = await _rowCategory(categories[i], questions[i]);
         trivia.add(Card(
-          child: Column(
-            children: [
-              currentRow,
-              Center(child: Text(questions[i])),
-              Center(child: Text(answers[i]))
-            ],
-          ),
+          child: SizedBox(
+              height: 150,
+              child: Column(
+                children: [
+                  currentRow,
+                  Center(child: Text(questions[i])),
+                  Center(child: Text(answers[i]))
+                ],
+              )),
         ));
       }
     });
@@ -114,8 +116,6 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      final screenHeight = MediaQuery.of(context).size.height - 114;
-
       return Scaffold(
           body: Container(
               decoration: const BoxDecoration(
@@ -123,101 +123,90 @@ class Profile extends StatelessWidget {
                 borderRadius:
                     BorderRadius.vertical(top: Radius.circular(boxRadiusConst)),
               ),
-              child: SizedBox(
-                  height: screenHeight,
-                  child: SingleChildScrollView(
-                      child: Column(children: [
-                    Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(30, 10, 10, 10),
-                              child: CircleAvatar(
-                                  backgroundImage: loginModel.getUserImage(),
-                                  backgroundColor: secondProfileColor,
-                                  radius: 35)),
-                          Flexible(
-                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 15, 0, 5),
-                                child: Text(
-                                  loginModel.username,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: const TextStyle(
-                                    fontSize: 26,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-                                child: Text(
-                                  loginModel.email,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ))
-                        ]),
-                    SizedBox(
-                        height: screenHeight,
-                        child: Column(children: [
-                          Expanded(
-                              child: DefaultTabController(
-                            initialIndex: _lastTab,
-                            length: 3,
-                            child: Scaffold(
-                              backgroundColor: secondaryColor,
-                              appBar: AppBar(
-                                backgroundColor: secondProfileColor,
-                                automaticallyImplyLeading: false,
-                                toolbarHeight: 0,
-                                elevation: 0,
-                                bottom: TabBar(
-                                  onTap: _onTapTab,
-                                  labelColor: defaultColor,
-                                  indicatorColor: defaultColor,
-                                  tabs: const [
-                                    Tab(
-                                        icon: Icon(Icons.question_mark),
-                                        text: "QUESTIONS"),
-                                    Tab(
-                                      icon: Icon(Icons.tag_faces),
-                                      text: "FRIENDS",
-                                    ),
-                                    Tab(
-                                      icon: Icon(Icons.settings),
-                                      text: "SETTINGS",
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              body: TabBarView(
-                                children: [
-                                  Container(
-                                      color: secondaryBackgroundColor,
-                                      child: const Questions()),
-                                  Container(
-                                      color: secondaryBackgroundColor,
-                                      child: const Icon(Icons.tag_faces)),
-                                  Container(
-                                      color: secondaryBackgroundColor,
-                                      child: const Icon(Icons.settings)),
-                                ],
-                              ),
-                            ),
-                          ))
-                        ]))
-                  ])))));
+              child: Column(children: [
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(30, 10, 10, 10),
+                      child: CircleAvatar(
+                          backgroundImage: loginModel.getUserImage(),
+                          backgroundColor: secondProfileColor,
+                          radius: 35)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 5),
+                        child: Text(
+                          loginModel.username,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        child: Text(
+                          loginModel.email,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ]),
+                Expanded(
+                    child: DefaultTabController(
+                  initialIndex: _lastTab,
+                  length: 3,
+                  child: Scaffold(
+                    backgroundColor: secondaryColor,
+                    appBar: AppBar(
+                      backgroundColor: secondProfileColor,
+                      automaticallyImplyLeading: false,
+                      toolbarHeight: 0,
+                      elevation: 0,
+                      bottom: TabBar(
+                        onTap: _onTapTab,
+                        labelColor: defaultColor,
+                        indicatorColor: defaultColor,
+                        tabs: const [
+                          Tab(
+                              icon: Icon(Icons.question_mark),
+                              text: "QUESTIONS"),
+                          Tab(
+                            icon: Icon(Icons.tag_faces),
+                            text: "FRIENDS",
+                          ),
+                          Tab(
+                            icon: Icon(Icons.settings),
+                            text: "SETTINGS",
+                          ),
+                        ],
+                      ),
+                    ),
+                    body: TabBarView(
+                      children: [
+                        Container(
+                            color: secondaryBackgroundColor,
+                            child: const Questions()),
+                        Container(
+                            color: secondaryBackgroundColor,
+                            child: const Icon(Icons.tag_faces)),
+                        Container(
+                            color: secondaryBackgroundColor,
+                            child: const Icon(Icons.settings)),
+                      ],
+                    ),
+                  ),
+                ))
+              ])));
     });
   }
 }
