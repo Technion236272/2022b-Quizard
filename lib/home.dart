@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -52,11 +53,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final profileScreen = Profile();
-  final playScreen = const Play();
-  final leaderboardScreen = const Leaderboard();
-
   int _currentIndex = 1;
+  final profileScreen = Profile();
 
   @override
   void initState() {
@@ -76,49 +74,46 @@ class _HomePageState extends State<HomePage> {
 
     Widget _chooseWidget() {
       if (_currentIndex == 1) {
-        return playScreen;
+        return const Play();
       }
       if (_currentIndex == 2) {
-        return leaderboardScreen;
+        return const Leaderboard();
       }
       return profileScreen;
     }
 
-    return Scaffold(
-        appBar: QuizardAppBar(),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.gamepad),
-              label: 'Play',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.crown),
-              label: 'Leaderboard',
-            ),
-          ],
-          currentIndex: _currentIndex,
-          backgroundColor: defaultColor,
-          selectedItemColor: backgroundColor,
-          unselectedItemColor: secondaryColor,
-          onTap: _onOptionTapped,
-        ),
-        body: _chooseWidget());
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      return Scaffold(
+          appBar: QuizardAppBar(),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.gamepad),
+                label: 'Play',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.crown),
+                label: 'Leaderboard',
+              ),
+            ],
+            currentIndex: _currentIndex,
+            backgroundColor: defaultColor,
+            selectedItemColor: backgroundColor,
+            unselectedItemColor: secondaryColor,
+            onTap: _onOptionTapped,
+          ),
+          body: _chooseWidget());
+    });
   }
 }
 
-class Play extends StatefulWidget {
+class Play extends StatelessWidget {
   const Play({Key? key}) : super(key: key);
 
-  @override
-  _PlayState createState() => _PlayState();
-}
-
-class _PlayState extends State<Play> {
   @override
   Widget build(BuildContext context) {
     InkWell _playOptionButton(String imgPath) {
@@ -197,14 +192,9 @@ class _PlayState extends State<Play> {
   }
 }
 
-class Leaderboard extends StatefulWidget {
+class Leaderboard extends StatelessWidget {
   const Leaderboard({Key? key}) : super(key: key);
 
-  @override
-  _LeaderboardState createState() => _LeaderboardState();
-}
-
-class _LeaderboardState extends State<Leaderboard> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height - 114;
