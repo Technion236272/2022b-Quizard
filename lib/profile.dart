@@ -50,8 +50,8 @@ class AddQuestionForm extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
                 child: ElevatedButton(
-                  onPressed: () {
-                    FirebaseFirestore.instance
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
                         .collection('users')
                         .doc(loginModel.username)
                         .get()
@@ -114,6 +114,9 @@ class _QuestionsState extends State<Questions> {
       List answers = value["answers"];
       List categories = value["categories"];
       for (int i = 0; i < questions.length; i++) {
+        final _question = questions[i];
+        final _answer = answers[i];
+        final _category = categories[i];
         trivia.add(Dismissible(
             key: UniqueKey(),
             confirmDismiss: (DismissDirection direction) {
@@ -126,19 +129,35 @@ class _QuestionsState extends State<Questions> {
                         "Are you sure you wish to delete this question?"),
                     actions: <Widget>[
                       TextButton(
-                          onPressed: () {
-                            questions.removeAt(i);
-                            answers.removeAt(i);
-                            categories.removeAt(i);
-                            FirebaseFirestore.instance
+                          onPressed: () async {
+                            await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(username)
-                                .update({
-                              "questions": questions,
-                              "answers": answers,
-                              "categories": categories,
-                            }).then((_) {
-                              Navigator.of(context).pop(true);
+                                .get()
+                                .then((value) {
+                              List questions = value["questions"];
+                              List answers = value["answers"];
+                              List categories = value["categories"];
+                              for (int i = 0; i < questions.length; i++) {
+                                if (questions[i] == _question &&
+                                    answers[i] == _answer &&
+                                    categories[i] == _category) {
+                                  questions.removeAt(i);
+                                  answers.removeAt(i);
+                                  categories.removeAt(i);
+                                  break;
+                                }
+                              }
+                              FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(username)
+                                  .update({
+                                "questions": questions,
+                                "answers": answers,
+                                "categories": categories,
+                              }).then((_) {
+                                Navigator.of(context).pop(true);
+                              });
                             });
                           },
                           child: const Text("DELETE")),
@@ -162,7 +181,7 @@ class _QuestionsState extends State<Questions> {
                 childrenPadding: EdgeInsets.zero,
                 title: Text(categories[i]),
                 subtitle:
-                    Text(questions[i], style: const TextStyle(fontSize: 20)),
+                    Text(questions[i], style: const TextStyle(fontSize: 22)),
                 children: <Widget>[
                   ListTile(
                       title: Text(answers[i],
@@ -192,8 +211,7 @@ class _QuestionsState extends State<Questions> {
               future: _questionsListWidget(context, loginModel.username),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
-                  var userDocument = snapshot.data;
-                  if (userDocument.isNotEmpty) {
+                  if (snapshot.data.isNotEmpty) {
                     return ListView(children: snapshot.data);
                   } else {
                     return const Padding(
@@ -205,18 +223,19 @@ class _QuestionsState extends State<Questions> {
                           textAlign: TextAlign.center,
                         )));
                   }
+                } else {
+                  return const Center(child: CircularProgressIndicator());
                 }
-                return const Center(child: CircularProgressIndicator());
               }));
     });
   }
 }
 
+//ignore: must_be_immutable
 class Profile extends StatelessWidget {
-  final tabQuestions = const Questions();
-  int _lastTab = 0;
-
   Profile({Key? key}) : super(key: key);
+
+  int _lastTab = 0;
 
   void _onTapTab(int index) {
     _lastTab = index;
@@ -304,7 +323,7 @@ class Profile extends StatelessWidget {
                       children: [
                         Container(
                             color: secondaryBackgroundColor,
-                            child: tabQuestions),
+                            child: const Questions()),
                         Container(
                             color: secondaryBackgroundColor,
                             child: const Icon(Icons.tag_faces)),

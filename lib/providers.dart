@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-enum Status { Uninitialized, Authenticated, Authenticating, Unauthenticated }
+enum Status { uninitialized, authenticated, authenticating, unauthenticated }
 
 class AuthModel with ChangeNotifier {
-  FirebaseAuth _auth;
+  final FirebaseAuth _auth;
   User? _user;
-  Status _status = Status.Uninitialized;
+  Status _status = Status.uninitialized;
 
   AuthModel.instance() : _auth = FirebaseAuth.instance {
     _auth.authStateChanges().listen(_onAuthStateChanged);
@@ -19,17 +19,16 @@ class AuthModel with ChangeNotifier {
 
   User? get user => _user;
 
-  bool get isAuthenticated => status == Status.Authenticated;
+  bool get isAuthenticated => status == Status.authenticated;
 
   Future<UserCredential?> signUp(String email, String password) async {
     try {
-      _status = Status.Authenticating;
+      _status = Status.authenticating;
       notifyListeners();
       return await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
     } catch (e) {
-      print(e);
-      _status = Status.Unauthenticated;
+      _status = Status.unauthenticated;
       notifyListeners();
       return null;
     }
@@ -37,12 +36,12 @@ class AuthModel with ChangeNotifier {
 
   Future<bool> signIn(String email, String password) async {
     try {
-      _status = Status.Authenticating;
+      _status = Status.authenticating;
       notifyListeners();
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return true;
     } catch (e) {
-      _status = Status.Unauthenticated;
+      _status = Status.unauthenticated;
       notifyListeners();
       return false;
     }
@@ -50,7 +49,7 @@ class AuthModel with ChangeNotifier {
 
   Future signOut() async {
     _auth.signOut();
-    _status = Status.Unauthenticated;
+    _status = Status.unauthenticated;
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
@@ -58,10 +57,10 @@ class AuthModel with ChangeNotifier {
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
     if (firebaseUser == null) {
       _user = null;
-      _status = Status.Unauthenticated;
+      _status = Status.unauthenticated;
     } else {
       _user = firebaseUser;
-      _status = Status.Authenticated;
+      _status = Status.authenticated;
     }
     notifyListeners();
   }
