@@ -52,7 +52,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final profileScreen = Profile();
+  final profileScreen = const Profile();
   final playScreen = const Play();
   final leaderboardScreen = const Leaderboard();
 

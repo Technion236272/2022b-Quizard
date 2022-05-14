@@ -1,12 +1,117 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
 import 'providers.dart';
 
-class Profile extends StatelessWidget {
-  Profile({Key? key}) : super(key: key);
+class Questions extends StatefulWidget {
+  const Questions({Key? key}) : super(key: key);
 
+  @override
+  State<Questions> createState() => _QuestionsState();
+}
+
+class _QuestionsState extends State<Questions> {
+  Future<String> _getStatus(String category, String question) async {
+    String retVal = '';
+    await FirebaseFirestore.instance
+        .collection('trivia')
+        .doc(category)
+        .get()
+        .then((value) {
+      for (int i = 0; i < value["questions"].length; i++) {
+        if (value["questions"][i] == question) {
+          retVal = value["status"][i];
+          break;
+        }
+      }
+    });
+    return retVal;
+  }
+
+  Future<bool> _isOfficialCategory(String category) async {
+    bool retVal = false;
+    await FirebaseFirestore.instance
+        .collection('trivia')
+        .doc(category)
+        .get()
+        .then((value) {
+      retVal = value["is_official"];
+    });
+    return retVal;
+  }
+
+  Future<Row> _rowCategory(String category, String question) async {
+    bool isOfficialCategory = await _isOfficialCategory(category);
+    if (isOfficialCategory) {
+      String status = await _getStatus(category, question);
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [Text(category), Text(status)]);
+    } else {
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [Text(category)]);
+    }
+  }
+
+  Future<List<Card>> _questionsListWidget(String username) async {
+    List<Card> trivia = <Card>[];
+    FirebaseFirestore fireStore = FirebaseFirestore.instance;
+    await fireStore.collection('users').doc(username).get().then((value) async {
+      List questions = value["questions"];
+      List answers = value["answers"];
+      List categories = value["categories"];
+      for (int i = 0; i < questions.length; i++) {
+        Row currentRow = await _rowCategory(categories[i], questions[i]);
+        trivia.add(Card(
+          child: Column(
+            children: [
+              currentRow,
+              Center(child: Text(questions[i])),
+              Center(child: Text(answers[i]))
+            ],
+          ),
+        ));
+      }
+    });
+    return trivia;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      return Scaffold(
+          backgroundColor: secondaryBackgroundColor,
+          body: FutureBuilder(
+            future: _questionsListWidget(loginModel.username),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Card>> snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!.isEmpty) {
+                  return const Center(
+                      child: Text("Add questions here for custom games."));
+                } else {
+                  return ListView(children: snapshot.data!);
+                }
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ));
+    });
+  }
+}
+
+class Profile extends StatefulWidget {
+  const Profile({Key? key}) : super(key: key);
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
   int _lastTab = 0;
 
   void _onTapTab(int index) {
@@ -106,7 +211,7 @@ class Profile extends StatelessWidget {
                                 children: [
                                   Container(
                                       color: secondaryBackgroundColor,
-                                      child: const Icon(Icons.question_mark)),
+                                      child: const Questions()),
                                   Container(
                                       color: secondaryBackgroundColor,
                                       child: const Icon(Icons.tag_faces)),
