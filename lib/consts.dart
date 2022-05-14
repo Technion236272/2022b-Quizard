@@ -17,3 +17,6 @@ const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
+
+// Lists
+const officialCategories = ["animal", "geography", "sports"];

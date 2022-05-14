@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,69 +14,71 @@ class Questions extends StatefulWidget {
 }
 
 class _QuestionsState extends State<Questions> {
-  Future<String> _getStatus(String category, String question) async {
-    String retVal = '';
+  Future<List<Dismissible>> _questionsListWidget(String username) async {
+    List<Dismissible> trivia = <Dismissible>[];
     await FirebaseFirestore.instance
-        .collection('trivia')
-        .doc(category)
+        .collection('users')
+        .doc(username)
         .get()
-        .then((value) {
-      for (int i = 0; i < value["questions"].length; i++) {
-        if (value["questions"][i] == question) {
-          retVal = value["status"][i];
-          break;
-        }
-      }
-    });
-    return retVal;
-  }
-
-  Future<bool> _isOfficialCategory(String category) async {
-    bool retVal = false;
-    await FirebaseFirestore.instance
-        .collection('trivia')
-        .doc(category)
-        .get()
-        .then((value) {
-      retVal = value["is_official"];
-    });
-    return retVal;
-  }
-
-  Future<Row> _rowCategory(String category, String question) async {
-    bool isOfficialCategory = await _isOfficialCategory(category);
-    if (isOfficialCategory) {
-      String status = await _getStatus(category, question);
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(category), Text(status)]);
-    } else {
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [Text(category)]);
-    }
-  }
-
-  Future<List<Card>> _questionsListWidget(String username) async {
-    List<Card> trivia = <Card>[];
-    FirebaseFirestore fireStore = FirebaseFirestore.instance;
-    await fireStore.collection('users').doc(username).get().then((value) async {
+        .then((value) async {
       List questions = value["questions"];
       List answers = value["answers"];
       List categories = value["categories"];
       for (int i = 0; i < questions.length; i++) {
-        Row currentRow = await _rowCategory(categories[i], questions[i]);
-        trivia.add(Card(
-          child: SizedBox(
-              height: 150,
-              child: Column(
-                children: [
-                  currentRow,
-                  Center(child: Text(questions[i])),
-                  Center(child: Text(answers[i]))
-                ],
-              )),
-        ));
+        trivia.add(Dismissible(
+            key: UniqueKey(),
+            confirmDismiss: (DismissDirection direction) async {
+              return await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Attention"),
+                    content: const Text(
+                        "Are you sure you wish to delete this question?"),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: () async {
+                            questions.removeAt(i);
+                            answers.removeAt(i);
+                            categories.removeAt(i);
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(username)
+                                .update({
+                              "questions": questions,
+                              "answers": answers,
+                              "categories": categories,
+                            }).then((_) {
+                              Navigator.of(context).pop(true);
+                            });
+                          },
+                          child: const Text("DELETE")),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text("CANCEL"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            background: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.red,
+              child: const Icon(Icons.delete),
+              alignment: AlignmentDirectional.centerStart,
+            ),
+            direction: DismissDirection.startToEnd,
+            child: ExpansionTile(
+                childrenPadding: EdgeInsets.zero,
+                title: Text(categories[i]),
+                subtitle:
+                    Text(questions[i], style: const TextStyle(fontSize: 20)),
+                children: <Widget>[
+                  ListTile(
+                      title: Text(answers[i],
+                          style: const TextStyle(fontSize: 18))),
+                ])));
       }
     });
     return trivia;
@@ -88,8 +91,8 @@ class _QuestionsState extends State<Questions> {
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
             future: _questionsListWidget(loginModel.username),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Card>> snapshot) {
+            builder: (BuildContext context,
+                AsyncSnapshot<List<Dismissible>> snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data!.isEmpty) {
                   return const Center(
