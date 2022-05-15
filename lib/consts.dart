@@ -7,8 +7,9 @@ const secondaryColor = Colors.white;
 const playOptionColor = Color.fromRGBO(250, 220, 70, 1);
 const thirdColor = Color.fromRGBO(191, 216, 235, 1);
 const secondaryBackgroundColor = Color.fromRGBO(248, 248, 248, 1);
-const correctAnswerColor = Color.fromRGBO(124, 209, 117, 1);
-const wrongAnswerColor = Color.fromRGBO(249, 51, 36, 1);
+const redColor = Color.fromRGBO(249, 51, 36, 1);
+const greenColor = Color.fromRGBO(124, 209, 117, 1);
+const blueColor = Colors.blue;
 
 // Numbers
 const grabbingHeightConst = 200.0;
