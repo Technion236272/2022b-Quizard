@@ -94,6 +94,11 @@ class LoginModel extends ChangeNotifier {
 
   void logOut() {
     _isLoggedIn = false;
+    _username = '';
+    _email = '';
+    _wins = 0;
+    _userImageUrl = '';
+    cachedQuestionsList = [];
     notifyListeners();
   }
 

@@ -1,9 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
 import 'providers.dart';
 import 'questions.dart';
+
+class Settings extends StatelessWidget {
+  const Settings({Key? key}) : super(key: key);
+
+  void _onPressedChangeAvatar(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+  }
+
+  void _onPressedChangeEmail(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+  }
+
+  void _onPressedChangeUsername(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+  }
+
+  void _onPressedChangePassword(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+  }
+
+  void _onPressedLogOut(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+    AuthModel.instance().signOut().then((value) {
+      loginModel.logOut();
+      // Hide StatusBar, Show navigation buttons
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: [SystemUiOverlay.bottom]);
+      Navigator.of(context).pop();
+    });
+  }
+
+  Padding _settingsButton(String buttonText, BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              primary: secondaryColor,
+              minimumSize: const Size.fromHeight(50)), // max width
+          child: Text(buttonText, style: const TextStyle(color: defaultColor)),
+          onPressed: () {
+            switch (buttonText) {
+              case 'Change Avatar':
+                _onPressedChangeAvatar(context);
+                break;
+              case 'Change Username':
+                _onPressedChangeUsername(context);
+                break;
+              case 'Change Email':
+                _onPressedChangeEmail(context);
+                break;
+              case 'Change Password':
+                _onPressedChangePassword(context);
+                break;
+              case 'Log Out':
+                _onPressedLogOut(context);
+            }
+          },
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(children: [
+                _settingsButton('Change Avatar', context),
+                _settingsButton('Change Username', context),
+                _settingsButton('Change Email', context),
+                _settingsButton('Change Password', context),
+              ]),
+              _settingsButton('Log Out', context),
+            ]));
+  }
+}
 
 //ignore: must_be_immutable
 class Profile extends StatelessWidget {
@@ -100,10 +178,14 @@ class Profile extends StatelessWidget {
                             child: const Questions()),
                         Container(
                             color: secondaryBackgroundColor,
-                            child: const Icon(Icons.tag_faces)),
+                            child: const Center(
+                                child: Text(
+                              "Coming soon.",
+                              style: TextStyle(fontSize: 20),
+                            ))),
                         Container(
                             color: secondaryBackgroundColor,
-                            child: const Icon(Icons.settings)),
+                            child: const Settings()),
                       ],
                     ),
                   ),

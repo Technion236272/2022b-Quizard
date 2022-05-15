@@ -166,24 +166,6 @@ class Play extends StatelessWidget {
                   ),
                 ],
               ),
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: secondaryColor,
-                        minimumSize: const Size.fromHeight(50)), // max width
-                    child: const Text('Log out',
-                        style: TextStyle(color: defaultColor)),
-                    onPressed: () {
-                      AuthModel.instance().signOut().then((value) {
-                        loginModel.logOut();
-                        // Hide StatusBar, Show navigation buttons
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                            overlays: [SystemUiOverlay.bottom]);
-                        Navigator.of(context).pop();
-                      });
-                    },
-                  )),
               Container()
             ]),
       );
