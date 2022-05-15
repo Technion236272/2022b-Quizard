@@ -52,7 +52,7 @@ class AddQuestionForm extends StatelessWidget {
                   onPressed: () async {
                     await FirebaseFirestore.instance
                         .collection('users')
-                        .doc(loginModel.username)
+                        .doc(loginModel.userId)
                         .get()
                         .then((value) {
                       List questions = value["questions"];
@@ -63,7 +63,7 @@ class AddQuestionForm extends StatelessWidget {
                       categories.add(_categoryController.text);
                       FirebaseFirestore.instance
                           .collection('users')
-                          .doc(loginModel.username)
+                          .doc(loginModel.userId)
                           .update({
                         "questions": questions,
                         "answers": answers,
@@ -102,7 +102,7 @@ class Questions extends StatefulWidget {
 
 class _QuestionsState extends State<Questions> {
   Future<bool?> _editQuestionDialog(
-      String username, String question, String answer, String category) {
+      String userId, String question, String answer, String category) {
     final _categoryController = TextEditingController();
     final _questionController = TextEditingController();
     final _answerController = TextEditingController();
@@ -156,7 +156,7 @@ class _QuestionsState extends State<Questions> {
                           onPressed: () async {
                             await FirebaseFirestore.instance
                                 .collection('users')
-                                .doc(username)
+                                .doc(userId)
                                 .get()
                                 .then((value) {
                               List questions = value["questions"];
@@ -174,7 +174,7 @@ class _QuestionsState extends State<Questions> {
                               }
                               FirebaseFirestore.instance
                                   .collection('users')
-                                  .doc(username)
+                                  .doc(userId)
                                   .update({
                                 "questions": questions,
                                 "answers": answers,
@@ -204,7 +204,7 @@ class _QuestionsState extends State<Questions> {
   }
 
   Future<bool?> _removeQuestionDialog(
-      String username, String question, String answer, String category) {
+      String userId, String question, String answer, String category) {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -217,7 +217,7 @@ class _QuestionsState extends State<Questions> {
                   onPressed: () async {
                     await FirebaseFirestore.instance
                         .collection('users')
-                        .doc(username)
+                        .doc(userId)
                         .get()
                         .then((value) {
                       List questions = value["questions"];
@@ -235,7 +235,7 @@ class _QuestionsState extends State<Questions> {
                       }
                       FirebaseFirestore.instance
                           .collection('users')
-                          .doc(username)
+                          .doc(userId)
                           .update({
                         "questions": questions,
                         "answers": answers,
@@ -256,11 +256,11 @@ class _QuestionsState extends State<Questions> {
   }
 
   Future<List<Dismissible>> _questionsListWidget(
-      BuildContext context, String username) async {
+      BuildContext context, String userId) async {
     List<Dismissible> trivia = <Dismissible>[];
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(username)
+        .doc(userId)
         .get()
         .then((value) {
       List questions = value["questions"];
@@ -272,10 +272,10 @@ class _QuestionsState extends State<Questions> {
             confirmDismiss: (DismissDirection direction) {
               if (direction == DismissDirection.startToEnd) {
                 return _removeQuestionDialog(
-                    username, questions[i], answers[i], categories[i]);
+                    userId, questions[i], answers[i], categories[i]);
               } else {
                 return _editQuestionDialog(
-                    username, questions[i], answers[i], categories[i]);
+                    userId, questions[i], answers[i], categories[i]);
               }
             },
             background: Container(
@@ -336,7 +336,7 @@ class _QuestionsState extends State<Questions> {
               }),
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
-              future: _questionsListWidget(context, loginModel.username),
+              future: _questionsListWidget(context, loginModel.userId),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data.isNotEmpty) {
