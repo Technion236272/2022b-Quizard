@@ -73,6 +73,7 @@ class LoginModel extends ChangeNotifier {
   String _email = '';
   int _wins = 0;
   String _userImageUrl = '';
+  List<Dismissible> cachedQuestionsList = [];
 
   final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
