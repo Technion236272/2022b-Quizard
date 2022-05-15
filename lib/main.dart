@@ -106,6 +106,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 loginModel.setEmail(user["email"]);
                 loginModel.setUsername(user["username"]);
                 loginModel.setWins(user["wins"]);
+                loginModel.setPassword(loginModel.passwordController.text);
                 _goToHomePage();
                 return;
               }

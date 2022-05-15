@@ -72,6 +72,7 @@ class LoginModel extends ChangeNotifier {
   String _userId = '';
   String _username = '';
   String _email = '';
+  String _password = '';
   int _wins = 0;
   String _userImageUrl = '';
   List<Dismissible> cachedQuestionsList = [];
@@ -84,6 +85,7 @@ class LoginModel extends ChangeNotifier {
   String get username => _username;
   String get userId => _userId;
   String get email => _email;
+  String get password => _password;
   int get wins => _wins;
   TextEditingController get emailOrUsernameController =>
       _emailOrUsernameController;
@@ -127,6 +129,11 @@ class LoginModel extends ChangeNotifier {
 
   void setUserId(String uid) {
     _userId = uid;
+    notifyListeners();
+  }
+
+  void setPassword(String pass) {
+    _password = pass;
     notifyListeners();
   }
 
