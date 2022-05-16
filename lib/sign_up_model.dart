@@ -12,16 +12,4 @@ class SignUpModel extends ChangeNotifier {
   TextEditingController get passwordController => _passwordController;
   TextEditingController get secondPasswordController => _secondPasswordController;
 
-  // Todo: Finish everything!
-
-
-  void signUp() {
-
-  }
-
-  void toggleSigningUp() {
-
-  }
-
-
 }

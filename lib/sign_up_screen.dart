@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'consts.dart';
 import 'sign_up_model.dart';
+import 'providers.dart';
 
 class SignUpScreen extends StatefulWidget{
   const SignUpScreen({Key? key}) : super(key: key);
@@ -21,8 +22,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
         overlays: [SystemUiOverlay.bottom]);
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final signUpModel = Provider.of<SignUpModel>(context, listen: false);
+
+    void _trySignUp() {
+      FocusManager.instance.primaryFocus?.unfocus();
+      if (signUpModel.emailController.text.isEmpty ||
+          signUpModel.passwordController.text.isEmpty ||
+          signUpModel.userNameController.text.isEmpty ||
+          signUpModel.secondPasswordController.text.isEmpty) {
+        ScaffoldMessenger
+            .of(context)
+            .showSnackBar(const SnackBar(
+          content: Text('All fields are required!'),
+        ))
+            .closed
+            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+        return;
+      }
+      if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]").hasMatch(
+          signUpModel.emailController.text)) {
+        ScaffoldMessenger
+            .of(context)
+            .showSnackBar(const SnackBar(
+          content: Text('Enter a valid email.'),
+        ))
+            .closed
+            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+        return;
+      }
+      if (signUpModel.passwordController.text !=
+          signUpModel.secondPasswordController.text) {
+        ScaffoldMessenger
+            .of(context)
+            .showSnackBar(const SnackBar(
+          content: Text('Passwords do not match!'),
+        ))
+            .closed
+            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+        return;
+      }
+      if (signUpModel.passwordController.text.length < 6) {
+        ScaffoldMessenger
+            .of(context)
+            .showSnackBar(const SnackBar(
+          content: Text('Password should contain at least 6 characters.'),
+        ))
+            .closed
+            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+        return;
+      }
+      AuthModel.instance().signUp(signUpModel.emailController.text.trim(),
+          signUpModel.passwordController.text.trim());
+      Navigator.of(context).pop();
+
+      // Todo: finish up "email is already registered".
+      // Todo: finish up "userName is already registered".
+    }
+
+
     return Consumer<SignUpModel>(builder: (context, signUpModel, child) {
       return Scaffold(
           body: Padding(
@@ -73,7 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               horizontal: 24, vertical: 3),
                           child: TextFormField(
                               controller: signUpModel.emailController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
                                 border: OutlineInputBorder(),
@@ -117,8 +177,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const Size.fromHeight(50)),
                             child: const Text('Finish signing up',
                                 style: TextStyle(color: defaultColor)),
-                            onPressed: () {          // TODO: Add sign up implementation
-                              Navigator.of(context).pop();
+                            onPressed: () {
+                              _trySignUp();
                             }
                         )),
                   ])
