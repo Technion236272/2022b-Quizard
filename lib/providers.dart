@@ -86,6 +86,7 @@ class LoginModel extends ChangeNotifier {
   String get userId => _userId;
   String get email => _email;
   String get password => _password;
+  String get userImageUrl => _userImageUrl;
   int get wins => _wins;
   TextEditingController get emailOrUsernameController =>
       _emailOrUsernameController;

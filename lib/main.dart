@@ -70,8 +70,9 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     Future<void> _goToHomePage() async {
-      final username = loginModel.username;
-      final ref = FirebaseStorage.instance.ref('images/profiles/$username.jpg');
+      final uid = loginModel.userId;
+      //TODO: Support also .png files
+      final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
       final url = await ref.getDownloadURL();
       loginModel.setUserImageUrl(url);
       loginModel.logIn();
