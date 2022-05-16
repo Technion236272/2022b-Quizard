@@ -69,10 +69,13 @@ class AuthModel with ChangeNotifier {
 class LoginModel extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool _isLoggingIn = false;
+  String _userId = '';
   String _username = '';
   String _email = '';
+  String _password = '';
   int _wins = 0;
   String _userImageUrl = '';
+  List<Dismissible> cachedQuestionsList = [];
 
   final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -80,7 +83,10 @@ class LoginModel extends ChangeNotifier {
   bool get isLoggingIn => _isLoggingIn;
   bool get isLoggedIn => _isLoggedIn;
   String get username => _username;
+  String get userId => _userId;
   String get email => _email;
+  String get password => _password;
+  String get userImageUrl => _userImageUrl;
   int get wins => _wins;
   TextEditingController get emailOrUsernameController =>
       _emailOrUsernameController;
@@ -93,6 +99,11 @@ class LoginModel extends ChangeNotifier {
 
   void logOut() {
     _isLoggedIn = false;
+    _username = '';
+    _email = '';
+    _wins = 0;
+    _userImageUrl = '';
+    cachedQuestionsList = [];
     notifyListeners();
   }
 
@@ -114,6 +125,16 @@ class LoginModel extends ChangeNotifier {
 
   void setWins(int wins) {
     _wins = wins;
+    notifyListeners();
+  }
+
+  void setUserId(String uid) {
+    _userId = uid;
+    notifyListeners();
+  }
+
+  void setPassword(String pass) {
+    _password = pass;
     notifyListeners();
   }
 

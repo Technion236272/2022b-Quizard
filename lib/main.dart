@@ -70,20 +70,23 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     Future<void> _goToHomePage() async {
-      final username = loginModel.username;
-      final ref = FirebaseStorage.instance.ref('images/profiles/$username.jpg');
+      final uid = loginModel.userId;
+      //TODO: Support also .png files
+      final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
       final url = await ref.getDownloadURL();
       loginModel.setUserImageUrl(url);
-      loginModel.getUserImage(); // Cache it
       loginModel.logIn();
-      loginModel.toggleLogging();
       Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => const HomePage()));
+      loginModel.toggleLogging();
     }
 
     void _tryLogin() {
       loginModel.toggleLogging();
+
       FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+
+      bool loggedIn = false;
 
       if (loginModel.emailOrUsernameController.text.isEmpty ||
           loginModel.passwordController.text.isEmpty) {
@@ -91,58 +94,29 @@ class _WelcomePageState extends State<WelcomePage> {
         return;
       }
 
-      // Tyring to log in as it's an email
-      AuthModel.instance()
-          .signIn(loginModel.emailOrUsernameController.text,
-              loginModel.passwordController.text)
-          .then((result) {
-        if (result == true) {
-          // it's a valid email! Gathering data and logging in...
-          FirebaseFirestore fireStore = FirebaseFirestore.instance;
-          fireStore.collection('users').get().then((users) {
-            for (var user in users.docs) {
-              if (user["email"] == loginModel.emailOrUsernameController.text) {
-                loginModel.setEmail(loginModel.emailOrUsernameController.text);
-                loginModel.setUsername(user.id);
+      FirebaseFirestore.instance.collection('users').get().then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == loginModel.emailOrUsernameController.text ||
+              user["username"] == loginModel.emailOrUsernameController.text) {
+            await AuthModel.instance()
+                .signIn(user["email"], loginModel.passwordController.text)
+                .then((value) {
+              if (value == true) {
+                loggedIn = true;
+                loginModel.setUserId(user.id);
+                loginModel.setEmail(user["email"]);
+                loginModel.setUsername(user["username"]);
                 loginModel.setWins(user["wins"]);
+                loginModel.setPassword(loginModel.passwordController.text);
                 _goToHomePage();
+                return;
               }
-            }
-          });
-        } else {
-          // Might be a user name? trying to get email by username...
-          FirebaseFirestore fireStore = FirebaseFirestore.instance;
-          fireStore
-              .collection('users')
-              .doc(loginModel.emailOrUsernameController.text)
-              .get()
-              .then((snapshot) {
-            if (snapshot.data() != null) {
-              // User found! trying to log in with
-              // corresponding email and entered password
-              AuthModel.instance()
-                  .signIn(snapshot.data()?["email"],
-                      loginModel.passwordController.text)
-                  .then((result) {
-                if (result == true) {
-                  // It was a valid username and found the right email.
-                  // logging in...
-                  loginModel
-                      .setUsername(loginModel.emailOrUsernameController.text);
-                  loginModel.setEmail(snapshot.data()?["email"]);
-                  loginModel.setWins(snapshot.data()?["wins"]);
-                  _goToHomePage();
-                } else {
-                  // It was a valid username but wasn't a valid password
-                  _wrongCerts();
-                }
-              });
-            } else {
-              // Else it wasn't a valid username / email,
-              // Or it was a valid email but wrong password
-              _wrongCerts();
-            }
-          });
+            });
+          }
+        }
+      }).then((value) {
+        if (!loggedIn) {
+          _wrongCerts();
         }
       });
     }
