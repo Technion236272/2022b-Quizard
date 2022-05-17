@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'consts.dart';
 import 'sign_up_model.dart';
 import 'providers.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class SignUpScreen extends StatefulWidget{
   const SignUpScreen({Key? key}) : super(key: key);
@@ -23,9 +25,70 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
     final signUpModel = Provider.of<SignUpModel>(context, listen: false);
+    File? imageFile = null;
+
+
+    _openGallery(BuildContext context) async {
+      final ImagePicker _picker = ImagePicker();
+      var photo = await _picker.pickImage(source: ImageSource.gallery);
+      this.setState(() {
+        imageFile = photo as File;
+      });
+      Navigator.of(context).pop();
+    }
+
+    _openCamera(BuildContext context) async {
+      final ImagePicker _picker = ImagePicker();
+      var photo = await _picker.pickImage(source: ImageSource.camera);
+      this.setState(() {
+        imageFile = photo as File;
+      });
+      Navigator.of(context).pop();
+    }
+
+    _deleteImage(BuildContext context) {
+      this.setState(() {
+        imageFile = File('images/titles/avatar.png');
+      });
+      Navigator.of(context).pop();
+    }
+
+    Future<void> _showChoiceDialog(BuildContext context) {
+      return showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Select"),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    GestureDetector(
+                        child: Text("Gallery"),
+                        onTap: () {
+                          _openGallery(context);
+                        }),
+                    Padding(padding: EdgeInsets.all(8.0)),
+                    GestureDetector(
+                        child: Text("Camera"),
+                        onTap: () {
+                          _openCamera(context);
+                        }),
+                    Padding(padding: EdgeInsets.all(8.0)),
+                    GestureDetector(
+                        child: Text("Remove current avatar"),
+                        onTap: () {
+                          _deleteImage(context);
+                        }),
+                  ],),
+              ),);
+          });
+    }
 
     void _trySignUp() {
       FocusManager.instance.primaryFocus?.unfocus();
@@ -83,6 +146,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
 
+
+
     return Consumer<SignUpModel>(builder: (context, signUpModel, child) {
       return Scaffold(
           body: Padding(
@@ -90,99 +155,97 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        InkWell(
-                            child: Icon(
-                              Icons.arrow_back,
-                              size: 32.0,
-                            ),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            }
-                        )],
-                    ),
-                    const Image(
-                        image: AssetImage('images/titles/almost_there.png')),
-                    const Text(
-                      'Select your avatar',
-                      style: TextStyle(color: Colors.white, height: 2, fontSize: 18),),
-                    Column(children: <Widget>[
-                      SizedBox(),
-                      GestureDetector(
-                      onTap: null,              // Todo: Select image as an avatar.
-                      child:  CircleAvatar(
-                        radius: 55.0,
-                        backgroundImage: ExactAssetImage('images/titles/avatar.png'),),
-                    )]),
-                    Column(children: <Widget>[
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 3),
-                          child: TextFormField(
-                              controller: signUpModel.userNameController,
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Username',
-                              ))),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 3),
-                          child: TextFormField(
-                              controller: signUpModel.emailController,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Email',
-                              ))),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 3),
-                          child: TextFormField(
-                              controller: signUpModel.passwordController,
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Password',
-                              ))),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 3),
-                          child: TextFormField(
-                              controller: signUpModel.secondPasswordController,
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Repeat password',
-                              ))),
-                    ]),
-                    Padding(   // TODO: Fix Overflow
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            InkWell(
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  size: 32.0,
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                }
+                            )],
+                        ),
+                      const Image(
+                          image: AssetImage('images/titles/almost_there.png')),
+                      const Text(
+                        'Select your avatar',
+                        style: TextStyle(color: Colors.white, height: 2, fontSize: 18),),
+                      Column(children: <Widget>[
+                        SizedBox(),
+                        GestureDetector(
+                          onTap: () => _showChoiceDialog(context),
+                          child:  CircleAvatar(
+                            radius: 55.0,
+                            backgroundImage: ExactAssetImage('images/titles/avatar.png'),),
+                        ),
+                      ]),
+                      Column(children: <Widget>[
+                        Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
+                            child: TextFormField(
+                                controller: signUpModel.userNameController,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  fillColor: secondaryColor,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Username',
+                                ))),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
+                            child: TextFormField(
+                                controller: signUpModel.emailController,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  fillColor: secondaryColor,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Email',
+                                ))),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 3),
+                            child: TextFormField(
+                                controller: signUpModel.passwordController,
+                                obscureText: true,
+                                enableSuggestions: false,
+                                autocorrect: false,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  fillColor: secondaryColor,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Password',
+                                ))),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
+                            child: TextFormField(
+                                controller: signUpModel.secondPasswordController,
+                                obscureText: true,
+                                enableSuggestions: false,
+                                autocorrect: false,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  fillColor: secondaryColor,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Repeat password',
+                                ))),
+                          ]),
+                            Padding(   // TODO: Fix Overflow
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
+                                child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
                                 primary: secondaryColor,
                                 minimumSize:
                                 const Size.fromHeight(50)),
-                            child: const Text('Finish signing up',
+                                child: const Text('Finish signing up',
                                 style: TextStyle(color: defaultColor)),
-                            onPressed: () {
-                              _trySignUp();
-                            }
-                        )),
-                  ])
-          ));
+                                onPressed: () {
+                                  _trySignUp();
+                                }
+                                )),
+                  ])));
+
     });
   }
 }
