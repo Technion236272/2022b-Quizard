@@ -1,11 +1,16 @@
+import 'dart:typed_data';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'consts.dart';
 import 'sign_up_model.dart';
 import 'providers.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+
 
 class SignUpScreen extends StatefulWidget{
   const SignUpScreen({Key? key}) : super(key: key);
@@ -25,37 +30,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
     final signUpModel = Provider.of<SignUpModel>(context, listen: false);
-    File? imageFile = null;
+    FilePickerResult? result = null;
 
-
-    _openGallery(BuildContext context) async {
-      final ImagePicker _picker = ImagePicker();
-      var photo = await _picker.pickImage(source: ImageSource.gallery);
-      this.setState(() {
-        imageFile = photo as File;
-      });
-      Navigator.of(context).pop();
-    }
-
-    _openCamera(BuildContext context) async {
-      final ImagePicker _picker = ImagePicker();
-      var photo = await _picker.pickImage(source: ImageSource.camera);
-      this.setState(() {
-        imageFile = photo as File;
-      });
-      Navigator.of(context).pop();
+    void _openGallery(BuildContext context) async {
+      result = await FilePicker.platform.pickFiles(withData: true);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(
+        content: Text('Changed avatar successfully'),
+      ))
+          .closed
+          .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
     }
 
     _deleteImage(BuildContext context) {
-      this.setState(() {
-        imageFile = File('images/titles/avatar.png');
-      });
-      Navigator.of(context).pop();
     }
 
     Future<void> _showChoiceDialog(BuildContext context) {
@@ -75,12 +65,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         }),
                     Padding(padding: EdgeInsets.all(8.0)),
                     GestureDetector(
-                        child: Text("Camera"),
-                        onTap: () {
-                          _openCamera(context);
-                        }),
-                    Padding(padding: EdgeInsets.all(8.0)),
-                    GestureDetector(
                         child: Text("Remove current avatar"),
                         onTap: () {
                           _deleteImage(context);
@@ -89,6 +73,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),);
           });
     }
+    void clearButtons()
+    {
+      signUpModel.userNameController.clear();
+      signUpModel.emailController.clear();
+      signUpModel.passwordController.clear();
+      signUpModel.secondPasswordController.clear();
+      signUpModel.setUserImageUrl('');
+      signUpModel.setUserId('');
+    }
+
+    void setAvatar() async {
+      var uid = signUpModel.userId;
+      final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
+      if (result != null) {
+        Uint8List? fileBytes = result?.files.first.bytes;
+        await ref.putData(fileBytes!);
+      }
+    }
+
+    Future<void> getUserId() async {
+      FirebaseFirestore.instance.collection('users').get().then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == signUpModel.emailController.text ||
+              user["username"] == signUpModel.userNameController.text) {
+            signUpModel.setUserId(user.id);
+            break;
+          }
+        };
+      });
+    }
+
+    bool checkAlreadyIn() {
+      FirebaseFirestore.instance.collection('users').get().then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == signUpModel.emailController.text ||
+              user["username"] == signUpModel.userNameController.text) {
+            return true;};}
+        });
+      return false;
+    }
+
 
     void _trySignUp() {
       FocusManager.instance.primaryFocus?.unfocus();
@@ -137,15 +162,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         return;
       }
-      AuthModel.instance().signUp(signUpModel.emailController.text.trim(),
-          signUpModel.passwordController.text.trim());
+      if(checkAlreadyIn()) {
+        ScaffoldMessenger
+            .of(context)
+            .showSnackBar(const SnackBar(
+          content: Text('Email/Username already exists.'),
+        ))
+            .closed
+            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+        return;
+      }
+
+      AuthModel.instance().signUp(signUpModel.emailController.text, signUpModel.userNameController.text,
+          signUpModel.passwordController.text);
+      AuthModel.instance().setUp(signUpModel.emailController.text, signUpModel.userNameController.text);
+      getUserId();
+      setAvatar();
+      clearButtons();
       Navigator.of(context).pop();
-
-      // Todo: finish up "email is already registered".
-      // Todo: finish up "userName is already registered".
     }
-
-
 
 
     return Consumer<SignUpModel>(builder: (context, signUpModel, child) {
@@ -178,8 +213,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         GestureDetector(
                           onTap: () => _showChoiceDialog(context),
                           child:  CircleAvatar(
-                            radius: 55.0,
-                            backgroundImage: ExactAssetImage('images/titles/avatar.png'),),
+                            radius: 70.0,
+                            backgroundImage: result == null ? ExactAssetImage('images/titles/avatar.png') : ExactAssetImage('images/titles/avatar.png'),),
                         ),
                       ]),
                       Column(children: <Widget>[

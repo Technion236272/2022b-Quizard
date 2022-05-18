@@ -10,6 +10,8 @@ import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'providers.dart';
+import 'sign_up_screen.dart';
+import 'sign_up_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +20,7 @@ void main() async {
   );
 
   runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => LoginModel())],
+      providers: [ChangeNotifierProvider(create: (context) => LoginModel()), ChangeNotifierProvider(create: (context) => SignUpModel())],
       child: const MyApp()));
 }
 
@@ -69,7 +71,7 @@ class _WelcomePageState extends State<WelcomePage> {
       loginModel.toggleLogging(); // Enable log in button back
     }
 
-    Future<void> _goToHomePage() async {
+      Future<void> _goToHomePage() async {
       final uid = loginModel.userId;
       //TODO: Support also .png files
       final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
@@ -227,11 +229,12 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text("Don't have an account? "),
                         InkWell(
                           child: Text('Sign Up'),
-                          onTap: null, //TODO: Go to Sign Up screen
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(builder: (context) => const SignUpScreen()))
                         )
                       ])
                 ]),

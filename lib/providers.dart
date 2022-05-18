@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,17 +22,33 @@ class AuthModel with ChangeNotifier {
 
   bool get isAuthenticated => status == Status.authenticated;
 
-  Future<UserCredential?> signUp(String email, String password) async {
+
+  Future<String?> signUp(String email, String userName, String password) async {
     try {
       _status = Status.authenticating;
       notifyListeners();
-      return await _auth.createUserWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
+      return _auth.currentUser?.uid;
     } catch (e) {
       _status = Status.unauthenticated;
       notifyListeners();
       return null;
     }
+  }
+
+  Future<void> setUp(String email, String userName) async {
+    var db = FirebaseFirestore.instance;
+    final user = <String, dynamic> {
+      "answers" : [],
+      "categories" : [],
+      "email" : email,
+      "questions" : [],
+      "username" : userName,
+      "wins" : 0
+    };
+    db.collection("users").add(user);
+    notifyListeners();
   }
 
   Future<bool> signIn(String email, String password) async {
