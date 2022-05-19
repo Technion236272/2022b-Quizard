@@ -1,15 +1,14 @@
-import 'dart:typed_data';
-
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'consts.dart';
+import 'package:flutter/cupertino.dart';
 import 'sign_up_model.dart';
 import 'providers.dart';
+import 'dart:typed_data';
+import 'consts.dart';
 
 
 class SignUpScreen extends StatefulWidget{
@@ -24,6 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     super.initState();
 
+
     // Hide StatusBar, Show navigation buttons
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: [SystemUiOverlay.bottom]);
@@ -32,11 +32,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Uint8List? blogImage;
+    bool flag = false;
     final signUpModel = Provider.of<SignUpModel>(context, listen: false);
-    FilePickerResult? result = null;
 
     void _openGallery(BuildContext context) async {
+      FilePickerResult? result;
       result = await FilePicker.platform.pickFiles(withData: true);
+      if(result != null) {
+        blogImage = result.files.first.bytes;
+        setState(() {});
+      }
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(
         content: Text('Changed avatar successfully'),
@@ -69,58 +75,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onTap: () {
                           _deleteImage(context);
                         }),
-                  ],),
-              ),);
-          });
-    }
-    void clearButtons()
-    {
-      signUpModel.userNameController.clear();
-      signUpModel.emailController.clear();
-      signUpModel.passwordController.clear();
-      signUpModel.secondPasswordController.clear();
-      signUpModel.setUserImageUrl('');
-      signUpModel.setUserId('');
+                    Padding(padding: EdgeInsets.all(8.0)),
+                InkWell(
+                    child: Text('Close'),
+                    onTap: () => Navigator.of(context).pop()
+                )],),),
+            );});
+
     }
 
-    void setAvatar() async {
+    Future<void> setAvatar() async {
       var uid = signUpModel.userId;
       final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
-      if (result != null) {
-        Uint8List? fileBytes = result?.files.first.bytes;
-        await ref.putData(fileBytes!);
-      }
+      await ref.putData(blogImage!);
+
     }
 
-    Future<void> getUserId() async {
-      FirebaseFirestore.instance.collection('users').get().then((users) async {
+    Future<void> setUserId() async{
+      FirebaseFirestore.instance.collection('users').get().then((users) {
         for (var user in users.docs) {
-          if (user["email"] == signUpModel.emailController.text ||
-              user["username"] == signUpModel.userNameController.text) {
+          if (user["email"] == signUpModel.emailController.text.trim() ||
+              user["username"] == signUpModel.userNameController.text.trim()) {
             signUpModel.setUserId(user.id);
+            ScaffoldMessenger
+                .of(context)
+                .showSnackBar(SnackBar(
+              content: Text(user.id)));
             break;
           }
-        };
-      });
+        };}).then((value) => null);
     }
 
-    bool checkAlreadyIn() {
-      FirebaseFirestore.instance.collection('users').get().then((users) async {
+    void register() {
+      AuthModel.instance().signUp(signUpModel.emailController.text.trim(), signUpModel.userNameController.text.trim(),
+          signUpModel.passwordController.text.trim());
+      AuthModel.instance().setUp(signUpModel.emailController.text.trim(), signUpModel.userNameController.text.trim());
+
+    }
+
+    Future<void> checkAlreadyRegistered() async {
+      FirebaseFirestore.instance.collection('users').get().then((users) {
         for (var user in users.docs) {
-          if (user["email"] == signUpModel.emailController.text ||
-              user["username"] == signUpModel.userNameController.text) {
-            return true;};}
-        });
-      return false;
-    }
+          if (user["email"] == signUpModel.emailController.text.trim() ||
+              user["username"] == signUpModel.userNameController.text.trim()) {
+            ScaffoldMessenger
+                .of(context)
+                .showSnackBar(const SnackBar(
+              content: Text('Email/Username already exists.'),
+            ))
+                .closed
+                .then((value) =>
+                ScaffoldMessenger.of(context).clearSnackBars());
+            flag = true;
+          };
+        }
+      }).then((value) async {
+        if (!flag) {
+          register();
+          await setUserId();
+          await setAvatar();
+          Navigator.of(context).pop();
+        }});
 
+      await signUpModel.deleteRegistration();
+    }
 
     void _trySignUp() {
       FocusManager.instance.primaryFocus?.unfocus();
-      if (signUpModel.emailController.text.isEmpty ||
-          signUpModel.passwordController.text.isEmpty ||
-          signUpModel.userNameController.text.isEmpty ||
-          signUpModel.secondPasswordController.text.isEmpty) {
+      if (signUpModel.emailController.text.trim().isEmpty ||
+          signUpModel.passwordController.text.trim().isEmpty ||
+          signUpModel.userNameController.text.trim().isEmpty ||
+          signUpModel.secondPasswordController.text.trim().isEmpty) {
         ScaffoldMessenger
             .of(context)
             .showSnackBar(const SnackBar(
@@ -130,8 +155,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         return;
       }
+
       if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]").hasMatch(
-          signUpModel.emailController.text)) {
+          signUpModel.emailController.text.trim())) {
         ScaffoldMessenger
             .of(context)
             .showSnackBar(const SnackBar(
@@ -141,6 +167,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         return;
       }
+
       if (signUpModel.passwordController.text !=
           signUpModel.secondPasswordController.text) {
         ScaffoldMessenger
@@ -152,7 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         return;
       }
-      if (signUpModel.passwordController.text.length < 6) {
+      if (signUpModel.passwordController.text.trim().length < 6) {
         ScaffoldMessenger
             .of(context)
             .showSnackBar(const SnackBar(
@@ -162,24 +189,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         return;
       }
-      if(checkAlreadyIn()) {
-        ScaffoldMessenger
-            .of(context)
-            .showSnackBar(const SnackBar(
-          content: Text('Email/Username already exists.'),
-        ))
-            .closed
-            .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
-        return;
-      }
-
-      AuthModel.instance().signUp(signUpModel.emailController.text, signUpModel.userNameController.text,
-          signUpModel.passwordController.text);
-      AuthModel.instance().setUp(signUpModel.emailController.text, signUpModel.userNameController.text);
-      getUserId();
-      setAvatar();
-      clearButtons();
-      Navigator.of(context).pop();
+      checkAlreadyRegistered();
     }
 
 
@@ -187,6 +197,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return Scaffold(
           body: Padding(
               padding: const EdgeInsets.all(12),
+              child: Expanded(
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -203,20 +214,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 }
                             )],
                         ),
-                      const Image(
-                          image: AssetImage('images/titles/almost_there.png')),
-                      const Text(
-                        'Select your avatar',
-                        style: TextStyle(color: Colors.white, height: 2, fontSize: 18),),
+                        const Image(
+                            image: AssetImage('images/titles/almost_there.png')),
+                        const Text(
+                          'Select your avatar',
+                          style: TextStyle(color: Colors.white, height: 2, fontSize: 20),),
                       Column(children: <Widget>[
-                        SizedBox(),
                         GestureDetector(
                           onTap: () => _showChoiceDialog(context),
-                          child:  CircleAvatar(
-                            radius: 70.0,
-                            backgroundImage: result == null ? ExactAssetImage('images/titles/avatar.png') : ExactAssetImage('images/titles/avatar.png'),),
-                        ),
-                      ]),
+                            child: CircleAvatar(
+                                backgroundImage: blogImage != null ? Image.memory(blogImage!).image: AssetImage('images/titles/avatar.png') ,
+                                backgroundColor: thirdColor,
+                                radius: 70))]),
                       Column(children: <Widget>[
                         Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
@@ -279,7 +288,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   _trySignUp();
                                 }
                                 )),
-                  ])));
+                  ]))));
 
     });
   }

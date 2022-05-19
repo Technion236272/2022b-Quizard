@@ -16,6 +16,16 @@ class SignUpModel extends ChangeNotifier {
   String get userId => _userId;
   String get userImageUrl => _userImageUrl;
 
+  Future deleteRegistration() {
+    userNameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    secondPasswordController.clear();
+    setUserImageUrl('');
+    setUserId('');
+    notifyListeners();
+    return Future.delayed(Duration.zero);
+  }
 
   void setUserId(String id) {
     _userId = id;
