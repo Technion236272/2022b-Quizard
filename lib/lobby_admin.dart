@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:chips_input/chips_input.dart';
 
 import 'consts.dart';
@@ -44,18 +44,29 @@ class LobbyAdmin extends StatefulWidget {
 }
 
 class _LobbyAdminState extends State<LobbyAdmin> {
-  final list = ['a', 'aa', 'aaa', 'ab', 'bbb'];
+  var categoriesList = [
+    ['', '', 0]
+  ];
 
   @override
   void initState() {
     super.initState();
-
-    // Hide StatusBar, Show navigation buttons
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: [SystemUiOverlay.bottom]);
   }
 
   ChipsInput _selectCategoryInput() {
+    FirebaseFirestore.instance.collection('users').get().then((users) {
+      for (var user in users.docs) {
+        final categories = user["categories"].toSet().toList();
+        for (int i = 0; i < categories.length; i++) {
+          final filteredListByItem =
+              user["categories"].where((cat) => cat == categories[i]);
+          //String category = "${categories[i]}" " (${user["username"]})";
+          categoriesList.add(
+              [categories[i], user["username"], filteredListByItem.length]);
+        }
+      }
+    });
+
     return ChipsInput(
       initialValue: const [],
       decoration: const InputDecoration(
@@ -67,8 +78,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       findSuggestions: (String query) {
         if (query.isNotEmpty) {
           var lowercaseQuery = query.toLowerCase();
-          final results = list.where((category) {
-            return category.toLowerCase().startsWith(lowercaseQuery);
+          final results = categoriesList.where((cat) {
+            return cat[0].toString().toLowerCase().startsWith(lowercaseQuery);
           }).toList(growable: false);
           return results;
         } else {
@@ -79,9 +90,11 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         print(data);
       },
       chipBuilder: (context, state, category) {
+        final option = category as List;
+        final optionText = "${option[0]} (${option[1]})";
         return InputChip(
           backgroundColor: secondaryColor,
-          label: Text(category.toString()),
+          label: Text(optionText),
           onDeleted: () => state.deleteChip(category),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
@@ -96,14 +109,22 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               child: ListView.builder(
                 itemCount: categories.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final option = categories.elementAt(index).toString();
+                  final option = categories.elementAt(index) as List;
+                  String optionText;
+                  if (option[2] == 1) {
+                    optionText =
+                        "${option[0]}, by ${option[1]}, ${option[2]} question";
+                  } else {
+                    optionText =
+                        "${option[0]}, by ${option[1]}, ${option[2]} questions";
+                  }
                   return GestureDetector(
                     onTap: () {
                       onSelected(option);
                     },
                     child: ListTile(
                       key: ObjectKey(option),
-                      title: Text(option),
+                      title: Text(optionText),
                     ),
                   );
                 },
