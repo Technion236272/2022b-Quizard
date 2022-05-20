@@ -84,6 +84,7 @@ class _HomePageState extends State<HomePage> {
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: QuizardAppBar(),
           bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
