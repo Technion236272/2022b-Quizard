@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
+import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 
 import 'consts.dart';
 
@@ -44,6 +45,21 @@ class LobbyAdmin extends StatefulWidget {
 }
 
 class _LobbyAdminState extends State<LobbyAdmin> {
+  List<String> selectedOfficialCategories = [];
+
+  List<String> officialCategories = [
+    'Art',
+    'Sports',
+    'Politics',
+    'Movies',
+    'Music',
+    'World',
+    'Geography',
+    'History',
+    'Business',
+    'Technology',
+  ];
+
   var categoriesList = [
     ['', '', 0]
   ];
@@ -60,7 +76,6 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         for (int i = 0; i < categories.length; i++) {
           final filteredListByItem =
               user["categories"].where((cat) => cat == categories[i]);
-          //String category = "${categories[i]}" " (${user["username"]})";
           categoriesList.add(
               [categories[i], user["username"], filteredListByItem.length]);
         }
@@ -70,10 +85,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     return ChipsInput(
       initialValue: const [],
       decoration: const InputDecoration(
-        filled: true,
-        fillColor: playOptionColor,
-        labelText: "Select Custom Categories",
-      ),
+          filled: true,
+          fillColor: secondaryColor,
+          hintText: "Type here...",
+          hintStyle: TextStyle(color: thirdColor)),
       maxChips: 5,
       findSuggestions: (String query) {
         if (query.isNotEmpty) {
@@ -92,12 +107,16 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       chipBuilder: (context, state, category) {
         final option = category as List;
         final optionText = "${option[0]} (${option[1]})";
-        return InputChip(
-          backgroundColor: secondaryColor,
-          label: Text(optionText),
-          onDeleted: () => state.deleteChip(category),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        );
+        return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: InputChip(
+              shape: const StadiumBorder(side: BorderSide(color: defaultColor)),
+              labelStyle: const TextStyle(fontSize: 16),
+              backgroundColor: lightBlueColor,
+              label: Text(optionText),
+              onDeleted: () => state.deleteChip(category),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ));
       },
       optionsViewBuilder: (context, onSelected, categories) {
         return Align(
@@ -136,6 +155,98 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     );
   }
 
+  Container _categoriesTitle(String title) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      color: lightBlueColor,
+      child: Text(
+        title,
+        style: const TextStyle(
+            fontSize: 18, color: defaultColor, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  Flexible _officialCategoriesChips() {
+    return Flexible(
+        fit: FlexFit.loose,
+        child: ChipsChoice<String>.multiple(
+          value: selectedOfficialCategories,
+          onChanged: (val) => setState(() => selectedOfficialCategories = val),
+          choiceItems: C2Choice.listFrom<String, String>(
+            source: officialCategories,
+            value: (i, v) => v,
+            label: (i, v) => v,
+            tooltip: (i, v) => v,
+          ),
+          choiceActiveStyle: const C2ChoiceStyle(
+              color: defaultColor,
+              borderColor: defaultColor,
+              backgroundColor: lightBlueColor),
+          //wrapped: true,
+          textDirection: TextDirection.ltr,
+          choiceStyle: const C2ChoiceStyle(
+            color: defaultColor,
+            borderColor: defaultColor,
+          ),
+        ));
+  }
+
+  Card _officialCategories() {
+    final collectCategories =
+        FirebaseFirestore.instance.collection('trivia').get().then((cats) {
+      final categories = [];
+      for (var cat in cats.docs) {
+        categories.add(cat.id);
+      }
+      return categories;
+    });
+
+    return Card(
+      elevation: 2,
+      //margin: const EdgeInsets.all(5),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _categoriesTitle('Official Categories'),
+          FutureBuilder(
+              future: collectCategories,
+              builder: ((context, snapshot) {
+                if (snapshot.hasData) {
+                  return _officialCategoriesChips();
+                } else {
+                  return const Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Text(
+                        "Loading, please wait...",
+                        style: TextStyle(fontSize: 16),
+                      ));
+                }
+              }))
+        ],
+      ),
+    );
+  }
+
+  Card _customCategories() {
+    return Card(
+      elevation: 2,
+      //margin: const EdgeInsets.all(5),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _categoriesTitle('Custom Categories'),
+          _selectCategoryInput(),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,8 +254,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         appBar: LobbyAppBar(),
         body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(children: [
-              _selectCategoryInput(),
-            ])));
+            child: Column(
+                children: [_officialCategories(), _customCategories()])));
   }
 }

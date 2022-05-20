@@ -155,3 +155,5 @@ class LoginModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+class GameModel extends ChangeNotifier {}
