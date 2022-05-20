@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
 import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
@@ -46,6 +47,8 @@ class LobbyAdmin extends StatefulWidget {
 
 class _LobbyAdminState extends State<LobbyAdmin> {
   List<String> selectedOfficialCategories = [];
+  var selectedCustomCategories = [];
+  bool finishedBuildAllCustomCategories = false;
 
   List<String> officialCategories = [
     'Art',
@@ -60,7 +63,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     'Technology',
   ];
 
-  var categoriesList = [
+  var customCategories = [
     ['', '', 0]
   ];
 
@@ -70,17 +73,21 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   ChipsInput _selectCategoryInput() {
-    FirebaseFirestore.instance.collection('users').get().then((users) {
-      for (var user in users.docs) {
-        final categories = user["categories"].toSet().toList();
-        for (int i = 0; i < categories.length; i++) {
-          final filteredListByItem =
-              user["categories"].where((cat) => cat == categories[i]);
-          categoriesList.add(
-              [categories[i], user["username"], filteredListByItem.length]);
+    // Get all categories by all users
+    if (!finishedBuildAllCustomCategories) {
+      FirebaseFirestore.instance.collection('users').get().then((users) {
+        for (var user in users.docs) {
+          final categories = user["categories"].toSet().toList();
+          for (int i = 0; i < categories.length; i++) {
+            final filteredListByItem =
+                user["categories"].where((cat) => cat == categories[i]);
+            customCategories.add(
+                [categories[i], user["username"], filteredListByItem.length]);
+          }
         }
-      }
-    });
+      });
+      finishedBuildAllCustomCategories = true;
+    }
 
     return ChipsInput(
       initialValue: const [],
@@ -93,16 +100,17 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       findSuggestions: (String query) {
         if (query.isNotEmpty) {
           var lowercaseQuery = query.toLowerCase();
-          final results = categoriesList.where((cat) {
+          final results = customCategories.where((cat) {
             return cat[0].toString().toLowerCase().startsWith(lowercaseQuery);
           }).toList(growable: false);
+          results.toSet().toList();
           return results;
         } else {
           return [];
         }
       },
       onChanged: (data) {
-        print(data);
+        selectedCustomCategories = data;
       },
       chipBuilder: (context, state, category) {
         final option = category as List;
@@ -155,17 +163,24 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     );
   }
 
-  Container _categoriesTitle(String title) {
+  Container _categoriesTitle(String title, String subtitle) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      color: lightBlueColor,
-      child: Text(
-        title,
-        style: const TextStyle(
-            fontSize: 18, color: defaultColor, fontWeight: FontWeight.w500),
-      ),
-    );
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        color: lightBlueColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                  fontSize: 18,
+                  color: defaultColor,
+                  fontWeight: FontWeight.w500),
+            ),
+            Text(subtitle)
+          ],
+        ));
   }
 
   Flexible _officialCategoriesChips() {
@@ -211,7 +226,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _categoriesTitle('Official Categories'),
+          _categoriesTitle(
+              'Official Categories', 'Scroll right for more categories'),
           FutureBuilder(
               future: collectCategories,
               builder: ((context, snapshot) {
@@ -240,7 +256,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _categoriesTitle('Custom Categories'),
+          _categoriesTitle(
+              'Custom Categories', 'Type and search any categories by users'),
           _selectCategoryInput(),
         ],
       ),
