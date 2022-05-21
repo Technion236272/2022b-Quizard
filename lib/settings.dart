@@ -314,14 +314,13 @@ class Settings extends StatelessWidget {
   static const _changeUsernameText = 'Change Username';
   static const _changeEmailText = 'Change Email';
   static const _changePasswordText = 'Change Password';
-  static const _logOutText = 'Log Out';
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: secondaryColor,
+              primary: thirdColor,
               minimumSize: const Size.fromHeight(50)), // max width
           child: Text(buttonText, style: const TextStyle(color: defaultColor)),
           onPressed: () async {
@@ -375,19 +374,30 @@ class Settings extends StatelessWidget {
                           content: ChangePasswordForm());
                     });
                 break;
-              case _logOutText:
-                final loginModel =
-                    Provider.of<LoginModel>(context, listen: false);
-                AuthModel.instance().signOut().then((value) {
-                  loginModel.logOut();
-                  // Hide StatusBar, Show navigation buttons
-                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                      overlays: [SystemUiOverlay.bottom]);
-                  Navigator.of(context).pop();
-                });
             }
           },
         ));
+  }
+
+  Padding _logOutButton(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                primary: redColor,
+                minimumSize: const Size.fromHeight(50)), // max width
+            child: const Text('Log Out', style: TextStyle(color: defaultColor)),
+            onPressed: () {
+              final loginModel =
+                  Provider.of<LoginModel>(context, listen: false);
+              AuthModel.instance().signOut().then((value) {
+                loginModel.logOut();
+                // Hide StatusBar, Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+                Navigator.of(context).pop();
+              });
+            }));
   }
 
   @override
@@ -407,7 +417,7 @@ class Settings extends StatelessWidget {
                         _settingsButton(_changeEmailText, context),
                         _settingsButton(_changePasswordText, context),
                       ]),
-                      _settingsButton(_logOutText, context),
+                      _logOutButton(context),
                     ]))));
   }
 }

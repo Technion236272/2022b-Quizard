@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/profile.dart';
 
+import 'lobby_admin.dart';
+import 'profile.dart';
 import 'consts.dart';
 import 'providers.dart';
 
@@ -83,6 +84,7 @@ class _HomePageState extends State<HomePage> {
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: QuizardAppBar(),
           bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
@@ -118,7 +120,13 @@ class Play extends StatelessWidget {
     InkWell _playOptionButton(String imgPath) {
       return InkWell(
         splashColor: defaultColor,
-        onTap: () {}, // TODO: Support games!
+        onTap: () {
+          // TODO: Support all games!
+          if (imgPath.contains('create_private')) {
+            Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (context) => const LobbyAdmin()));
+          }
+        },
         child: Padding(
             padding: const EdgeInsets.all(7),
             child: Container(
