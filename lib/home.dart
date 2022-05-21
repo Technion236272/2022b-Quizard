@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/lobby_admin.dart';
-import 'package:quizard/profile.dart';
 
+import 'lobby_admin.dart';
+import 'profile.dart';
 import 'consts.dart';
 import 'providers.dart';
 
@@ -121,7 +121,7 @@ class Play extends StatelessWidget {
       return InkWell(
         splashColor: defaultColor,
         onTap: () {
-          // TODO: Support games!
+          // TODO: Support all games!
           if (imgPath.contains('create_private')) {
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));

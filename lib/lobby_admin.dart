@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
 import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
+import 'package:provider/provider.dart';
 
+import 'providers.dart';
 import 'consts.dart';
 
 class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
@@ -49,6 +50,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   List<String> selectedOfficialCategories = [];
   var selectedCustomCategories = [];
   bool finishedBuildAllCustomCategories = false;
+  String lockText = '';
 
   List<String> officialCategories = [
     'Art',
@@ -70,6 +72,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   @override
   void initState() {
     super.initState();
+    lockText = 'UNLOCKED';
   }
 
   ChipsInput _selectCategoryInput() {
@@ -209,42 +212,18 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Card _officialCategories() {
-    final collectCategories =
-        FirebaseFirestore.instance.collection('trivia').get().then((cats) {
-      final categories = [];
-      for (var cat in cats.docs) {
-        categories.add(cat.id);
-      }
-      return categories;
-    });
-
     return Card(
-      elevation: 2,
-      //margin: const EdgeInsets.all(5),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _categoriesTitle(
-              'Official Categories', 'Scroll right for more categories'),
-          FutureBuilder(
-              future: collectCategories,
-              builder: ((context, snapshot) {
-                if (snapshot.hasData) {
-                  return _officialCategoriesChips();
-                } else {
-                  return const Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Text(
-                        "Loading, please wait...",
-                        style: TextStyle(fontSize: 16),
-                      ));
-                }
-              }))
-        ],
-      ),
-    );
+        elevation: 2,
+        //margin: const EdgeInsets.all(5),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _categoriesTitle(
+                  'Official Categories', 'Scroll right for more categories'),
+              _officialCategoriesChips()
+            ]));
   }
 
   Card _customCategories() {
@@ -264,14 +243,187 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     );
   }
 
+  TextButton _settingsButton(String text) {
+    return TextButton(
+      style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.0),
+                  side: const BorderSide(color: defaultColor))),
+          backgroundColor: MaterialStateProperty.all<Color>(lightBlueColor)),
+      onPressed: () {
+        switch (text) {
+          case 'CHAT':
+            constSnackBar('Coming soon', context);
+            break;
+          case 'PIN CODE':
+            constSnackBar('Copied to clipboard', context);
+            break;
+          case 'INVITE':
+            constSnackBar('Coming soon', context);
+            break;
+          case 'UNLOCKED':
+            setState(() {
+              lockText = 'LOCKED';
+            });
+
+            break;
+          case 'LOCKED':
+            setState(() {
+              lockText = 'UNLOCKED';
+            });
+            break;
+        }
+      },
+      child: Text(text),
+    );
+  }
+
+  Row _gameSettings() {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      _settingsButton('CHAT'),
+      _settingsButton('PIN CODE'),
+      _settingsButton('INVITE'),
+      _settingsButton(lockText)
+    ]);
+  }
+
+  Container _lobbyTitle(int numberOfParticipants) {
+    return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        color: lightBlueColor,
+        child: Column(
+          children: [
+            Text(
+              'Private Game ($numberOfParticipants/5 Players)',
+              style: const TextStyle(
+                  fontSize: 18,
+                  color: defaultColor,
+                  fontWeight: FontWeight.w500),
+            )
+          ],
+        ));
+  }
+
+  GestureDetector _kickIcon(String username) {
+    return GestureDetector(
+        child: const Icon(Icons.block, color: redColor),
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Kick Player"),
+                  content: Text("Are you sure you wish to kick $username?"),
+                  actions: <Widget>[
+                    TextButton(
+                        onPressed: () async {}, child: const Text("KICK")),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text("CANCEL"),
+                    ),
+                  ],
+                );
+              });
+        });
+  }
+
+  Consumer<GameModel> _participant(String username, bool admin) {
+    bool? isReady = false; // TODO: Change to find state of isReady of others
+    bool matchUsernames = false;
+
+    return Consumer<GameModel>(builder: (context, gameModel, child) {
+      final loginModel = Provider.of<LoginModel>(context, listen: false);
+
+      if (username == loginModel.username) {
+        matchUsernames = true;
+      }
+
+      return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+                backgroundImage: loginModel.getUserImage(),
+                backgroundColor: thirdColor,
+                radius: 25),
+            title: Text(
+              username,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 18),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                admin ? const Icon(null) : _kickIcon(username),
+                Transform.translate(
+                    offset: const Offset(8, 0),
+                    child: Checkbox(
+                        activeColor: greenColor,
+                        value: matchUsernames ? gameModel.isReady : isReady,
+                        onChanged: matchUsernames
+                            ? (value) => gameModel.toggleIsReady()
+                            : null)),
+                const Text("Ready")
+              ],
+            ),
+          ));
+    });
+  }
+
+  ListView _participants() {
+    return ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        children: [
+          _participant('razash', true),
+          _participant('maysam', false),
+          _participant('ramzi10', false)
+        ]);
+  }
+
+  Card _gameLobby() {
+    int numberOfParticipants = 3; //TODO: Get value from GameModel
+    return Card(
+      color: secondaryColor,
+      elevation: 2,
+      child: Column(
+        children: [
+          _lobbyTitle(numberOfParticipants),
+          _gameSettings(),
+          _participants()
+        ],
+      ),
+    );
+  }
+
+  Padding _startGameButton() {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              primary: secondaryColor,
+              minimumSize: const Size.fromHeight(50)), // max width
+          child: const Text('Start Game',
+              style: TextStyle(color: defaultColor, fontSize: 18)),
+          onPressed: () {},
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         //resizeToAvoidBottomInset: false,
         appBar: LobbyAppBar(),
-        body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-                children: [_officialCategories(), _customCategories()])));
+        body: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(children: [
+                  _officialCategories(),
+                  _customCategories(),
+                  _gameLobby(),
+                  _startGameButton()
+                ]))));
   }
 }

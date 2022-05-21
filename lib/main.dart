@@ -17,9 +17,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => LoginModel())],
-      child: const MyApp()));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => LoginModel()),
+    ChangeNotifierProvider(create: (context) => GameModel())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -178,11 +179,10 @@ class _WelcomePageState extends State<WelcomePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: secondaryColor,
                             minimumSize:
                                 const Size.fromHeight(50)), // max width
                         child: const Text('Log in',
-                            style: TextStyle(color: defaultColor)),
+                            style: TextStyle(fontSize: 18)),
                         onPressed: loginModel.isLoggingIn ? null : _tryLogin,
                       )),
                   Padding(

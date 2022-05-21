@@ -156,4 +156,13 @@ class LoginModel extends ChangeNotifier {
   }
 }
 
-class GameModel extends ChangeNotifier {}
+class GameModel extends ChangeNotifier {
+  bool? _isReady = false;
+
+  bool? get isReady => _isReady;
+
+  void toggleIsReady() {
+    _isReady = !_isReady!;
+    notifyListeners();
+  }
+}
