@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,8 +24,7 @@ class AuthModel with ChangeNotifier {
 
   bool get isAuthenticated => status == Status.authenticated;
 
-
-  Future<String?> signUp(String email, String userName, String password) async {
+  Future<String?> signUp(String email, String password) async {
     try {
       _status = Status.authenticating;
       notifyListeners();
@@ -37,17 +38,17 @@ class AuthModel with ChangeNotifier {
     }
   }
 
-  Future<void> setUp(String email, String userName) async {
-    var db = FirebaseFirestore.instance;
-    final user = <String, dynamic> {
-      "answers" : [],
-      "categories" : [],
-      "email" : email,
-      "questions" : [],
-      "username" : userName,
-      "wins" : 0
+  Future<void> setUp(String email, String userName, String userId) async {
+    var users = FirebaseFirestore.instance.collection("users");
+    final user = <String, dynamic>{
+      "answers": [],
+      "categories": [],
+      "email": email,
+      "questions": [],
+      "username": userName,
+      "wins": 0
     };
-    db.collection("users").add(user);
+    users.doc(userId).set(user);
     notifyListeners();
   }
 
@@ -93,6 +94,7 @@ class LoginModel extends ChangeNotifier {
   int _wins = 0;
   String _userImageUrl = '';
   List<Dismissible> cachedQuestionsList = [];
+  late Uint8List initAvatarBlock;
 
   final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -170,5 +172,14 @@ class LoginModel extends ChangeNotifier {
 
   void notifyAddedQuestion() {
     notifyListeners();
+  }
+
+  void setInitBlocksAvatar(Uint8List blocks) {
+    initAvatarBlock = blocks;
+    notifyListeners();
+  }
+
+  ImageProvider getInitAvatar() {
+    return Image.memory(initAvatarBlock).image;
   }
 }

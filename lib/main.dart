@@ -10,8 +10,7 @@ import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'providers.dart';
-import 'sign_up_screen.dart';
-import 'sign_up_model.dart';
+import 'sign_up.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +19,7 @@ void main() async {
   );
 
   runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => LoginModel()), ChangeNotifierProvider(create: (context) => SignUpModel())],
+      providers: [ChangeNotifierProvider(create: (context) => LoginModel())],
       child: const MyApp()));
 }
 
@@ -71,7 +70,7 @@ class _WelcomePageState extends State<WelcomePage> {
       loginModel.toggleLogging(); // Enable log in button back
     }
 
-      Future<void> _goToHomePage() async {
+    Future<void> _goToHomePage() async {
       final uid = loginModel.userId;
       //TODO: Support also .png files
       final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
@@ -121,6 +120,17 @@ class _WelcomePageState extends State<WelcomePage> {
           _wrongCerts();
         }
       });
+    }
+
+    void _signUpPrep() async {
+      final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
+      final url = await ref.getDownloadURL();
+      loginModel.setUserImageUrl(url);
+      final blogImage = await ref.getData();
+      loginModel.setInitBlocksAvatar(blogImage!);
+      Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const SignUpScreen()));
     }
 
     // Consumer for disabling button while logging in
@@ -230,12 +240,10 @@ class _WelcomePageState extends State<WelcomePage> {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text("Don't have an account? "),
+                        const Text("Don't have an account? "),
                         InkWell(
-                          child: Text('Sign Up'),
-                          onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(builder: (context) => const SignUpScreen()))
-                        )
+                            child: const Text('Sign Up'),
+                            onTap: () => _signUpPrep())
                       ])
                 ]),
           ));
