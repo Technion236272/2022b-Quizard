@@ -10,6 +10,7 @@ import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'providers.dart';
+import 'sign_up.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +123,17 @@ class _WelcomePageState extends State<WelcomePage> {
       });
     }
 
+    void _signUpPrep() async {
+      final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
+      final url = await ref.getDownloadURL();
+      loginModel.setUserImageUrl(url);
+      final blogImage = await ref.getData();
+      loginModel.setInitBlocksAvatar(blogImage!);
+      Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const SignUpScreen()));
+    }
+
     // Consumer for disabling button while logging in
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
@@ -227,12 +239,11 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
-                        Text("Don't have an account? "),
+                      children: <Widget>[
+                        const Text("Don't have an account? "),
                         InkWell(
-                          child: Text('Sign Up'),
-                          onTap: null, //TODO: Go to Sign Up screen
-                        )
+                            child: const Text('Sign Up'),
+                            onTap: () => _signUpPrep())
                       ])
                 ]),
           ));
