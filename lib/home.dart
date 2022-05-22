@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -116,8 +117,23 @@ class _HomePageState extends State<HomePage> {
 class Play extends StatelessWidget {
   const Play({Key? key}) : super(key: key);
 
-  void _initializeGameOnFirebase(GameModel gameModel) {
-    // TODO: Initialize game lobby on firebase
+  Future<void> _initializeGame(
+      GameModel gameModel, LoginModel loginModel) async {
+    gameModel.admin = loginModel.username;
+    gameModel.addParticipant(loginModel.username);
+    gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
+    var games = FirebaseFirestore.instance.collection('custom_games');
+    final game = <String, dynamic>{
+      "admin": gameModel.admin,
+      "participants": gameModel.participants,
+      "pin_code": gameModel.pinCode,
+      "is_private": gameModel.isPrivate,
+      "is_locked": gameModel.isLocked,
+      "are_ready": gameModel.areReady,
+      "official_categories": gameModel.officialCategories,
+      "custom_categories": gameModel.customCategories,
+    };
+    await games.doc(gameModel.pinCode).set(game);
   }
 
   @override
@@ -127,14 +143,11 @@ class Play extends StatelessWidget {
         splashColor: defaultColor,
         onTap: () {
           // TODO: Support all games!
+          final gameModel = Provider.of<GameModel>(context, listen: false);
+          final loginModel = Provider.of<LoginModel>(context, listen: false);
           if (imgPath.contains('create_private')) {
-            final gameModel = Provider.of<GameModel>(context, listen: false);
-            final loginModel = Provider.of<LoginModel>(context, listen: false);
             gameModel.isPrivate = true;
-            gameModel.admin = loginModel.username;
-            gameModel.addParticipant(loginModel.username);
-            gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
-            _initializeGameOnFirebase(gameModel);
+            _initializeGame(gameModel, loginModel);
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
           }

@@ -185,22 +185,26 @@ class LoginModel extends ChangeNotifier {
 }
 
 class GameModel extends ChangeNotifier {
-  bool? _isReady = false;
+  List<bool?> _areReady = [false];
   bool _isPrivate = true;
   bool _isLocked = false;
   String _pinCode = '';
   String _admin = '';
   final List<String> _participants = [];
+  List<String> _officialCategories = [];
+  List<String> _customCategories = [];
 
-  bool? get isReady => _isReady;
+  List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
   String get pinCode => _pinCode;
   String get admin => _admin;
   List<String> get participants => _participants;
+  List<String> get officialCategories => _officialCategories;
+  List<String> get customCategories => _customCategories;
 
-  set isReady(bool? value) {
-    _isReady = value;
+  set areReady(List<bool?> values) {
+    _areReady = values;
     notifyListeners();
   }
 
@@ -224,6 +228,16 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set officialCategories(List<String> categories) {
+    _officialCategories = categories;
+    notifyListeners();
+  }
+
+  set customCategories(List<String> categories) {
+    _customCategories = categories;
+    notifyListeners();
+  }
+
   void addParticipant(String username) {
     if (!_participants.contains(username)) {
       _participants.add(username);
@@ -236,10 +250,5 @@ class GameModel extends ChangeNotifier {
       _participants.remove(username);
       notifyListeners();
     }
-  }
-
-  void toggleIsReady() {
-    _isReady = !_isReady!;
-    notifyListeners();
   }
 }
