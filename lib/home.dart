@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:random_string/random_string.dart';
 
 import 'lobby_admin.dart';
 import 'profile.dart';
@@ -115,6 +116,10 @@ class _HomePageState extends State<HomePage> {
 class Play extends StatelessWidget {
   const Play({Key? key}) : super(key: key);
 
+  void _initializeGameOnFirebase(GameModel gameModel) {
+    // TODO: Initialize game lobby on firebase
+  }
+
   @override
   Widget build(BuildContext context) {
     InkWell _playOptionButton(String imgPath) {
@@ -123,6 +128,13 @@ class Play extends StatelessWidget {
         onTap: () {
           // TODO: Support all games!
           if (imgPath.contains('create_private')) {
+            final gameModel = Provider.of<GameModel>(context, listen: false);
+            final loginModel = Provider.of<LoginModel>(context, listen: false);
+            gameModel.isPrivate = true;
+            gameModel.admin = loginModel.username;
+            gameModel.addParticipant(loginModel.username);
+            gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
+            _initializeGameOnFirebase(gameModel);
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
           }

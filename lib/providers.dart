@@ -186,8 +186,57 @@ class LoginModel extends ChangeNotifier {
 
 class GameModel extends ChangeNotifier {
   bool? _isReady = false;
+  bool _isPrivate = true;
+  bool _isLocked = false;
+  String _pinCode = '';
+  String _admin = '';
+  final List<String> _participants = [];
 
   bool? get isReady => _isReady;
+  bool get isPrivate => _isPrivate;
+  bool get isLocked => _isLocked;
+  String get pinCode => _pinCode;
+  String get admin => _admin;
+  List<String> get participants => _participants;
+
+  set isReady(bool? value) {
+    _isReady = value;
+    notifyListeners();
+  }
+
+  set isPrivate(bool value) {
+    _isPrivate = value;
+    notifyListeners();
+  }
+
+  set isLocked(bool value) {
+    _isLocked = value;
+    notifyListeners();
+  }
+
+  set pinCode(String value) {
+    _pinCode = value;
+    notifyListeners();
+  }
+
+  set admin(String value) {
+    _admin = value;
+    notifyListeners();
+  }
+
+  void addParticipant(String username) {
+    if (!_participants.contains(username)) {
+      _participants.add(username);
+      notifyListeners();
+    }
+  }
+
+  void removeParticipant(String username) {
+    if (_participants.contains(username)) {
+      _participants.remove(username);
+      notifyListeners();
+    }
+  }
 
   void toggleIsReady() {
     _isReady = !_isReady!;

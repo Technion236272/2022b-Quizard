@@ -76,7 +76,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   ChipsInput _selectCategoryInput() {
-    // Get all categories by all users
+    // Get all categories by all users once
     if (!finishedBuildAllCustomCategories) {
       FirebaseFirestore.instance.collection('users').get().then((users) {
         for (var user in users.docs) {
