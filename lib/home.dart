@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/join_game.dart';
 import 'package:random_string/random_string.dart';
 
 import 'lobby_admin.dart';
@@ -150,6 +151,10 @@ class Play extends StatelessWidget {
             _initializeGame(gameModel, loginModel);
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
+          }
+          if (imgPath.contains('join_existing')) {
+            Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (context) => JoinGame()));
           }
         },
         child: Padding(

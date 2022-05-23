@@ -190,9 +190,10 @@ class GameModel extends ChangeNotifier {
   bool _isLocked = false;
   String _pinCode = '';
   String _admin = '';
-  final List<String> _participants = [];
+  List<String> _participants = [];
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
+  List<String> _selectedCategories = [];
 
   List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
@@ -200,8 +201,9 @@ class GameModel extends ChangeNotifier {
   String get pinCode => _pinCode;
   String get admin => _admin;
   List<String> get participants => _participants;
-  List<String> get officialCategories => _officialCategories;
-  List<String> get customCategories => _customCategories;
+  List<String> get officialCategories => _officialCategories; // For admin
+  List<String> get customCategories => _customCategories; // For admin
+  List<String> get selectedCategories => _selectedCategories; // For participant
 
   set areReady(List<bool?> values) {
     _areReady = values;
@@ -228,6 +230,11 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set participants(List<String> values) {
+    _participants = values;
+    notifyListeners();
+  }
+
   set officialCategories(List<String> categories) {
     _officialCategories = categories;
     notifyListeners();
@@ -235,6 +242,11 @@ class GameModel extends ChangeNotifier {
 
   set customCategories(List<String> categories) {
     _customCategories = categories;
+    notifyListeners();
+  }
+
+  set selectedCategories(List<String> categories) {
+    _selectedCategories = categories;
     notifyListeners();
   }
 
@@ -250,5 +262,17 @@ class GameModel extends ChangeNotifier {
       _participants.remove(username);
       notifyListeners();
     }
+  }
+
+  void resetData() {
+    _areReady = [false];
+    _isPrivate = true;
+    _isLocked = false;
+    _pinCode = '';
+    _admin = '';
+    _participants = [];
+    _officialCategories = [];
+    _customCategories = [];
+    notifyListeners();
   }
 }
