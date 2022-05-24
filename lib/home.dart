@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/join_game.dart';
+import 'package:random_string/random_string.dart';
 
 import 'lobby_admin.dart';
 import 'profile.dart';
@@ -115,6 +118,25 @@ class _HomePageState extends State<HomePage> {
 class Play extends StatelessWidget {
   const Play({Key? key}) : super(key: key);
 
+  Future<void> _initializeGame(
+      GameModel gameModel, LoginModel loginModel) async {
+    gameModel.admin = loginModel.username;
+    gameModel.addParticipant(loginModel.username);
+    gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
+    var games = FirebaseFirestore.instance.collection('custom_games');
+    final game = <String, dynamic>{
+      "admin": gameModel.admin,
+      "participants": gameModel.participants,
+      "pin_code": gameModel.pinCode,
+      "is_private": gameModel.isPrivate,
+      "is_locked": gameModel.isLocked,
+      "are_ready": gameModel.areReady,
+      "official_categories": gameModel.officialCategories,
+      "custom_categories": gameModel.customCategories,
+    };
+    await games.doc(gameModel.pinCode).set(game);
+  }
+
   @override
   Widget build(BuildContext context) {
     InkWell _playOptionButton(String imgPath) {
@@ -122,9 +144,18 @@ class Play extends StatelessWidget {
         splashColor: defaultColor,
         onTap: () {
           // TODO: Support all games!
+          final gameModel = Provider.of<GameModel>(context, listen: false);
+          final loginModel = Provider.of<LoginModel>(context, listen: false);
           if (imgPath.contains('create_private')) {
+            gameModel.resetData();
+            gameModel.isPrivate = true;
+            _initializeGame(gameModel, loginModel);
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
+          }
+          if (imgPath.contains('join_existing')) {
+            Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (context) => JoinGame()));
           }
         },
         child: Padding(

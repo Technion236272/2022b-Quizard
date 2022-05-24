@@ -185,12 +185,105 @@ class LoginModel extends ChangeNotifier {
 }
 
 class GameModel extends ChangeNotifier {
-  bool? _isReady = false;
+  List<bool?> _areReady = [false];
+  bool _isPrivate = true;
+  bool _isLocked = false;
+  String _pinCode = '';
+  String _admin = '';
+  List<String> _participants = [];
+  List<String> _officialCategories = [];
+  List<String> _customCategories = [];
+  List<String> _selectedCategories = [];
 
-  bool? get isReady => _isReady;
+  List<bool?> get areReady => _areReady;
+  bool get isPrivate => _isPrivate;
+  bool get isLocked => _isLocked;
+  String get pinCode => _pinCode;
+  String get admin => _admin;
+  List<String> get participants => _participants;
+  List<String> get officialCategories => _officialCategories; // For admin
+  List<String> get customCategories => _customCategories; // For admin
+  List<String> get selectedCategories => _selectedCategories; // For participant
 
-  void toggleIsReady() {
-    _isReady = !_isReady!;
+  set areReady(List<bool?> values) {
+    _areReady = values;
     notifyListeners();
+  }
+
+  set isPrivate(bool value) {
+    _isPrivate = value;
+    notifyListeners();
+  }
+
+  set isLocked(bool value) {
+    _isLocked = value;
+    notifyListeners();
+  }
+
+  set pinCode(String value) {
+    _pinCode = value;
+    notifyListeners();
+  }
+
+  set admin(String value) {
+    _admin = value;
+    notifyListeners();
+  }
+
+  set participants(List<String> values) {
+    _participants = values;
+    notifyListeners();
+  }
+
+  set officialCategories(List<String> categories) {
+    _officialCategories = categories;
+    notifyListeners();
+  }
+
+  set customCategories(List<String> categories) {
+    _customCategories = categories;
+    notifyListeners();
+  }
+
+  set selectedCategories(List<String> categories) {
+    _selectedCategories = categories;
+    notifyListeners();
+  }
+
+  void addParticipant(String username) {
+    if (!_participants.contains(username)) {
+      _participants.add(username);
+      notifyListeners();
+    }
+  }
+
+  void removeParticipant(String username) {
+    if (_participants.contains(username)) {
+      _participants.remove(username);
+      notifyListeners();
+    }
+  }
+
+  void resetData() {
+    _areReady = [false];
+    _isPrivate = true;
+    _isLocked = false;
+    _pinCode = '';
+    _admin = '';
+    _participants = [];
+    _officialCategories = [];
+    _customCategories = [];
+    notifyListeners();
+  }
+
+  void update(DocumentSnapshot game) {
+    if (game.exists) {
+      _areReady = List<bool?>.from(game["are_ready"]);
+      _isLocked = game["is_locked"];
+      _participants = List<String>.from(game["participants"]);
+      _officialCategories = List<String>.from(game["official_categories"]);
+      _customCategories = List<String>.from(game["custom_categories"]);
+      _selectedCategories = _officialCategories + _customCategories;
+    }
   }
 }
