@@ -42,9 +42,8 @@ class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
                                         "will be kicked automatically"),
                                 actions: <Widget>[
                                   TextButton(
-                                      onPressed: () {
-                                        gameModel.resetData();
-                                        FirebaseFirestore.instance
+                                      onPressed: () async {
+                                        await FirebaseFirestore.instance
                                             .collection('custom_games')
                                             .doc(gameModel.pinCode)
                                             .delete();
@@ -314,7 +313,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar('Copied to clipboard', context);
+              constSnackBar(
+                  'Copied ${gameModel.pinCode} to clipboard', context);
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -380,27 +380,43 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     });
   }
 
-  GestureDetector _kickIcon(String username) {
-    return GestureDetector(
-        child: const Icon(Icons.block, color: redColor),
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Kick Player"),
-                  content: Text("Are you sure you wish to kick $username?"),
-                  actions: <Widget>[
-                    TextButton(
-                        onPressed: () async {}, child: const Text("KICK")),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text("CANCEL"),
-                    ),
-                  ],
-                );
-              });
-        });
+  Consumer<GameModel> _kickIcon(String username) {
+    return Consumer<GameModel>(builder: (context, gameModel, child) {
+      return GestureDetector(
+          child: const Icon(Icons.block, color: redColor),
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Kick Player"),
+                    content: Text("Are you sure you wish to kick $username?"),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: () async {
+                            int participantIndex =
+                                gameModel.participants.indexOf(username, 0);
+                            gameModel.participants.remove(username);
+                            gameModel.areReady.removeAt(participantIndex);
+                            var game = FirebaseFirestore.instance
+                                .collection('custom_games')
+                                .doc(gameModel.pinCode);
+                            await game.update({
+                              "participants": gameModel.participants,
+                              "are_ready": gameModel.areReady
+                            });
+                            Navigator.of(context).pop(true);
+                          },
+                          child: const Text("KICK")),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text("CANCEL"),
+                      ),
+                    ],
+                  );
+                });
+          });
+    });
   }
 
   Consumer<GameModel> _participant(String username, bool admin) {
@@ -520,41 +536,54 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Consumer<GameModel> _startGameButton() {
-    return Consumer<GameModel>(builder: (context, gameModel, child) {
-      return Padding(
-          padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                primary: secondaryColor,
-                minimumSize: const Size.fromHeight(50)), // max width
-            child: const Text('Start Game',
-                style: TextStyle(color: defaultColor, fontSize: 18)),
-            onPressed: () {
-              if (gameModel.areReady.contains(false)) {
-                constSnackBar(
-                    'Not all participants are ready to start', context);
-              } else if (gameModel.participants.length < 2) {
-                constSnackBar('Not enough participants to start', context);
-              } else {
-                constSnackBar('Start game!', context);
-              }
-            },
-          ));
-    });
+    void _startGame() {
+      //TODO: Start game!
+      constSnackBar('Start game!', context);
+    }
+
+    return Consumer<GameModel>(
+      builder: (context, gameModel, child) {
+        bool canStartGame = !gameModel.areReady.contains(false) &&
+            gameModel.participants.length >= 2;
+        return Padding(
+            padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    primary: defaultColor,
+                    minimumSize: const Size.fromHeight(50)), // max width
+                child: const Text('Start Game', style: TextStyle(fontSize: 18)),
+                onPressed: canStartGame ? _startGame : null));
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+
     return Scaffold(
         appBar: LobbyAppBar(),
         body: SingleChildScrollView(
-            child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(children: [
-                  _officialCategories(),
-                  _customCategories(),
-                  _gameLobby(),
-                  _startGameButton()
-                ]))));
+            child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('custom_games')
+                    .doc(gameModel.pinCode)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    var game = snapshot.data!;
+                    if (game.exists) {
+                      gameModel.update(snapshot.data!);
+                    }
+                  }
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(children: [
+                        _officialCategories(),
+                        _customCategories(),
+                        _gameLobby(),
+                        _startGameButton()
+                      ]));
+                })));
   }
 }

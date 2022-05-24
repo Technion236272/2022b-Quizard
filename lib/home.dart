@@ -147,6 +147,7 @@ class Play extends StatelessWidget {
           final gameModel = Provider.of<GameModel>(context, listen: false);
           final loginModel = Provider.of<LoginModel>(context, listen: false);
           if (imgPath.contains('create_private')) {
+            gameModel.resetData();
             gameModel.isPrivate = true;
             _initializeGame(gameModel, loginModel);
             Navigator.of(context).push(MaterialPageRoute<void>(

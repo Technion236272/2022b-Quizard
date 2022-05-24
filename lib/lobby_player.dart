@@ -119,30 +119,38 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   Consumer<GameModel> _selectedCategoriesChips() {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
-      return Flexible(
-          fit: FlexFit.loose,
-          child: ChipsChoice<String>.multiple(
-            value: gameModel.selectedCategories,
-            onChanged: (val) => setState(() {
-              gameModel.selectedCategories = val;
-            }),
-            choiceItems: C2Choice.listFrom<String, String>(
-              source: gameModel.selectedCategories,
-              value: (i, v) => v,
-              label: (i, v) => v,
-              tooltip: (i, v) => v,
-            ),
-            choiceActiveStyle: const C2ChoiceStyle(
+      if (gameModel.selectedCategories.isEmpty) {
+        return const Flexible(
+            child: Padding(
+                padding: EdgeInsets.all(15),
+                child: Text(
+                  "No categories selected",
+                  style: TextStyle(fontSize: 18),
+                )));
+      } else {
+        return Flexible(
+            fit: FlexFit.loose,
+            child: ChipsChoice<String>.multiple(
+              value: gameModel.selectedCategories,
+              onChanged: (val) {},
+              choiceItems: C2Choice.listFrom<String, String>(
+                source: gameModel.selectedCategories,
+                value: (i, v) => v,
+                label: (i, v) => v,
+                tooltip: (i, v) => v,
+              ),
+              choiceActiveStyle: const C2ChoiceStyle(
+                  color: defaultColor,
+                  borderColor: defaultColor,
+                  backgroundColor: lightBlueColor),
+              wrapped: true,
+              textDirection: TextDirection.ltr,
+              choiceStyle: const C2ChoiceStyle(
                 color: defaultColor,
                 borderColor: defaultColor,
-                backgroundColor: lightBlueColor),
-            wrapped: true,
-            textDirection: TextDirection.ltr,
-            choiceStyle: const C2ChoiceStyle(
-              color: defaultColor,
-              borderColor: defaultColor,
-            ),
-          ));
+              ),
+            ));
+      }
     });
   }
 
@@ -176,7 +184,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar('Copied to clipboard', context);
+              constSnackBar(
+                  'Copied ${gameModel.pinCode} to clipboard', context);
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -319,15 +328,25 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   Consumer<GameModel> _participants() {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
-      final participantsList = [_participant(gameModel.participants[0], true)];
-      for (int i = 1; i < gameModel.participants.length; i++) {
-        participantsList.add(_participant(gameModel.participants[i], false));
-      }
-      return ListView(
-          physics: const NeverScrollableScrollPhysics(),
+      if (gameModel.participants.isNotEmpty) {
+        final participantsList = [
+          _participant(gameModel.participants[0], true)
+        ];
+        for (int i = 1; i < gameModel.participants.length; i++) {
+          participantsList.add(_participant(gameModel.participants[i], false));
+        }
+        return ListView(
+            physics: const NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            children: participantsList);
+      } else {
+        return ListView(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          children: participantsList);
+          children: const [ListTile()],
+        );
+      }
     });
   }
 
@@ -343,14 +362,82 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+
+    void _dialogGameClosed() {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Game Closed"),
+              content: const Text("The admin closed the game"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("CLOSE"),
+                ),
+              ],
+            );
+          });
+    }
+
+    void _dialogKickedByAdmin() {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Game Closed"),
+              content:
+                  const Text("You have been kicked by the admin from the game"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("CLOSE"),
+                ),
+              ],
+            );
+          });
+    }
+
     return Scaffold(
         appBar: LobbyAppBar(),
         body: SingleChildScrollView(
-            child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(children: [
-                  _selectedCategories(),
-                  _gameLobby(),
-                ]))));
+            child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('custom_games')
+                    .doc(gameModel.pinCode)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    var game = snapshot.data!;
+                    if (!game.exists) {
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        Navigator.of(context).pop(false);
+                        _dialogGameClosed();
+                      });
+                    } else {
+                      gameModel.update(snapshot.data!);
+                      if (game["is_locked"]) {
+                        lockText = 'LOCKED';
+                      } else {
+                        lockText = 'UNLOCKED';
+                      }
+                      if (!gameModel.participants
+                          .contains(loginModel.username)) {
+                        WidgetsBinding.instance?.addPostFrameCallback((_) {
+                          Navigator.of(context).pop(false);
+                          _dialogKickedByAdmin();
+                        });
+                      }
+                    }
+                  }
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(children: [
+                        _selectedCategories(),
+                        _gameLobby(),
+                      ]));
+                })));
   }
 }

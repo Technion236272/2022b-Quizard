@@ -97,6 +97,7 @@ class JoinGame extends StatelessWidget {
             final gameModel = Provider.of<GameModel>(context, listen: false);
             final loginModel = Provider.of<LoginModel>(context, listen: false);
             await _initializeGame(gameModel, loginModel);
+            pinCodeController.text = '';
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyPlayer()));
           }

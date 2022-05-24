@@ -275,4 +275,15 @@ class GameModel extends ChangeNotifier {
     _customCategories = [];
     notifyListeners();
   }
+
+  void update(DocumentSnapshot game) {
+    if (game.exists) {
+      _areReady = List<bool?>.from(game["are_ready"]);
+      _isLocked = game["is_locked"];
+      _participants = List<String>.from(game["participants"]);
+      _officialCategories = List<String>.from(game["official_categories"]);
+      _customCategories = List<String>.from(game["custom_categories"]);
+      _selectedCategories = _officialCategories + _customCategories;
+    }
+  }
 }
