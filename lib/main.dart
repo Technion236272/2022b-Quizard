@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -14,7 +17,7 @@ import 'providers.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    // options: DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(MultiProvider(
@@ -46,6 +49,9 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
+
+  var loading = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +60,9 @@ class _WelcomePageState extends State<WelcomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: [SystemUiOverlay.bottom]);
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +238,10 @@ class _WelcomePageState extends State<WelcomePage> {
                                 primary: secondaryColor,
                                 minimumSize:
                                     const Size.fromHeight(50)), // max width
-                            onPressed: () {}, //TODO: Continue with Google
+                            onPressed: () {
+                              signInWithGoogle();
+
+                            }, //TODO: Continue with Google
                             label: const Text('Continue with Google',
                                 style: TextStyle(color: defaultColor)),
                             icon: const FaIcon(FontAwesomeIcons.google,
@@ -243,7 +255,9 @@ class _WelcomePageState extends State<WelcomePage> {
                                 primary: secondaryColor,
                                 minimumSize:
                                     const Size.fromHeight(50)), // max width
-                            onPressed: () {}, //TODO: Continue with Facebook
+                            onPressed: () async {
+                              signinWithFacebook();
+                            }, //TODO: Continue with Facebook
                             label: const Text('Continue with Facebook',
                                 style: TextStyle(color: defaultColor)),
                             icon: const FaIcon(FontAwesomeIcons.facebook,
@@ -264,4 +278,110 @@ class _WelcomePageState extends State<WelcomePage> {
           ));
     });
   }
+
+  // final FirebaseAuth _auth = FirebaseAuth.instance;
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+
+  // Future<String?> signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleSignInAccount =
+  //         await _googleSignIn.signIn();
+  //     final GoogleSignInAuthentication googleSignInAuthentication =
+  //         await googleSignInAccount!.authentication;
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleSignInAuthentication.accessToken,
+  //       idToken: googleSignInAuthentication.idToken,
+  //     );
+  //     await _auth.signInWithCredential(credential);
+  //   } on FirebaseAuthException catch (e) {
+  //     print(e.message);
+  //     throw e;
+  //   }
+  // }
+  Future<User?> signInWithGoogle() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user;
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount? googleSignInAccount =
+    await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential =
+        await auth.signInWithCredential(credential);
+
+        user = userCredential.user;
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content:
+              'The account already exists with a different credential.',
+            ),
+          );
+        } else if (e.code == 'invalid-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content: 'Error occurred while accessing credentials. Try again.',
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          customSnackBar(
+            content: 'Error occurred using Google Sign-In. Try again.',
+          ),
+        );
+      }
+    }
+    FirebaseFirestore.instance.collection('Users').doc().set({
+      'email': user!.email,
+      'Name': user.displayName,
+
+    });
+    String? email= user.email;
+    String? name=user.displayName;
+    String? uid=user.uid;
+
+    print('adialldadad');
+    print(user.displayName);
+    Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const HomePage()));
+    return user;
+  }
+  Future<UserCredential> signinWithFacebook() async {
+    // Trigger the sign-in flow
+    final LoginResult loginResult = await FacebookAuth.instance.login();
+
+    // Create a credential from the access token
+    final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+    // Once signed in, return the UserCredential
+    Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (context) => const HomePage()));
+    return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+  }
+
+  static SnackBar customSnackBar({required String content}) {
+    return SnackBar(
+      backgroundColor: Colors.black,
+      content: Text(
+        content,
+        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+      ),
+    );
+  }
 }
+
+

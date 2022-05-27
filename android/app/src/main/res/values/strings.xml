@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quizard</string>
+
+    <string name="facebook_app_id">414657014003188</string>
+    <string name="fb_login_protocol_scheme">fb414657014003188</string>
+    <string name="facebook_client_token">c99fddd03f9558f5a81a189738683eae</string>
+
+
+</resources>
