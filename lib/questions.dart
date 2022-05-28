@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -336,7 +337,7 @@ class _QuestionsState extends State<Questions> {
               }),
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
-              future: _questionsListWidget(context, loginModel.userId),
+              future: _questionsListWidget(context, loginModel.userId.isEmpty?"${FirebaseAuth.instance.currentUser?.uid}":loginModel.userId),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data.isNotEmpty) {

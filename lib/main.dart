@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
+
 import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
@@ -90,6 +91,21 @@ class _WelcomePageState extends State<WelcomePage> {
       Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => const HomePage()));
       loginModel.toggleLogging();
+    }
+
+    void login(photoLink) {
+      bool loggedIn = false;
+      FirebaseFirestore.instance.collection('users').get().then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+            loginModel.setUserId(user.id);
+            loginModel.setEmail(user["email"]);
+            loginModel.setUsername(user["username"]);
+            loginModel.setWins(user["wins"]);
+            loginModel.setUserImageUrl(photoLink);
+          }
+        }
+      });
     }
 
     void _tryLogin() {
@@ -225,7 +241,35 @@ class _WelcomePageState extends State<WelcomePage> {
                                 minimumSize:
                                     const Size.fromHeight(50)), // max width
                             onPressed: () {
-                              signInWithGoogle();
+                              signInWithGoogle().then((value) {
+                                bool userExist=false;
+                                FirebaseFirestore.instance.collection('users').get().then((users) async {
+                                  for (var user in users.docs) {
+                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+                                      userExist=true;
+                                    }
+                                  }
+                                  if(!userExist) {
+                                    var users = FirebaseFirestore.instance.collection("users");
+                                    final userToAdd = <String, dynamic>{
+                                      "answers": [],
+                                      "categories": [],
+                                      "email": value!.email,
+                                      "questions": [],
+                                      "username": value.displayName,
+                                      "wins": 0
+                                    };
+                                    users.doc(value?.uid).set(userToAdd);
+                                  }
+
+                                  login("${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute<void>(builder: (context) => const HomePage()));
+
+                                });
+
+                              });
+
 
                             }, //TODO: Continue with Google
                             label: const Text('Continue with Google',
@@ -242,7 +286,35 @@ class _WelcomePageState extends State<WelcomePage> {
                                 minimumSize:
                                     const Size.fromHeight(50)), // max width
                             onPressed: () async {
-                              signinWithFacebook();
+                              signinWithFacebook().then((value) {
+                                bool userExist=false;
+                                FirebaseFirestore.instance.collection('users').get().then((users) async {
+                                  for (var user in users.docs) {
+                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+                                      userExist=true;
+
+                                    }
+                                  }
+                                  if(!userExist) {
+                                    var users = FirebaseFirestore.instance
+                                        .collection("users");
+                                    final user = <String, dynamic>{
+                                      "answers": [],
+                                      "categories": [],
+                                      "email": value.user?.email,
+                                      "questions": [],
+                                      "username": value.user?.displayName,
+                                      "wins": 0
+                                    };
+                                    users.doc(value.user?.uid).set(user);
+                                  }
+                                  login("${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute<void>(builder: (context) => const HomePage()));
+                                });
+
+                              });
+
                             }, //TODO: Continue with Facebook
                             label: const Text('Continue with Facebook',
                                 style: TextStyle(color: defaultColor)),
@@ -264,26 +336,6 @@ class _WelcomePageState extends State<WelcomePage> {
     });
   }
 
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
-  // final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-
-  // Future<String?> signInWithGoogle() async {
-  //   try {
-  //     final GoogleSignInAccount? googleSignInAccount =
-  //         await _googleSignIn.signIn();
-  //     final GoogleSignInAuthentication googleSignInAuthentication =
-  //         await googleSignInAccount!.authentication;
-  //     final AuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleSignInAuthentication.accessToken,
-  //       idToken: googleSignInAuthentication.idToken,
-  //     );
-  //     await _auth.signInWithCredential(credential);
-  //   } on FirebaseAuthException catch (e) {
-  //     print(e.message);
-  //     throw e;
-  //   }
-  // }
   Future<User?> signInWithGoogle() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user;
@@ -330,21 +382,13 @@ class _WelcomePageState extends State<WelcomePage> {
         );
       }
     }
-    FirebaseFirestore.instance.collection('Users').doc().set({
-      'email': user!.email,
-      'Name': user.displayName,
 
-    });
-    String? email= user.email;
-    String? name=user.displayName;
-    String? uid=user.uid;
 
-    print('adialldadad');
-    print(user.displayName);
-    Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => const HomePage()));
+
     return user;
   }
+
+
   Future<UserCredential> signinWithFacebook() async {
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
@@ -352,10 +396,12 @@ class _WelcomePageState extends State<WelcomePage> {
     // Create a credential from the access token
     final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
+
     // Once signed in, return the UserCredential
-    Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (context) => const HomePage()));
-    return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+
+    return userCredential;
   }
 
   static SnackBar customSnackBar({required String content}) {
