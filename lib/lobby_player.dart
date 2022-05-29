@@ -412,7 +412,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   if (snapshot.hasData) {
                     var game = snapshot.data!;
                     if (!game.exists) {
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
                         Navigator.of(context).pop(false);
                         _dialogGameClosed();
                       });
@@ -425,7 +425,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       }
                       if (!gameModel.participants
                           .contains(loginModel.username)) {
-                        WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
                           Navigator.of(context).pop(false);
                           _dialogKickedByAdmin();
                         });

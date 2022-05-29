@@ -259,7 +259,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.displayName,
                                       "wins": 0
                                     };
-                                    users.doc(value?.uid).set(userToAdd);
+                                    users.doc(value.uid).set(userToAdd);
                                   }
 
                                   login("${FirebaseAuth.instance.currentUser?.photoURL}");
@@ -274,8 +274,8 @@ class _WelcomePageState extends State<WelcomePage> {
                             }, //TODO: Continue with Google
                             label: const Text('Continue with Google',
                                 style: TextStyle(color: defaultColor)),
-                            icon: const FaIcon(FontAwesomeIcons.google,
-                                color: defaultColor),
+                            icon:   Image.asset(
+                              'images/google.png',height: 24,),
                           )),
                       Padding(
                           padding: const EdgeInsets.symmetric(
@@ -318,8 +318,8 @@ class _WelcomePageState extends State<WelcomePage> {
                             }, //TODO: Continue with Facebook
                             label: const Text('Continue with Facebook',
                                 style: TextStyle(color: defaultColor)),
-                            icon: const FaIcon(FontAwesomeIcons.facebook,
-                                color: defaultColor),
+                            icon:   Image.asset(
+                              'images/facebook.png',height: 24,),
                           )),
                     ],
                   ),
