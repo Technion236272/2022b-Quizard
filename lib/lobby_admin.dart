@@ -45,7 +45,8 @@ class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
                                   TextButton(
                                       onPressed: () async {
                                         await FirebaseFirestore.instance
-                                            .collection('custom_games')
+                                            .collection(
+                                                'versions/v1/custom_games')
                                             .doc(gameModel.pinCode)
                                             .delete();
                                         Navigator.of(context).pop(true);
@@ -82,16 +83,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   String lockText = '';
 
   List<String> officialCategories = [
-    'Art',
-    'Sports',
-    'Politics',
-    'Movies',
-    'Music',
-    'World',
+    'Animal',
     'Geography',
-    'History',
-    'Business',
-    'Technology',
+    'Sports',
   ];
 
   // pattern: ['category', 'username', questions_num]
@@ -109,7 +103,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   ChipsInput _selectCategoryInput() {
     // Get all categories by all users ONCE
     if (!finishedBuildAllCustomCategories) {
-      FirebaseFirestore.instance.collection('users').get().then((users) {
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) {
         for (var user in users.docs) {
           final categories = user["categories"].toSet().toList();
           for (int i = 0; i < categories.length; i++) {
@@ -160,7 +157,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.customCategories = selectedCustomCategories;
         FirebaseFirestore.instance
-            .collection('custom_games')
+            .collection('versions/v1/custom_games')
             .doc(gameModel.pinCode)
             .update({"custom_categories": selectedCustomCategories});
       },
@@ -244,7 +241,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             onChanged: (val) => setState(() {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
-                  .collection('custom_games')
+                  .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
             }),
@@ -325,7 +322,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 lockText = 'LOCKED';
               });
               FirebaseFirestore.instance
-                  .collection('custom_games')
+                  .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": true});
               gameModel.isLocked = true;
@@ -335,7 +332,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 lockText = 'UNLOCKED';
               });
               FirebaseFirestore.instance
-                  .collection('custom_games')
+                  .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": false});
               gameModel.isLocked = false;
@@ -400,7 +397,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                             gameModel.participants.remove(username);
                             gameModel.areReady.removeAt(participantIndex);
                             var game = FirebaseFirestore.instance
-                                .collection('custom_games')
+                                .collection('versions/v1/custom_games')
                                 .doc(gameModel.pinCode);
                             await game.update({
                               "participants": gameModel.participants,
@@ -437,7 +434,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           gameModel.areReady[participantIndex] =
               !(gameModel.areReady[participantIndex])!;
           FirebaseFirestore.instance
-              .collection('custom_games')
+              .collection('versions/v1/custom_games')
               .doc(gameModel.pinCode)
               .update({"are_ready": gameModel.areReady});
         }
@@ -445,7 +442,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('users')
+              .collection('versions/v1/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -537,16 +534,98 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Consumer<GameModel> _startGameButton() {
-    void _startGame() {
-      Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => FirstGameScreen()));
-      constSnackBar('Start game!', context);
+    Future<bool> _buildQuestions() async {
+      final allQuestions = [];
+      final allAnswers = [];
+      GameModel gameModel = Provider.of<GameModel>(context, listen: false);
+      var users = FirebaseFirestore.instance.collection('versions/v1/users');
+      var officialQuestions = FirebaseFirestore.instance
+          .collection('versions/v1/official_questions');
+      for (int i = 0; i < gameModel.selectedCategories.length; i++) {
+        final selectedCategory = gameModel.selectedCategories[i];
+        if (officialCategories.contains(selectedCategory)) {
+          await officialQuestions.doc(selectedCategory).get().then((category) {
+            allQuestions.addAll(category["questions"]);
+            allAnswers.addAll(category["answers"]);
+          });
+        } else {
+          final username = selectedCategory.split('(').last.split(')').first;
+          final category = selectedCategory.split(' (').first;
+          String userId = '';
+
+          await users.get().then((allUsers) {
+            for (var user in allUsers.docs) {
+              if (user["username"] == username) {
+                userId = user.id;
+              }
+            }
+          });
+
+          if (userId != '') {
+            await users.doc(userId).get().then((user) {
+              final userQuestions = user["questions"];
+              final userAnswers = user["answers"];
+              final userCategories = user["categories"];
+              for (int i = 0; i < userCategories.length; i++) {
+                if (userCategories[i].toString() == category) {
+                  allQuestions.add(userQuestions[i].toString());
+                  allAnswers.add(userAnswers[i].toString());
+                }
+              }
+            });
+          }
+        }
+      }
+
+      if (allQuestions.length < roundsPerGame) {
+        return false;
+      }
+
+      final selectedQuestions = [];
+      final selectedAnswers = [];
+      List shuffledIndexes = List.generate(allQuestions.length, (i) => i);
+      shuffledIndexes.shuffle();
+      for (int i = 0; i < roundsPerGame; i++) {
+        selectedQuestions.add(allQuestions[shuffledIndexes[i]]);
+        selectedAnswers.add(allAnswers[shuffledIndexes[i]]);
+      }
+
+      final falseAnswers = [];
+      for (int i = 0; i < gameModel.participants.length; i++) {
+        falseAnswers.add('');
+      }
+
+      await FirebaseFirestore.instance
+          .collection('versions/v1/custom_games')
+          .doc(gameModel.pinCode)
+          .update({
+        "questions": selectedQuestions,
+        "answers": selectedAnswers,
+        "false_answers": falseAnswers
+      });
+
+      return true;
+    }
+
+    Future<void> _startGame() async {
+      GameModel gameModel = Provider.of<GameModel>(context, listen: false);
+      LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
+      int participantIndex =
+          gameModel.participants.indexOf(loginModel.username);
+      bool retVal = await _buildQuestions();
+      if (!retVal) {
+        constSnackBar("Not enough questions to build a game", context);
+      } else {
+        Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (context) => FirstGameScreen(
+                pinCode: gameModel.pinCode, userIndex: participantIndex)));
+      }
     }
 
     return Consumer<GameModel>(
       builder: (context, gameModel, child) {
         bool canStartGame = !gameModel.areReady.contains(false) &&
-            gameModel.participants.length >= 2;
+            gameModel.participants.isNotEmpty;
         return Padding(
             padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
             child: ElevatedButton(
@@ -568,7 +647,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         body: SingleChildScrollView(
             child: StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('custom_games')
+                    .collection('versions/v1/custom_games')
                     .doc(gameModel.pinCode)
                     .snapshots(),
                 builder: (context, snapshot) {

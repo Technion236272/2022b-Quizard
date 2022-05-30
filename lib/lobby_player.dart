@@ -5,6 +5,7 @@ import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+import 'game.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -19,7 +20,8 @@ class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
     Future<void> _exitGame() async {
       List participants = gameModel.participants;
       List areReady = gameModel.areReady;
-      var games = FirebaseFirestore.instance.collection('custom_games');
+      var games =
+          FirebaseFirestore.instance.collection('versions/v1/custom_games');
       await games.doc(gameModel.pinCode).get().then((game) {
         int myIndex = game["participants"].indexOf(loginModel.username);
         participants.remove(loginModel.username);
@@ -252,7 +254,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           gameModel.areReady[participantIndex] =
               !(gameModel.areReady[participantIndex])!;
           FirebaseFirestore.instance
-              .collection('custom_games')
+              .collection('versions/v1/custom_games')
               .doc(gameModel.pinCode)
               .update({"are_ready": gameModel.areReady});
         }
@@ -260,7 +262,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('users')
+              .collection('versions/v1/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -405,14 +407,14 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
         body: SingleChildScrollView(
             child: StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('custom_games')
+                    .collection('versions/v1/custom_games')
                     .doc(gameModel.pinCode)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     var game = snapshot.data!;
                     if (!game.exists) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
                         Navigator.of(context).pop(false);
                         _dialogGameClosed();
                       });
@@ -425,9 +427,20 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       }
                       if (!gameModel.participants
                           .contains(loginModel.username)) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                        WidgetsBinding.instance?.addPostFrameCallback((_) {
                           Navigator.of(context).pop(false);
                           _dialogKickedByAdmin();
+                        });
+                      }
+                      final questions = List<String>.from(game["questions"]);
+                      if (questions.isNotEmpty) {
+                        int participantIndex =
+                            gameModel.participants.indexOf(loginModel.username);
+                        WidgetsBinding.instance?.addPostFrameCallback((_) {
+                          Navigator.of(context).push(MaterialPageRoute<void>(
+                              builder: (context) => FirstGameScreen(
+                                  pinCode: gameModel.pinCode,
+                                  userIndex: participantIndex)));
                         });
                       }
                     }

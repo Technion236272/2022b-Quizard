@@ -5,12 +5,9 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
-
-import 'firebase_options.dart';
 import 'consts.dart';
 import 'home.dart';
 import 'providers.dart';
@@ -19,8 +16,8 @@ import 'sign_up.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    // options: DefaultFirebaseOptions.currentPlatform,
-  );
+      // options: DefaultFirebaseOptions.currentPlatform,
+      );
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
@@ -52,7 +49,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-
   var loading = false;
 
   @override
@@ -63,9 +59,6 @@ class _WelcomePageState extends State<WelcomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: [SystemUiOverlay.bottom]);
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +87,10 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     void login(photoLink) {
-      bool loggedIn = false;
-      FirebaseFirestore.instance.collection('users').get().then((users) async {
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) async {
         for (var user in users.docs) {
           if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
             loginModel.setUserId(user.id);
@@ -121,7 +116,10 @@ class _WelcomePageState extends State<WelcomePage> {
         return;
       }
 
-      FirebaseFirestore.instance.collection('users').get().then((users) async {
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) async {
         for (var user in users.docs) {
           if (user["email"] == loginModel.emailOrUsernameController.text ||
               user["username"] == loginModel.emailOrUsernameController.text) {
@@ -242,15 +240,21 @@ class _WelcomePageState extends State<WelcomePage> {
                                     const Size.fromHeight(50)), // max width
                             onPressed: () {
                               signInWithGoogle().then((value) {
-                                bool userExist=false;
-                                FirebaseFirestore.instance.collection('users').get().then((users) async {
+                                bool userExist = false;
+                                FirebaseFirestore.instance
+                                    .collection('versions/v1/users')
+                                    .get()
+                                    .then((users) async {
                                   for (var user in users.docs) {
-                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
-                                      userExist=true;
+                                    if (user["email"] ==
+                                        FirebaseAuth
+                                            .instance.currentUser?.email) {
+                                      userExist = true;
                                     }
                                   }
-                                  if(!userExist) {
-                                    var users = FirebaseFirestore.instance.collection("users");
+                                  if (!userExist) {
+                                    var users = FirebaseFirestore.instance
+                                        .collection("versions/v1/users");
                                     final userToAdd = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
@@ -262,20 +266,21 @@ class _WelcomePageState extends State<WelcomePage> {
                                     users.doc(value.uid).set(userToAdd);
                                   }
 
-                                  login("${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  login(
+                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
                                   Navigator.of(context).push(
-                                      MaterialPageRoute<void>(builder: (context) => const HomePage()));
-
+                                      MaterialPageRoute<void>(
+                                          builder: (context) =>
+                                              const HomePage()));
                                 });
-
                               });
-
-
                             }, //TODO: Continue with Google
                             label: const Text('Continue with Google',
                                 style: TextStyle(color: defaultColor)),
-                            icon:   Image.asset(
-                              'images/google.png',height: 24,),
+                            icon: Image.asset(
+                              'images/google.png',
+                              height: 24,
+                            ),
                           )),
                       Padding(
                           padding: const EdgeInsets.symmetric(
@@ -287,17 +292,21 @@ class _WelcomePageState extends State<WelcomePage> {
                                     const Size.fromHeight(50)), // max width
                             onPressed: () async {
                               signinWithFacebook().then((value) {
-                                bool userExist=false;
-                                FirebaseFirestore.instance.collection('users').get().then((users) async {
+                                bool userExist = false;
+                                FirebaseFirestore.instance
+                                    .collection('versions/v1/users')
+                                    .get()
+                                    .then((users) async {
                                   for (var user in users.docs) {
-                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
-                                      userExist=true;
-
+                                    if (user["email"] ==
+                                        FirebaseAuth
+                                            .instance.currentUser?.email) {
+                                      userExist = true;
                                     }
                                   }
-                                  if(!userExist) {
+                                  if (!userExist) {
                                     var users = FirebaseFirestore.instance
-                                        .collection("users");
+                                        .collection("versions/v1/users");
                                     final user = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
@@ -308,18 +317,21 @@ class _WelcomePageState extends State<WelcomePage> {
                                     };
                                     users.doc(value.user?.uid).set(user);
                                   }
-                                  login("${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  login(
+                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
                                   Navigator.of(context).push(
-                                      MaterialPageRoute<void>(builder: (context) => const HomePage()));
+                                      MaterialPageRoute<void>(
+                                          builder: (context) =>
+                                              const HomePage()));
                                 });
-
                               });
-
                             }, //TODO: Continue with Facebook
                             label: const Text('Continue with Facebook',
                                 style: TextStyle(color: defaultColor)),
-                            icon:   Image.asset(
-                              'images/facebook.png',height: 24,),
+                            icon: Image.asset(
+                              'images/facebook.png',
+                              height: 24,
+                            ),
                           )),
                     ],
                   ),
@@ -343,11 +355,11 @@ class _WelcomePageState extends State<WelcomePage> {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     final GoogleSignInAccount? googleSignInAccount =
-    await googleSignIn.signIn();
+        await googleSignIn.signIn();
 
     if (googleSignInAccount != null) {
       final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
+          await googleSignInAccount.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
@@ -356,7 +368,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
       try {
         final UserCredential userCredential =
-        await auth.signInWithCredential(credential);
+            await auth.signInWithCredential(credential);
 
         user = userCredential.user;
       } on FirebaseAuthException catch (e) {
@@ -364,7 +376,7 @@ class _WelcomePageState extends State<WelcomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
               content:
-              'The account already exists with a different credential.',
+                  'The account already exists with a different credential.',
             ),
           );
         } else if (e.code == 'invalid-credential') {
@@ -383,23 +395,21 @@ class _WelcomePageState extends State<WelcomePage> {
       }
     }
 
-
-
     return user;
   }
-
 
   Future<UserCredential> signinWithFacebook() async {
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
 
     // Create a credential from the access token
-    final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
-
+    final OAuthCredential facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
 
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential);
 
     return userCredential;
   }
@@ -409,10 +419,8 @@ class _WelcomePageState extends State<WelcomePage> {
       backgroundColor: Colors.black,
       content: Text(
         content,
-        style: TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
+        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
       ),
     );
   }
 }
-
-

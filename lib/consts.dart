@@ -10,6 +10,7 @@ const secondaryBackgroundColor = Color.fromRGBO(248, 248, 248, 1);
 const redColor = Color.fromRGBO(230, 124, 117, 1);
 const greenColor = Color.fromRGBO(124, 220, 117, 1);
 const blueColor = Colors.blue;
+const orangeColor = Colors.orange;
 const lightBlueColor = Color(0xFFECEFF1);
 
 // Numbers
@@ -18,6 +19,7 @@ const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
+const roundsPerGame = 7;
 
 // SnackBar
 void constSnackBar(String text, BuildContext context) {

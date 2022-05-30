@@ -123,7 +123,8 @@ class Play extends StatelessWidget {
     gameModel.admin = loginModel.username;
     gameModel.addParticipant(loginModel.username);
     gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
-    var games = FirebaseFirestore.instance.collection('custom_games');
+    var games =
+        FirebaseFirestore.instance.collection('versions/v1/custom_games');
     final game = <String, dynamic>{
       "admin": gameModel.admin,
       "participants": gameModel.participants,
@@ -133,6 +134,8 @@ class Play extends StatelessWidget {
       "are_ready": gameModel.areReady,
       "official_categories": gameModel.officialCategories,
       "custom_categories": gameModel.customCategories,
+      "questions": [],
+      "answers": []
     };
     await games.doc(gameModel.pinCode).set(game);
   }
