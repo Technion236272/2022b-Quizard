@@ -78,19 +78,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     Future<void> checkAlreadyRegistered() async {
-      FirebaseFirestore.instance.collection('users').get().then((users) {
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) {
         for (var user in users.docs) {
           if (user["email"] == emailController.text.trim() ||
               user["username"] == userNameController.text.trim()) {
-              ScaffoldMessenger.of(context)
+            ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(
                   content: Text('Email/Username already exists.'),
                 ))
                 .closed
                 .then(
                     (value) => ScaffoldMessenger.of(context).clearSnackBars());
-              loginModel.toggleLogging();
-              return;
+            loginModel.toggleLogging();
+            return;
           }
         }
       }).then((value) async {
@@ -158,103 +161,100 @@ class _SignUpScreenState extends State<SignUpScreen> {
               reverse: true, // Helps to see the whole form. amazing!
               child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Column(
+                  child: Column(children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            InkWell(
-                                child: const Icon(
-                                  Icons.arrow_back,
-                                  size: 32.0,
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                })
-                          ],
-                        ),
-                        const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Image(
-                                image: AssetImage(
-                                    'images/titles/almost_there.png'))),
-                        const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              'Select your avatar by clicking the photo below',
-                            )),
-                        Column(children: <Widget>[
-                          Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: GestureDetector(
-                                  onTap: () => _openGallery(context),
-                                  child: CircleAvatar(
-                                      backgroundImage:
-                                          loginModel.getInitAvatar(),
-                                      backgroundColor: thirdColor,
-                                      radius: 70)))
-                        ]),
-                        Column(children: <Widget>[
-                          Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                              child: TextFormField(
-                                  controller: userNameController,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: secondaryColor,
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Username',
-                                  ))),
-                          Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                              child: TextFormField(
-                                  controller: emailController,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: secondaryColor,
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Email',
-                                  ))),
-                          Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                              child: TextFormField(
-                                  controller: passwordController,
-                                  obscureText: true,
-                                  enableSuggestions: false,
-                                  autocorrect: false,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: secondaryColor,
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Password',
-                                  ))),
-                          Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 8),
-                              child: TextFormField(
-                                  controller: secondPasswordController,
-                                  obscureText: true,
-                                  enableSuggestions: false,
-                                  autocorrect: false,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: secondaryColor,
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Repeat password',
-                                  ))),
-                        ]),
-                        Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(50)),
-                              child: const Text('Finish signing up'),
-                              onPressed:
-                                  loginModel.isLoggingIn ? null : _trySignUp,
-                            )),
-                      ]))));
+                        InkWell(
+                            child: const Icon(
+                              Icons.arrow_back,
+                              size: 32.0,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            })
+                      ],
+                    ),
+                    const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Image(
+                            image:
+                                AssetImage('images/titles/almost_there.png'))),
+                    const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Select your avatar by clicking the photo below',
+                        )),
+                    Column(children: <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: GestureDetector(
+                              onTap: () => _openGallery(context),
+                              child: CircleAvatar(
+                                  backgroundImage: loginModel.getInitAvatar(),
+                                  backgroundColor: thirdColor,
+                                  radius: 70)))
+                    ]),
+                    Column(children: <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: TextFormField(
+                              controller: userNameController,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: secondaryColor,
+                                border: OutlineInputBorder(),
+                                hintText: 'Username',
+                              ))),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: TextFormField(
+                              controller: emailController,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: secondaryColor,
+                                border: OutlineInputBorder(),
+                                hintText: 'Email',
+                              ))),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: TextFormField(
+                              controller: passwordController,
+                              obscureText: true,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: secondaryColor,
+                                border: OutlineInputBorder(),
+                                hintText: 'Password',
+                              ))),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: TextFormField(
+                              controller: secondPasswordController,
+                              obscureText: true,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: secondaryColor,
+                                border: OutlineInputBorder(),
+                                hintText: 'Repeat password',
+                              ))),
+                    ]),
+                    Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(50)),
+                          child: const Text('Finish signing up'),
+                          onPressed: loginModel.isLoggingIn ? null : _trySignUp,
+                        )),
+                  ]))));
     });
   }
 }

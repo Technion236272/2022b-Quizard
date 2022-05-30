@@ -18,6 +18,7 @@ const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
+const roundsPerGame = 7;
 
 // SnackBar
 void constSnackBar(String text, BuildContext context) {
