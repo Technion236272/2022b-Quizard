@@ -80,7 +80,7 @@ class LobbyAdmin extends StatefulWidget {
 
 class _LobbyAdminState extends State<LobbyAdmin> {
   bool finishedBuildAllCustomCategories = false;
-  String lockText = '';
+  String lockText = 'UNLOCKED';
 
   List<String> officialCategories = [
     'Animal',
@@ -93,12 +93,6 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   var customCategories = [
     ['', '', 0]
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    lockText = 'UNLOCKED';
-  }
 
   ChipsInput _selectCategoryInput() {
     // Get all categories by all users ONCE
@@ -238,13 +232,13 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           fit: FlexFit.loose,
           child: ChipsChoice<String>.multiple(
             value: gameModel.officialCategories,
-            onChanged: (val) => setState(() {
+            onChanged: (val) {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
                   .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
-            }),
+            },
             choiceItems: C2Choice.listFrom<String, String>(
               source: officialCategories,
               value: (i, v) => v,
@@ -318,9 +312,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               constSnackBar('Coming soon', context);
               break;
             case 'UNLOCKED':
-              setState(() {
-                lockText = 'LOCKED';
-              });
+              lockText = 'LOCKED';
               FirebaseFirestore.instance
                   .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
@@ -328,9 +320,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               gameModel.isLocked = true;
               break;
             case 'LOCKED':
-              setState(() {
-                lockText = 'UNLOCKED';
-              });
+              lockText = 'UNLOCKED';
               FirebaseFirestore.instance
                   .collection('versions/v1/custom_games')
                   .doc(gameModel.pinCode)
@@ -418,13 +408,11 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Consumer<GameModel> _participant(String username, bool admin) {
-    bool? isReady;
     bool matchUsernames = false;
 
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       return Consumer<LoginModel>(builder: (context, loginModel, child) {
         int participantIndex = gameModel.participants.indexOf(username, 0);
-        isReady = gameModel.areReady[participantIndex];
         if (username == loginModel.username) {
           matchUsernames = true;
         }
@@ -491,12 +479,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     Checkbox(
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         activeColor: greenColor,
-                        value: isReady,
+                        value: gameModel.areReady[participantIndex],
                         onChanged: matchUsernames
                             ? (value) {
-                                setState(() {
-                                  isReady = value!;
-                                });
                                 _toggleIsReady();
                               }
                             : null),
@@ -591,8 +576,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       }
 
       final falseAnswers = [];
+      final selectedAnswersPerRound = [];
       for (int i = 0; i < gameModel.participants.length; i++) {
         falseAnswers.add('');
+        selectedAnswersPerRound.add('');
       }
 
       await FirebaseFirestore.instance
@@ -601,7 +588,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           .update({
         "questions": selectedQuestions,
         "answers": selectedAnswers,
-        "false_answers": falseAnswers
+        "false_answers": falseAnswers,
+        "selected_answers": selectedAnswersPerRound
       });
 
       return true;
@@ -612,13 +600,13 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
       int participantIndex =
           gameModel.participants.indexOf(loginModel.username);
+      gameModel.userIndex = participantIndex;
       bool retVal = await _buildQuestions();
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
       } else {
         Navigator.of(context).push(MaterialPageRoute<void>(
-            builder: (context) => FirstGameScreen(
-                pinCode: gameModel.pinCode, userIndex: participantIndex)));
+            builder: (context) => const FirstGameScreen()));
       }
     }
 

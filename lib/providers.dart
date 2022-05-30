@@ -190,10 +190,14 @@ class GameModel extends ChangeNotifier {
   bool _isLocked = false;
   String _pinCode = '';
   String _admin = '';
+  int userIndex = -1;
   List<String> _participants = [];
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = [];
+  List<String> _gameQuestions = [];
+  List<String> _gameAnswers = [];
+  List<String> currentAnswers = [];
 
   List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
@@ -204,6 +208,8 @@ class GameModel extends ChangeNotifier {
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
+  List<String> get gameQuestions => _gameQuestions;
+  List<String> get gameAnswers => _gameAnswers;
 
   set areReady(List<bool?> values) {
     _areReady = values;
@@ -247,6 +253,16 @@ class GameModel extends ChangeNotifier {
 
   set selectedCategories(List<String> categories) {
     _selectedCategories = categories;
+    notifyListeners();
+  }
+
+  set gameQuestions(List<String> questions) {
+    _gameQuestions = questions;
+    notifyListeners();
+  }
+
+  set gameAnswers(List<String> answers) {
+    _gameAnswers = answers;
     notifyListeners();
   }
 
