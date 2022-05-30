@@ -48,7 +48,7 @@ class Question extends StatelessWidget {
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(
-            'Question ' ' $_questionIndex\n',
+            'Question' ' $_questionIndex\n',
             style: const TextStyle(fontSize: 22),
             textAlign: TextAlign.center,
           ),
@@ -166,8 +166,11 @@ class Result extends StatelessWidget {
 // Almost nothing is fully implemented.
 
 class SecondGameScreen extends StatefulWidget {
-  const SecondGameScreen({Key? key, required this.pinCode}) : super(key: key);
+  const SecondGameScreen(
+      {Key? key, required this.pinCode, required this.userIndex})
+      : super(key: key);
   final String pinCode;
+  final int userIndex;
 
   @override
   State<SecondGameScreen> createState() => _SecondGameScreenState();
@@ -296,8 +299,9 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                 if (!falseAnswers.contains('')) {
                   WidgetsBinding.instance?.addPostFrameCallback((_) {
                     Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (context) =>
-                            SecondGameScreen(pinCode: widget.pinCode)));
+                        builder: (context) => SecondGameScreen(
+                            pinCode: widget.pinCode,
+                            userIndex: widget.userIndex)));
                   });
                 }
               }

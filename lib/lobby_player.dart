@@ -5,6 +5,7 @@ import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+import 'game.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -429,6 +430,17 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         WidgetsBinding.instance?.addPostFrameCallback((_) {
                           Navigator.of(context).pop(false);
                           _dialogKickedByAdmin();
+                        });
+                      }
+                      final questions = List<String>.from(game["questions"]);
+                      if (questions.isNotEmpty) {
+                        int participantIndex =
+                            gameModel.participants.indexOf(loginModel.username);
+                        WidgetsBinding.instance?.addPostFrameCallback((_) {
+                          Navigator.of(context).push(MaterialPageRoute<void>(
+                              builder: (context) => FirstGameScreen(
+                                  pinCode: gameModel.pinCode,
+                                  userIndex: participantIndex)));
                         });
                       }
                     }
