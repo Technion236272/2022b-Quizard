@@ -579,32 +579,46 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
       if (allQuestions.length < roundsPerGame) {
         return false;
-      } else {
-        final selectedQuestions = [];
-        final selectedAnswers = [];
-        List shuffledIndexes = List.generate(allQuestions.length, (i) => i);
-        shuffledIndexes.shuffle();
-        for (int i = 0; i < roundsPerGame; i++) {
-          selectedQuestions.add(allQuestions[shuffledIndexes[i]]);
-          selectedAnswers.add(allAnswers[shuffledIndexes[i]]);
-        }
-        await FirebaseFirestore.instance
-            .collection('versions/v1/custom_games')
-            .doc(gameModel.pinCode)
-            .update(
-                {"questions": selectedQuestions, "answers": selectedAnswers});
       }
+
+      final selectedQuestions = [];
+      final selectedAnswers = [];
+      List shuffledIndexes = List.generate(allQuestions.length, (i) => i);
+      shuffledIndexes.shuffle();
+      for (int i = 0; i < roundsPerGame; i++) {
+        selectedQuestions.add(allQuestions[shuffledIndexes[i]]);
+        selectedAnswers.add(allAnswers[shuffledIndexes[i]]);
+      }
+
+      final falseAnswers = [];
+      for (int i = 0; i < gameModel.participants.length; i++) {
+        falseAnswers.add('');
+      }
+
+      await FirebaseFirestore.instance
+          .collection('versions/v1/custom_games')
+          .doc(gameModel.pinCode)
+          .update({
+        "questions": selectedQuestions,
+        "answers": selectedAnswers,
+        "false_answers": falseAnswers
+      });
 
       return true;
     }
 
     Future<void> _startGame() async {
+      GameModel gameModel = Provider.of<GameModel>(context, listen: false);
+      LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
+      int participantIndex =
+          gameModel.participants.indexOf(loginModel.username);
       bool retVal = await _buildQuestions();
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
       } else {
         Navigator.of(context).push(MaterialPageRoute<void>(
-            builder: (context) => const FirstGameScreen()));
+            builder: (context) => FirstGameScreen(
+                pinCode: gameModel.pinCode, userIndex: participantIndex)));
       }
     }
 
