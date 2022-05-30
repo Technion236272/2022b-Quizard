@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'consts.dart';
 
 int questionIndex = 0;
-List<Map<String, dynamic>> questions = [];
+
+List<String> questions = [];
+List<String> answers = [];
+List<String> currentAnswers = [];
 
 /*
 Example of questions:
@@ -66,11 +69,10 @@ class Question extends StatelessWidget {
 }
 
 class Answer extends StatelessWidget {
-  final Function selectHandler;
   final String answerText;
   final int questionScore;
 
-  Answer(this.selectHandler, this.answerText, this.questionScore);
+  Answer(this.answerText, this.questionScore);
 
   @override
   Widget build(BuildContext context) {
@@ -117,16 +119,13 @@ class Quiz extends StatefulWidget {
 class _QuizState extends State<Quiz> {
   @override
   Widget build(BuildContext context) {
+    List<Widget> quiz = [Question(questions[questionIndex], questionIndex + 1)];
+    quiz.add(Answer(currentAnswers[0], 10));
+    for (int i = 1; i < currentAnswers.length; i++) {
+      quiz.add(Answer(currentAnswers[i], 10));
+    }
     return Column(
-      children: [
-        Question(questions[questionIndex]['questionText'] as String,
-            questionIndex + 1),
-        ...(questions[questionIndex]['answers'] as List<Map<String, dynamic>>)
-            .map((answer) {
-          return Answer(() => widget.answerQuestion(answer['score']),
-              answer['text'] as String, answer['score'] as int);
-        }).toList(),
-      ],
+      children: quiz,
     );
   }
 }
@@ -248,6 +247,7 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
   // Timer? _countDownTimer;
   // Duration _timeDuration = Duration(seconds: 30);
   final _answerController = TextEditingController();
+  bool submitted = false;
 
   @override
   void initState() {
@@ -288,6 +288,19 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         .collection("versions/v1/custom_games")
         .doc(widget.pinCode);
 
+    Future<void> _submitFalseAnswer() async {
+      var game = FirebaseFirestore.instance
+          .collection('versions/v1/custom_games')
+          .doc(widget.pinCode);
+      var falseAnswers = [];
+      await game.get().then((value) {
+        falseAnswers = value["false_answers"];
+      });
+      falseAnswers[widget.userIndex] = _answerController.text;
+      await game.update({"false_answers": falseAnswers});
+      submitted = true;
+    }
+
     StreamBuilder<DocumentSnapshot<Object?>> _bodyBuild() {
       return StreamBuilder<DocumentSnapshot>(
           stream: game.snapshots(),
@@ -297,6 +310,9 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
               if (data != null) {
                 final falseAnswers = List<String>.from(data["false_answers"]);
                 if (!falseAnswers.contains('')) {
+                  currentAnswers = [];
+                  currentAnswers.add(answers[questionIndex]);
+                  currentAnswers.addAll(falseAnswers);
                   WidgetsBinding.instance?.addPostFrameCallback((_) {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (context) => SecondGameScreen(
@@ -309,8 +325,7 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
             return Padding(
                 padding: const EdgeInsets.all(30.0),
                 child: Column(children: <Widget>[
-                  Question(questions[questionIndex]['questionText'] as String,
-                      questionIndex + 1),
+                  Question(questions[questionIndex], questionIndex + 1),
                   Padding(
                       padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
                       child: TextFormField(
@@ -333,18 +348,7 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                                   const Size.fromHeight(50)), // max width
                           child: const Text('Submit',
                               style: TextStyle(fontSize: 18)),
-                          onPressed: () async {
-                            var game = FirebaseFirestore.instance
-                                .collection('versions/v1/custom_games')
-                                .doc(widget.pinCode);
-                            var falseAnswers = [];
-                            await game.get().then((value) {
-                              falseAnswers = value["false_answers"];
-                            });
-                            falseAnswers[widget.userIndex] =
-                                _answerController.text;
-                            await game.update({"false_answers": falseAnswers});
-                          })),
+                          onPressed: submitted ? null : _submitFalseAnswer)),
                   const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
                   const Text(
                     'Time left:',
@@ -366,14 +370,8 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
           .doc(widget.pinCode)
           .get()
           .then((game) {
-        for (int i = 0; i < roundsPerGame; i++) {
-          Map<String, dynamic> rightAnswer = {'text': '', 'score': 10};
-          rightAnswer["text"] = game["answers"][i];
-          Map<String, dynamic> question = {'questionText': '', 'answers': []};
-          question["questionText"] = game["questions"][i];
-          question["answers"] = [rightAnswer];
-          questions.add(question);
-        }
+        questions = List<String>.from(game["questions"]);
+        answers = List<String>.from(game["answers"]);
       });
       return true;
     }
