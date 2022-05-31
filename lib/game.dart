@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/home.dart';
 import 'package:quizard/providers.dart';
 import 'consts.dart';
-
-int questionIndex = 0;
 
 class Question extends StatelessWidget {
   final String _questionText;
@@ -98,35 +97,42 @@ class _AnswerState extends State<Answer> {
 
 // Should be the score-board class.
 class Result extends StatelessWidget {
-  final int resultScore;
-  final Function resetHandler;
-
-  const Result(
-      {Key? key, required this.resultScore, required this.resetHandler})
-      : super(key: key);
-
-  //Result(this.resultScore, this.resetHandler);
+  const Result({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Score ' '$resultScore',
-            style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+    return Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 50,
+          backgroundColor: backgroundColor,
+          toolbarOpacity: 0,
+          elevation: 0,
+        ),
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Score ' '100',
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 50),
+                child: ElevatedButton(
+                  child: const Text(
+                    'Exit Quiz',
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (context) => const HomePage()));
+                  },
+                ),
+              )
+            ],
           ),
-          ElevatedButton(
-            child: const Text(
-              'Restart Quiz!',
-            ), //Text
-            onPressed: resetHandler(),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
 
@@ -208,8 +214,14 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
                         gameModel.falseAnswerController.text = '';
                         gameModel.currentQuizOptions = [];
                         gameModel.currentScreen = 1;
-                        questionIndex++;
-                        Navigator.of(context).pop(true);
+                        gameModel.currentQuestionIndex++;
+                        if (gameModel.currentQuestionIndex < roundsPerGame) {
+                          Navigator.of(context).pop(true);
+                        } else {
+                          gameModel.currentQuestionIndex = 0;
+                          Navigator.of(context).push(MaterialPageRoute<void>(
+                              builder: (context) => const Result()));
+                        }
                       });
                       return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 150.0),
@@ -278,8 +290,8 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         return Padding(
             padding: const EdgeInsets.all(30.0),
             child: Column(children: <Widget>[
-              Question(
-                  gameModel.gameQuestions[questionIndex], questionIndex + 1),
+              Question(gameModel.gameQuestions[gameModel.currentQuestionIndex],
+                  gameModel.currentQuestionIndex + 1),
               Padding(
                   padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
                   child: TextFormField(
@@ -331,8 +343,8 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                   if (!falseAnswers.contains('')) {
                     if (gameModel.currentScreen == 1) {
                       gameModel.currentAnswers = [];
-                      gameModel.currentAnswers
-                          .add(gameModel.gameAnswers[questionIndex]);
+                      gameModel.currentAnswers.add(gameModel
+                          .gameAnswers[gameModel.currentQuestionIndex]);
                       gameModel.currentAnswers.addAll(falseAnswers);
                       WidgetsBinding.instance?.addPostFrameCallback((_) {
                         gameModel.currentScreen = 2;

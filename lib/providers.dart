@@ -187,6 +187,7 @@ class LoginModel extends ChangeNotifier {
 }
 
 class GameModel extends ChangeNotifier {
+  int _currentQuestionIndex = 0;
   List<bool?> _areReady = [false];
   bool _isPrivate = true;
   bool _isLocked = false;
@@ -206,6 +207,7 @@ class GameModel extends ChangeNotifier {
 
   final _falseAnswerController = TextEditingController();
 
+  int get currentQuestionIndex => _currentQuestionIndex;
   List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
@@ -221,6 +223,11 @@ class GameModel extends ChangeNotifier {
   List<String> get gameAnswers => _gameAnswers;
   TextEditingController get falseAnswerController => _falseAnswerController;
   List<Widget> get currentQuizOptions => _currentQuizOptions;
+
+  set currentQuestionIndex(int value) {
+    _currentQuestionIndex = value;
+    notifyListeners();
+  }
 
   set areReady(List<bool?> values) {
     _areReady = values;
@@ -339,7 +346,9 @@ class GameModel extends ChangeNotifier {
       }
       _currentQuizOptions.shuffle();
       _currentQuizOptions.insert(
-          0, Question(gameQuestions[questionIndex], questionIndex + 1));
+          0,
+          Question(
+              gameQuestions[currentQuestionIndex], currentQuestionIndex + 1));
     }
   }
 }
