@@ -22,6 +22,6 @@ In the modern time, many peaople attracted to habbits which don't contribute to 
 * [ ] Game room settings(Appearance, Language, etc..).
 ----
 ## Table of Contents 
-[ Database ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/database.md).
-[ Setup ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/setup.md).
-[ Algorithms ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/algorithms.md).
+[ Database ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/database.md)
+>[ Setup ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/setup.md)
+>[ Algorithms ](https://github.com/Technion236272/2022b-Quizard/blob/readme_edit/docs/algorithms.md)
