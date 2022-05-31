@@ -238,13 +238,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
   }
 
   Consumer<GameModel> _participant(String username, bool admin) {
-    bool? isReady;
     bool matchUsernames = false;
 
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       return Consumer<LoginModel>(builder: (context, loginModel, child) {
         int participantIndex = gameModel.participants.indexOf(username, 0);
-        isReady = gameModel.areReady[participantIndex];
         if (username == loginModel.username) {
           matchUsernames = true;
         }
@@ -310,12 +308,9 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                     Checkbox(
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         activeColor: greenColor,
-                        value: isReady,
+                        value: gameModel.areReady[participantIndex],
                         onChanged: matchUsernames
                             ? (value) {
-                                setState(() {
-                                  isReady = value!;
-                                });
                                 _toggleIsReady();
                               }
                             : null),
@@ -414,10 +409,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   if (snapshot.hasData) {
                     var game = snapshot.data!;
                     if (!game.exists) {
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        Navigator.of(context).pop(false);
-                        _dialogGameClosed();
-                      });
+                      Navigator.of(context).pop(false);
+                      _dialogGameClosed();
                     } else {
                       gameModel.update(snapshot.data!);
                       if (game["is_locked"]) {
@@ -427,20 +420,20 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       }
                       if (!gameModel.participants
                           .contains(loginModel.username)) {
-                        WidgetsBinding.instance?.addPostFrameCallback((_) {
-                          Navigator.of(context).pop(false);
-                          _dialogKickedByAdmin();
-                        });
+                        Navigator.of(context).pop(false);
+                        _dialogKickedByAdmin();
                       }
                       final questions = List<String>.from(game["questions"]);
                       if (questions.isNotEmpty) {
                         int participantIndex =
                             gameModel.participants.indexOf(loginModel.username);
+                        gameModel.userIndex = participantIndex;
                         WidgetsBinding.instance?.addPostFrameCallback((_) {
-                          Navigator.of(context).push(MaterialPageRoute<void>(
-                              builder: (context) => FirstGameScreen(
-                                  pinCode: gameModel.pinCode,
-                                  userIndex: participantIndex)));
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const FirstGameScreen()));
                         });
                       }
                     }

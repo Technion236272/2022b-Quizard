@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'game.dart';
+
 enum Status { uninitialized, authenticated, authenticating, unauthenticated }
 
 class AuthModel with ChangeNotifier {
@@ -185,25 +187,47 @@ class LoginModel extends ChangeNotifier {
 }
 
 class GameModel extends ChangeNotifier {
+  int _currentQuestionIndex = 0;
   List<bool?> _areReady = [false];
   bool _isPrivate = true;
   bool _isLocked = false;
+  bool _enableSubmitFalseAnswer = true;
   String _pinCode = '';
   String _admin = '';
+  int userIndex = -1;
+  int _currentScreen = 1;
   List<String> _participants = [];
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = [];
+  List<String> _gameQuestions = [];
+  List<String> _gameAnswers = [];
+  List<String> currentAnswers = [];
+  List<Widget> _currentQuizOptions = [];
 
+  final _falseAnswerController = TextEditingController();
+
+  int get currentQuestionIndex => _currentQuestionIndex;
   List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
+  bool get enableSubmitFalseAnswer => _enableSubmitFalseAnswer;
   String get pinCode => _pinCode;
   String get admin => _admin;
+  int get currentScreen => _currentScreen;
   List<String> get participants => _participants;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
+  List<String> get gameQuestions => _gameQuestions;
+  List<String> get gameAnswers => _gameAnswers;
+  TextEditingController get falseAnswerController => _falseAnswerController;
+  List<Widget> get currentQuizOptions => _currentQuizOptions;
+
+  set currentQuestionIndex(int value) {
+    _currentQuestionIndex = value;
+    notifyListeners();
+  }
 
   set areReady(List<bool?> values) {
     _areReady = values;
@@ -220,6 +244,11 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set enableSubmitFalseAnswer(bool value) {
+    _enableSubmitFalseAnswer = value;
+    notifyListeners();
+  }
+
   set pinCode(String value) {
     _pinCode = value;
     notifyListeners();
@@ -227,6 +256,11 @@ class GameModel extends ChangeNotifier {
 
   set admin(String value) {
     _admin = value;
+    notifyListeners();
+  }
+
+  set currentScreen(int value) {
+    _currentScreen = value;
     notifyListeners();
   }
 
@@ -247,6 +281,21 @@ class GameModel extends ChangeNotifier {
 
   set selectedCategories(List<String> categories) {
     _selectedCategories = categories;
+    notifyListeners();
+  }
+
+  set gameQuestions(List<String> questions) {
+    _gameQuestions = questions;
+    notifyListeners();
+  }
+
+  set gameAnswers(List<String> answers) {
+    _gameAnswers = answers;
+    notifyListeners();
+  }
+
+  set currentQuizOptions(List<Widget> values) {
+    _currentQuizOptions = values;
     notifyListeners();
   }
 
@@ -284,6 +333,22 @@ class GameModel extends ChangeNotifier {
       _officialCategories = List<String>.from(game["official_categories"]);
       _customCategories = List<String>.from(game["custom_categories"]);
       _selectedCategories = _officialCategories + _customCategories;
+    }
+  }
+
+  void quizOptionsUpdate() {
+    if (_currentQuizOptions.isEmpty) {
+      _currentQuizOptions
+          .add(Answer(answerText: currentAnswers[0], questionScore: 10));
+      for (int i = 1; i < currentAnswers.length; i++) {
+        _currentQuizOptions
+            .add(Answer(answerText: currentAnswers[i], questionScore: 0));
+      }
+      _currentQuizOptions.shuffle();
+      _currentQuizOptions.insert(
+          0,
+          Question(
+              gameQuestions[currentQuestionIndex], currentQuestionIndex + 1));
     }
   }
 }
