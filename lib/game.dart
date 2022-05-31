@@ -198,34 +198,38 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
                       List<String>.from(data["selected_answers"]);
                   if (!selectedAnswers.contains('')) {
                     if (gameModel.currentScreen == 2) {
-                      gameModel.currentAnswers = [];
-                      final falseAnswers = [];
-                      final selectedAnswersPerRound = [];
-                      for (int i = 0; i < gameModel.participants.length; i++) {
-                        falseAnswers.add('');
-                        selectedAnswersPerRound.add('');
-                      }
-                      game.update({
-                        "selected_answers": selectedAnswersPerRound,
-                        "false_answers": falseAnswers
-                      });
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        gameModel.enableSubmitFalseAnswer = true;
-                        gameModel.falseAnswerController.text = '';
-                        gameModel.currentQuizOptions = [];
-                        gameModel.currentScreen = 1;
-                        gameModel.currentQuestionIndex++;
-                        if (gameModel.currentQuestionIndex < roundsPerGame) {
-                          Navigator.of(context).pop(true);
-                        } else {
-                          gameModel.currentQuestionIndex = 0;
-                          Navigator.of(context).push(MaterialPageRoute<void>(
-                              builder: (context) => const Result()));
+                      Future.delayed(const Duration(milliseconds: 2000), () {
+                        gameModel.currentAnswers = [];
+                        final falseAnswers = [];
+                        final selectedAnswersPerRound = [];
+                        for (int i = 0;
+                            i < gameModel.participants.length;
+                            i++) {
+                          falseAnswers.add('');
+                          selectedAnswersPerRound.add('');
                         }
+                        game.update({
+                          "selected_answers": selectedAnswersPerRound,
+                          "false_answers": falseAnswers
+                        });
+                        WidgetsBinding.instance?.addPostFrameCallback((_) {
+                          gameModel.enableSubmitFalseAnswer = true;
+                          gameModel.falseAnswerController.text = '';
+                          gameModel.currentQuizOptions = [];
+                          gameModel.currentScreen = 1;
+                          gameModel.currentQuestionIndex++;
+                          if (gameModel.currentQuestionIndex < roundsPerGame) {
+                            Navigator.of(context).pop(true);
+                          } else {
+                            gameModel.currentQuestionIndex = 0;
+                            Navigator.of(context).push(MaterialPageRoute<void>(
+                                builder: (context) => const Result()));
+                          }
+                        });
+                        return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 150.0),
+                            child: Center(child: CircularProgressIndicator()));
                       });
-                      return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 150.0),
-                          child: Center(child: CircularProgressIndicator()));
                     }
                   }
                 }
