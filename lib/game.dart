@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quizard/home.dart';
@@ -7,6 +8,8 @@ import 'package:confetti/confetti.dart';
 import 'consts.dart';
 
 List<String> players = [];
+List<String> photos = [];
+int i = 0;
 
 class Question extends StatelessWidget {
   final String _questionText;
@@ -115,7 +118,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
   @override
   Widget build(BuildContext context) {
     _controllerTopCenter =
-        ConfettiController(duration: const Duration(seconds: 10));
+        ConfettiController(duration: const Duration(seconds: 60));
     _controllerTopCenter.play();
     Future<List<String>> _buildPlayers() async {
       await FirebaseFirestore.instance
@@ -125,13 +128,25 @@ class _ScoreBoardState extends State<ScoreBoard> {
           .then((game) {
         players = List<String>.from(game["participants"]);
       });
-
-      for(var name in players)
-      {
-
-
-      }
-
+      /*
+      photos.fillRange(0, players.length);
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) async {
+        for (var user in users.docs) {
+          for(int k=0; k<players.length; k++){
+              if (user["username"] == players[k]) {
+                String id = user.id;
+                final ref = FirebaseStorage.instance.ref('images/profiles/$id.jpg');
+                final url = await ref.getDownloadURL();
+                photos[k] = url;
+                break;
+              }
+            }
+        }
+      });
+       */
       return players;
     }
 
@@ -139,54 +154,52 @@ class _ScoreBoardState extends State<ScoreBoard> {
         body: Container(
             child: Column( children: [
               const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 100),
-                  child: Image(
-                      image:
-                      AssetImage('images/titles/winner.png'))),
-              FutureBuilder(
-                future: _buildPlayers(),
-                builder: (BuildContext context, AsyncSnapshot snapshot){
-                  print(snapshot.data);
-                  if(snapshot.data == null){
-                    return Container(
-                        child: Center(
-                            child: Text("Loading...")
-                        )
-                    );
-                  } else {
-                    return Center(child:
-                    Column(children:[
-                      ConfettiWidget(
-                        confettiController: _controllerTopCenter,
-                        blastDirection: 7,
-                        shouldLoop: false,
-                      ),
-                      Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          height: 400,
-                          width: 350,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            color: secondaryColor,
+              padding: EdgeInsets.symmetric(vertical: 100),
+              child: Image(
+                  image:
+                  AssetImage('images/titles/winner.png'))),
+                  FutureBuilder(
+                      future: _buildPlayers(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot){
+                      if(snapshot.data == null){
+                        return Container(
+                            child: Center(
+                                child: Text("Loading...")
+                            ));}
+                      else {
+                        return Center(child:
+                        Column(children:[
+                          ConfettiWidget(
+                            confettiController: _controllerTopCenter,
+                            blastDirection: 180,
+                            numberOfParticles: 20,
+                            emissionFrequency: 0.002,
+                            shouldLoop: false,
                           ),
-                          child: ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      "https://www.google.com/search?q=image&sxsrf=ALiCzsYILxEWE940ni0LAbcujZ3rgC1VDg:1653996309044&tbm=isch&source=iu&ictx=1&vet=1&fir=sp12V8x9gw6KuM%252C4O2GvGuD-Cf09M%252C_%253BgxFxsvFBmxeZ9M%252C0JWe7yDOKrVFAM%252C_%253BDH7p1w2o_fIU8M%252CBa_eiczVaD9-zM%252C_%253BQOZymhPf48LDYM%252CLOSptVP0p_ZwUM%252C_%253Bn5hAWsQ-sgKo_M%252C-UStXW0dQEx4SM%252C_%253B2DNOEjVi-CBaYM%252CAOz9-XMe1ixZJM%252C_%253B0DzWhtJoQ1KWgM%252CcIQ7wXCEtJiOWM%252C_%253Bz4_uU0QB2pe-SM%252C7SySw5zvOgPYAM%252C_%253B2nDXavJs9DoKTM%252CB51x0PBR9KNzvM%252C_%253BsI3XXpFjQg61vM%252C0_HmqFdutkPVdM%252C_%253BMOAYgJU89sFKnM%252CygIoihldBPn-LM%252C_%253BuPicAfWpubBp4M%252C_Hlm4-qqBRN0IM%252C_&usg=AI4_-kRJA4O93E7EcUkikx5uVNLogU3cNA&sa=X&ved=2ahUKEwiF99az0In4AhWE8LsIHXFZBGgQ9QF6BAgCEAE#imgrc=sp12V8x9gw6KuM"
-                                  ),
+                          Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              height: 400,
+                              width: 350,
+                              decoration: BoxDecoration(
+                                border: Border.all(
                                 ),
-                                title: Text(snapshot.data[index]),
-                              );
-                            },
+                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                color: secondaryColor,),
+                              child: ListView.builder(
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index.isOdd) return new Divider();
+                                     return ListTile(
+                                      trailing: Text("500"),
+                                      title: Text(players[0]),
+                                      leading: CircleAvatar(
+                                      radius: 30,
+                                      backgroundImage: NetworkImage("https://picsum.photos/250?image=9"),
+                                      ),
+                                  );
+                                },
                           ))]));
-                  }
-                },
-              ),
+                      }},),
             ])));
   }
 }
