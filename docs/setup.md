@@ -21,8 +21,8 @@
 * questions.dart : Questions screen in profile Screen
 * lobby_admin.dart/lobby_player.dart : for the use of game.dart screen
 * join_game.dart : for join game screen
-....
 
+### After developing :
 * After you edited / added a new code to the project open a  pull request , wait for it to get accepted and then push your new code.
 
 
