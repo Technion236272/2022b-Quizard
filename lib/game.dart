@@ -96,42 +96,16 @@ class _AnswerState extends State<Answer> {
   }
 }
 
-class Quiz extends StatefulWidget {
-  const Quiz({Key? key, required this.pinCode, required this.answerQuestion})
-      : super(key: key);
-  final String pinCode;
-  final Function answerQuestion;
-
-  @override
-  _QuizState createState() => _QuizState();
-}
-
-class _QuizState extends State<Quiz> {
-  @override
-  Widget build(BuildContext context) {
-    final gameModel = Provider.of<GameModel>(context, listen: false);
-    List<Widget> quiz = [];
-    quiz.add(
-        Answer(answerText: gameModel.currentAnswers[0], questionScore: 10));
-    for (int i = 1; i < gameModel.currentAnswers.length; i++) {
-      quiz.add(
-          Answer(answerText: gameModel.currentAnswers[i], questionScore: 0));
-    }
-    quiz.shuffle();
-    quiz.insert(
-        0, Question(gameModel.gameQuestions[questionIndex], questionIndex + 1));
-    return Column(
-      children: quiz,
-    );
-  }
-}
-
 // Should be the score-board class.
 class Result extends StatelessWidget {
   final int resultScore;
   final Function resetHandler;
 
-  Result(this.resultScore, this.resetHandler);
+  const Result(
+      {Key? key, required this.resultScore, required this.resetHandler})
+      : super(key: key);
+
+  //Result(this.resultScore, this.resetHandler);
 
   @override
   Widget build(BuildContext context) {
@@ -168,26 +142,90 @@ class SecondGameScreen extends StatefulWidget {
 }
 
 class _SecondGameScreenState extends State<SecondGameScreen> {
-  var _totalScore = 0;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _answerQuestion(int score) {
-    _totalScore += score;
-    questionIndex = questionIndex + 1;
-  }
-
-  void _resetQuiz() {
-    questionIndex = 0;
-    _totalScore = 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
+    final game = FirebaseFirestore.instance
+        .collection("versions/v1/custom_games")
+        .doc(gameModel.pinCode);
+
+    Consumer<GameModel> _quizBody() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        gameModel.quizOptionsUpdate();
+        return Column(
+          children: gameModel.currentQuizOptions,
+        );
+      });
+    }
+
+    Padding _secondScreenBody() {
+      game.get().then((value) {});
+      return Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: SingleChildScrollView(
+            child: Column(children: <Widget>[
+              _quizBody(),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
+              const Text(
+                'Time left:',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+              const Icon(
+                Icons.timer,
+                size: 40.0,
+              )
+            ]), //Scaffold
+          ));
+    }
+
+    Consumer<GameModel> _bodyBuild() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        return StreamBuilder<DocumentSnapshot>(
+            stream: game.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var data = snapshot.data;
+                if (data != null) {
+                  final selectedAnswers =
+                      List<String>.from(data["selected_answers"]);
+                  if (!selectedAnswers.contains('')) {
+                    if (gameModel.currentScreen == 2) {
+                      gameModel.currentAnswers = [];
+                      final falseAnswers = [];
+                      final selectedAnswersPerRound = [];
+                      for (int i = 0; i < gameModel.participants.length; i++) {
+                        falseAnswers.add('');
+                        selectedAnswersPerRound.add('');
+                      }
+                      game.update({
+                        "selected_answers": selectedAnswersPerRound,
+                        "false_answers": falseAnswers
+                      });
+                      WidgetsBinding.instance?.addPostFrameCallback((_) {
+                        gameModel.enableSubmitFalseAnswer = true;
+                        gameModel.falseAnswerController.text = '';
+                        gameModel.currentQuizOptions = [];
+                        gameModel.currentScreen = 1;
+                        questionIndex++;
+                        Navigator.of(context).pop(true);
+                      });
+                      return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 150.0),
+                          child: Center(child: CircularProgressIndicator()));
+                    }
+                  }
+                }
+              }
+              if (gameModel.currentScreen == 2) {
+                return _secondScreenBody();
+              } else {
+                return Container();
+              }
+            });
+      });
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -197,29 +235,7 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: SingleChildScrollView(
-              child: Column(children: <Widget>[
-                Container(
-                    child: questionIndex < gameModel.gameQuestions.length
-                        ? Quiz(
-                            pinCode: gameModel.pinCode,
-                            answerQuestion: _answerQuestion)
-                        : Result(_totalScore, _resetQuiz)),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-                const Text(
-                  'Time left:',
-                  style: TextStyle(fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-                const Icon(
-                  Icons.timer,
-                  size: 40.0,
-                )
-              ]), //Scaffold
-            ))); //MaterialApp
+        body: _bodyBuild()); //MaterialApp
   }
 }
 
@@ -234,20 +250,15 @@ class FirstGameScreen extends StatefulWidget {
 }
 
 class _FirstGameScreenState extends State<FirstGameScreen> {
-  final _answerController = TextEditingController();
-  bool _submitted = false;
-  bool _calledNextScreen = false;
-
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-
     final game = FirebaseFirestore.instance
         .collection("versions/v1/custom_games")
         .doc(gameModel.pinCode);
 
     Future<void> _submitFalseAnswer() async {
-      if (_answerController.text != "") {
+      if (gameModel.falseAnswerController.text != "") {
         var game = FirebaseFirestore.instance
             .collection('versions/v1/custom_games')
             .doc(gameModel.pinCode);
@@ -255,12 +266,57 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         await game.get().then((value) {
           falseAnswers = value["false_answers"];
         });
-        falseAnswers[gameModel.userIndex] = _answerController.text;
+        falseAnswers[gameModel.userIndex] =
+            gameModel.falseAnswerController.text;
         await game.update({"false_answers": falseAnswers});
-        setState(() {
-          _submitted = true;
-        });
+        gameModel.enableSubmitFalseAnswer = false;
       }
+    }
+
+    Consumer<GameModel> _firstScreenBody() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        return Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(children: <Widget>[
+              Question(
+                  gameModel.gameQuestions[questionIndex], questionIndex + 1),
+              Padding(
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: TextFormField(
+                      controller: gameModel.falseAnswerController,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: secondaryColor,
+                        contentPadding:
+                            EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter a false answer...',
+                      ))),
+              Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 60, horizontal: 80),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: defaultColor,
+                          minimumSize: const Size.fromHeight(50)), // max width
+                      child:
+                          const Text('Submit', style: TextStyle(fontSize: 18)),
+                      onPressed: gameModel.enableSubmitFalseAnswer
+                          ? _submitFalseAnswer
+                          : null)),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
+              const Text(
+                'Time left:',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+              const Icon(
+                Icons.timer,
+                size: 40.0,
+              )
+            ]));
+      });
     }
 
     Consumer<GameModel> _bodyBuild() {
@@ -273,80 +329,43 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                 if (data != null) {
                   final falseAnswers = List<String>.from(data["false_answers"]);
                   if (!falseAnswers.contains('')) {
-                    gameModel.currentAnswers = [];
-                    gameModel.currentAnswers
-                        .add(gameModel.gameAnswers[questionIndex]);
-                    gameModel.currentAnswers.addAll(falseAnswers);
-                    if (!_calledNextScreen) {
-                      _calledNextScreen = true;
+                    if (gameModel.currentScreen == 1) {
+                      gameModel.currentAnswers = [];
+                      gameModel.currentAnswers
+                          .add(gameModel.gameAnswers[questionIndex]);
+                      gameModel.currentAnswers.addAll(falseAnswers);
                       WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const SecondGameScreen()));
+                        gameModel.currentScreen = 2;
+                        Navigator.of(context).push(MaterialPageRoute<void>(
+                            builder: (context) => const SecondGameScreen()));
                       });
+                      return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 150.0),
+                          child: Center(child: CircularProgressIndicator()));
                     }
-                    return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 150.0),
-                        child: Center(child: CircularProgressIndicator()));
                   }
                 }
               }
-              return Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(children: <Widget>[
-                    Question(gameModel.gameQuestions[questionIndex],
-                        questionIndex + 1),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                        child: TextFormField(
-                            controller: _answerController,
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: secondaryColor,
-                              contentPadding:
-                                  EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                              border: OutlineInputBorder(),
-                              hintText: 'Enter a false answer...',
-                            ))),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 60, horizontal: 80),
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: defaultColor,
-                                minimumSize:
-                                    const Size.fromHeight(50)), // max width
-                            child: const Text('Submit',
-                                style: TextStyle(fontSize: 18)),
-                            onPressed: _submitted ? null : _submitFalseAnswer)),
-                    const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-                    const Text(
-                      'Time left:',
-                      style: TextStyle(fontSize: 20),
-                      textAlign: TextAlign.center,
-                    ),
-                    const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-                    const Icon(
-                      Icons.timer,
-                      size: 40.0,
-                    )
-                  ]));
+              if (gameModel.currentScreen == 1) {
+                return _firstScreenBody();
+              } else {
+                return Container();
+              }
             });
       });
     }
 
     Future<bool> _buildQuestions() async {
-      await FirebaseFirestore.instance
+      var game = FirebaseFirestore.instance
           .collection('versions/v1/custom_games')
-          .doc(gameModel.pinCode)
-          .get()
-          .then((game) {
+          .doc(gameModel.pinCode);
+
+      await game.get().then((game) {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.gameQuestions = List<String>.from(game["questions"]);
         gameModel.gameAnswers = List<String>.from(game["answers"]);
       });
+
       return true;
     }
 
