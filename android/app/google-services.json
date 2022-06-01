@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "510806764101",
+    "firebase_url": "https://quizard-10-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "quizard-10",
+    "storage_bucket": "quizard-10.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510806764101:android:e565dacf5698a0e5d0512c",
+        "android_client_info": {
+          "package_name": "com.technion.quizard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "510806764101-iosh31rpegul4c36l34pjub32cibhjg3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.quizard",
+            "certificate_hash": "9bceae82f3ed7e463336ae363d230b8ee2bd16a5"
+          }
+        },
+        {
+          "client_id": "510806764101-pkupk27qk0dar2gcprb2h3htr6e1qvmh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.technion.quizard",
+            "certificate_hash": "4904b3215921dc9e7a86e6e37f99f53863c8b9b5"
+          }
+        },
+        {
+          "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWSIGP48jsqdswame9s_Aar9eHqK8BQSE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

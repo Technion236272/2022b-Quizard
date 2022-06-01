@@ -1,115 +1,426 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'consts.dart';
+import 'home.dart';
+import 'providers.dart';
+import 'sign_up.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      // options: DefaultFirebaseOptions.currentPlatform,
+      );
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => LoginModel()),
+    ChangeNotifierProvider(create: (context) => GameModel())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+      theme: Theme.of(context).copyWith(
+        colorScheme:
+            Theme.of(context).colorScheme.copyWith(primary: defaultColor),
+        scaffoldBackgroundColor: backgroundColor,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const WelcomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class WelcomePage extends StatefulWidget {
+  const WelcomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _WelcomePageState extends State<WelcomePage> {
+  var loading = false;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    // Hide StatusBar, Show navigation buttons
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom]);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+
+    void _wrongCerts() {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(
+            content: Text('Wrong certificates'),
+          ))
+          .closed
+          .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
+      loginModel.toggleLogging(); // Enable log in button back
+    }
+
+    Future<void> _goToHomePage() async {
+      final uid = loginModel.userId;
+      //TODO: Support also .png files
+      final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
+      final url = await ref.getDownloadURL();
+      loginModel.setUserImageUrl(url);
+      loginModel.logIn();
+      Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const HomePage()));
+      loginModel.toggleLogging();
+    }
+
+    void login(photoLink) {
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+            loginModel.setUserId(user.id);
+            loginModel.setEmail(user["email"]);
+            loginModel.setUsername(user["username"]);
+            loginModel.setWins(user["wins"]);
+            loginModel.setUserImageUrl(photoLink);
+          }
+        }
+      });
+    }
+
+    void _tryLogin() {
+      loginModel.toggleLogging();
+
+      FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+
+      bool loggedIn = false;
+
+      if (loginModel.emailOrUsernameController.text.isEmpty ||
+          loginModel.passwordController.text.isEmpty) {
+        _wrongCerts();
+        return;
+      }
+
+      FirebaseFirestore.instance
+          .collection('versions/v1/users')
+          .get()
+          .then((users) async {
+        for (var user in users.docs) {
+          if (user["email"] == loginModel.emailOrUsernameController.text ||
+              user["username"] == loginModel.emailOrUsernameController.text) {
+            await AuthModel.instance()
+                .signIn(user["email"], loginModel.passwordController.text)
+                .then((value) {
+              if (value == true) {
+                loggedIn = true;
+                loginModel.setUserId(user.id);
+                loginModel.setEmail(user["email"]);
+                loginModel.setUsername(user["username"]);
+                loginModel.setWins(user["wins"]);
+                loginModel.setPassword(loginModel.passwordController.text);
+                _goToHomePage();
+                return;
+              }
+            });
+          }
+        }
+      }).then((value) {
+        if (!loggedIn) {
+          _wrongCerts();
+        }
+      });
+    }
+
+    void _signUpPrep() async {
+      final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
+      final url = await ref.getDownloadURL();
+      loginModel.setUserImageUrl(url);
+      final blogImage = await ref.getData();
+      loginModel.setInitBlocksAvatar(blogImage!);
+      Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const SignUpScreen()));
+    }
+
+    // Consumer for disabling button while logging in
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      return Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const <Widget>[
+                      InkWell(
+                        child: Icon(
+                          Icons.language,
+                          size: 32.0,
+                        ),
+                        onTap: null, // TODO: Go to Change Language screen
+                      )
+                    ],
+                  ),
+                  const Image(image: AssetImage('images/titles/quizard.png')),
+                  const Text(
+                    'Please login to your account',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Column(children: <Widget>[
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
+                        child: TextFormField(
+                            controller: loginModel.emailOrUsernameController,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: secondaryColor,
+                              border: OutlineInputBorder(),
+                              hintText: 'Username / Email',
+                            ))),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
+                        child: TextFormField(
+                            controller: loginModel.passwordController,
+                            obscureText: true,
+                            enableSuggestions: false,
+                            autocorrect: false,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: secondaryColor,
+                              border: OutlineInputBorder(),
+                              hintText: 'Password',
+                            ))),
+                  ]),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            minimumSize:
+                                const Size.fromHeight(50)), // max width
+                        child: const Text('Log in',
+                            style: TextStyle(fontSize: 18)),
+                        onPressed: loginModel.isLoggingIn ? null : _tryLogin,
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(children: const <Widget>[
+                        // OR Divider
+                        Expanded(child: Divider(color: defaultColor)),
+                        Text("  OR  "),
+                        Expanded(child: Divider(color: defaultColor)),
+                      ])),
+                  Column(
+                    children: <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                primary: secondaryColor,
+                                minimumSize:
+                                    const Size.fromHeight(50)), // max width
+                            onPressed: () {
+                              signInWithGoogle().then((value) {
+                                bool userExist = false;
+                                FirebaseFirestore.instance
+                                    .collection('versions/v1/users')
+                                    .get()
+                                    .then((users) async {
+                                  for (var user in users.docs) {
+                                    if (user["email"] ==
+                                        FirebaseAuth
+                                            .instance.currentUser?.email) {
+                                      userExist = true;
+                                    }
+                                  }
+                                  if (!userExist) {
+                                    var users = FirebaseFirestore.instance
+                                        .collection("versions/v1/users");
+                                    final userToAdd = <String, dynamic>{
+                                      "answers": [],
+                                      "categories": [],
+                                      "email": value!.email,
+                                      "questions": [],
+                                      "username": value.displayName,
+                                      "wins": 0
+                                    };
+                                    users.doc(value.uid).set(userToAdd);
+                                  }
+
+                                  login(
+                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                          builder: (context) =>
+                                              const HomePage()));
+                                });
+                              });
+                            }, //TODO: Continue with Google
+                            label: const Text('Continue with Google',
+                                style: TextStyle(color: defaultColor)),
+                            icon: Image.asset(
+                              'images/google.png',
+                              height: 24,
+                            ),
+                          )),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 8),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                primary: secondaryColor,
+                                minimumSize:
+                                    const Size.fromHeight(50)), // max width
+                            onPressed: () async {
+                              signinWithFacebook().then((value) {
+                                bool userExist = false;
+                                FirebaseFirestore.instance
+                                    .collection('versions/v1/users')
+                                    .get()
+                                    .then((users) async {
+                                  for (var user in users.docs) {
+                                    if (user["email"] ==
+                                        FirebaseAuth
+                                            .instance.currentUser?.email) {
+                                      userExist = true;
+                                    }
+                                  }
+                                  if (!userExist) {
+                                    var users = FirebaseFirestore.instance
+                                        .collection("versions/v1/users");
+                                    final user = <String, dynamic>{
+                                      "answers": [],
+                                      "categories": [],
+                                      "email": value.user?.email,
+                                      "questions": [],
+                                      "username": value.user?.displayName,
+                                      "wins": 0
+                                    };
+                                    users.doc(value.user?.uid).set(user);
+                                  }
+                                  login(
+                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                          builder: (context) =>
+                                              const HomePage()));
+                                });
+                              });
+                            }, //TODO: Continue with Facebook
+                            label: const Text('Continue with Facebook',
+                                style: TextStyle(color: defaultColor)),
+                            icon: Image.asset(
+                              'images/facebook.png',
+                              height: 24,
+                            ),
+                          )),
+                    ],
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Text("Don't have an account? "),
+                        InkWell(
+                            child: const Text('Sign Up'),
+                            onTap: () => _signUpPrep())
+                      ])
+                ]),
+          ));
+    });
+  }
+
+  Future<User?> signInWithGoogle() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user;
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential =
+            await auth.signInWithCredential(credential);
+
+        user = userCredential.user;
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content:
+                  'The account already exists with a different credential.',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+          );
+        } else if (e.code == 'invalid-credential') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            customSnackBar(
+              content: 'Error occurred while accessing credentials. Try again.',
             ),
-          ],
-        ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          customSnackBar(
+            content: 'Error occurred using Google Sign-In. Try again.',
+          ),
+        );
+      }
+    }
+
+    return user;
+  }
+
+  Future<UserCredential> signinWithFacebook() async {
+    // Trigger the sign-in flow
+    final LoginResult loginResult = await FacebookAuth.instance.login();
+
+    // Create a credential from the access token
+    final OAuthCredential facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+    // Once signed in, return the UserCredential
+
+    UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential);
+
+    return userCredential;
+  }
+
+  static SnackBar customSnackBar({required String content}) {
+    return SnackBar(
+      backgroundColor: Colors.black,
+      content: Text(
+        content,
+        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
