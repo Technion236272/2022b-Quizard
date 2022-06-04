@@ -74,7 +74,7 @@ class _AnswerState extends State<Answer> {
               .get()
               .then((game) {
             final selectedAnswers = List<String>.from(game["selected_answers"]);
-            if (selectedAnswers[gameModel.userIndex] == "") {
+            if (selectedAnswers[gameModel.playerIndex] == "") {
               setState(() {
                 if (widget.questionScore < 10) {
                   buttonColor = redColor;
@@ -82,7 +82,7 @@ class _AnswerState extends State<Answer> {
                   buttonColor = greenColor;
                 }
               });
-              selectedAnswers[gameModel.userIndex] = widget.answerText;
+              selectedAnswers[gameModel.playerIndex] = widget.answerText;
               FirebaseFirestore.instance
                   .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
@@ -202,9 +202,8 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
                         gameModel.currentAnswers = [];
                         final falseAnswers = [];
                         final selectedAnswersPerRound = [];
-                        for (int i = 0;
-                            i < gameModel.participants.length;
-                            i++) {
+                        int numOfPlayers = gameModel.getNumOfPlayers();
+                        for (int i = 0; i < numOfPlayers; i++) {
                           falseAnswers.add('');
                           selectedAnswersPerRound.add('');
                         }
@@ -282,7 +281,7 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         await game.get().then((value) {
           falseAnswers = value["false_answers"];
         });
-        falseAnswers[gameModel.userIndex] =
+        falseAnswers[gameModel.playerIndex] =
             gameModel.falseAnswerController.text;
         await game.update({"false_answers": falseAnswers});
         gameModel.enableSubmitFalseAnswer = false;

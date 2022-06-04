@@ -45,23 +45,17 @@ class JoinGame extends StatelessWidget {
 
   Future<void> _initializeGame(
       GameModel gameModel, LoginModel loginModel) async {
+    gameModel.pinCode = pinCodeController.text.toUpperCase();
+    int newPlayerIndex = -1;
     var games =
         FirebaseFirestore.instance.collection('$strVersion/custom_games');
-    await games.doc(pinCodeController.text.toUpperCase()).get().then((game) {
-      gameModel.admin = game["admin"];
-      gameModel.participants = List<String>.from(game["participants"]);
-      gameModel.addParticipant(loginModel.username);
+    await games.doc(gameModel.pinCode).get().then((game) {
+      gameModel.update(game);
+      newPlayerIndex = gameModel.addNewPlayer(loginModel.username);
       gameModel.pinCode = pinCodeController.text.toUpperCase();
-      gameModel.areReady = List<bool?>.from(game["are_ready"]);
-      gameModel.areReady.add(false);
-      gameModel.selectedCategories =
-          List<String>.from(game["custom_categories"]) +
-              List<String>.from(game["official_categories"]);
-      gameModel.isPrivate = game["is_private"];
     });
     final game = <String, dynamic>{
-      "participants": gameModel.participants,
-      "are_ready": gameModel.areReady,
+      "player$newPlayerIndex": gameModel.players[newPlayerIndex],
     };
     await games.doc(gameModel.pinCode).update(game);
   }

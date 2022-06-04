@@ -188,35 +188,62 @@ class LoginModel extends ChangeNotifier {
 }
 
 class GameModel extends ChangeNotifier {
+  List<Map<String, dynamic>> _playersMaps = [
+    {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    },
+    {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    },
+    {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    },
+    {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    },
+    {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    }
+  ];
   int _currentQuestionIndex = 0;
-  List<bool?> _areReady = [false];
   bool _isPrivate = true;
   bool _isLocked = false;
   bool _enableSubmitFalseAnswer = true;
   String _pinCode = '';
-  String _admin = '';
-  int userIndex = -1;
-  int _currentScreen = 1;
-  List<String> _participants = [];
+  int playerIndex = 0; // Starts from 0 for admin
+  int _currentScreen = 1; // 1 - Enter false answer ; 2 - Choose correct answer
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
-  List<String> _selectedCategories = [];
-  List<String> _gameQuestions = [];
-  List<String> _gameAnswers = [];
+  List<String> _selectedCategories = []; // selected = official + custom
+  List<String> _gameQuestions = []; // "questions" in Firestore
+  List<String> _gameAnswers = []; // "answers" in Firestore
   List<String> currentAnswers = [];
   List<Widget> _currentQuizOptions = [];
 
   final _falseAnswerController = TextEditingController();
 
+  List<Map<String, dynamic>> get players => _playersMaps;
   int get currentQuestionIndex => _currentQuestionIndex;
-  List<bool?> get areReady => _areReady;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
   bool get enableSubmitFalseAnswer => _enableSubmitFalseAnswer;
   String get pinCode => _pinCode;
-  String get admin => _admin;
   int get currentScreen => _currentScreen;
-  List<String> get participants => _participants;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
@@ -225,13 +252,75 @@ class GameModel extends ChangeNotifier {
   TextEditingController get falseAnswerController => _falseAnswerController;
   List<Widget> get currentQuizOptions => _currentQuizOptions;
 
-  set currentQuestionIndex(int value) {
-    _currentQuestionIndex = value;
+  // dataType should match the field in player's map
+  void setDataToPlayer(String dataType, String data, int index) {
+    _playersMaps[index][dataType] = data;
     notifyListeners();
   }
 
-  set areReady(List<bool?> values) {
-    _areReady = values;
+  int getNumOfPlayers() {
+    int numOfPlayers = 0;
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] != "") {
+        numOfPlayers++;
+      }
+    }
+    return numOfPlayers;
+  }
+
+  int addNewPlayer(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] == "") {
+        _playersMaps[i]["username"] = username;
+        playerIndex = i;
+        notifyListeners();
+        return i;
+      }
+    }
+    notifyListeners();
+    return -1;
+  }
+
+  void removeMyself() {
+    _playersMaps[playerIndex]["username"] = "";
+    _playersMaps[playerIndex]["is_ready"] = false;
+    _playersMaps[playerIndex]["selected_answer"] = "";
+    _playersMaps[playerIndex]["false_answer"] = "";
+    playerIndex = 0;
+    notifyListeners();
+  }
+
+  int getPlayerIndexByUsername(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] == username) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  bool areAllReady() {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] != "") {
+        if (players[i]["is_ready"] == false) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  bool doesUsernameExist(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] == username) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  set currentQuestionIndex(int value) {
+    _currentQuestionIndex = value;
     notifyListeners();
   }
 
@@ -255,18 +344,8 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set admin(String value) {
-    _admin = value;
-    notifyListeners();
-  }
-
   set currentScreen(int value) {
     _currentScreen = value;
-    notifyListeners();
-  }
-
-  set participants(List<String> values) {
-    _participants = values;
     notifyListeners();
   }
 
@@ -300,37 +379,64 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addParticipant(String username) {
-    if (!_participants.contains(username)) {
-      _participants.add(username);
-      notifyListeners();
-    }
-  }
-
-  void removeParticipant(String username) {
-    if (_participants.contains(username)) {
-      _participants.remove(username);
-      notifyListeners();
-    }
-  }
-
   void resetData() {
-    _areReady = [false];
+    _playersMaps = [
+      {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      },
+      {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      },
+      {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      },
+      {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      },
+      {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      }
+    ];
+    _currentQuestionIndex = 0;
+    playerIndex = 0;
+    _currentScreen = 1;
+    _enableSubmitFalseAnswer = true;
     _isPrivate = true;
     _isLocked = false;
     _pinCode = '';
-    _admin = '';
-    _participants = [];
     _officialCategories = [];
     _customCategories = [];
+    _selectedCategories = [];
+    _gameQuestions = [];
+    _gameAnswers = [];
+    currentAnswers = [];
+    _currentQuizOptions = [];
+    _falseAnswerController.text = "";
     notifyListeners();
   }
 
   void update(DocumentSnapshot game) {
     if (game.exists) {
-      _areReady = List<bool?>.from(game["are_ready"]);
+      for (int i = 0; i < maxPlayers; i++) {
+        _playersMaps[i] = game["player$i"];
+      }
       _isLocked = game["is_locked"];
-      _participants = List<String>.from(game["participants"]);
+      _isPrivate = game["is_private"];
       _officialCategories = List<String>.from(game["official_categories"]);
       _customCategories = List<String>.from(game["custom_categories"]);
       _selectedCategories = _officialCategories + _customCategories;

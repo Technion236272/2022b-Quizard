@@ -15,21 +15,20 @@ class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-    final loginModel = Provider.of<LoginModel>(context, listen: false);
 
     Future<void> _exitGame() async {
-      List participants = gameModel.participants;
-      List areReady = gameModel.areReady;
+      Map<String, dynamic> emptyPlayer = {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": ""
+      };
+      int myIndex = gameModel.playerIndex;
       var games =
           FirebaseFirestore.instance.collection('$strVersion/custom_games');
-      await games.doc(gameModel.pinCode).get().then((game) {
-        int myIndex = game["participants"].indexOf(loginModel.username);
-        participants.remove(loginModel.username);
-        areReady.removeAt(myIndex);
-      });
       await games
           .doc(gameModel.pinCode)
-          .update({"participants": participants, "are_ready": areReady});
+          .update({"player$myIndex": emptyPlayer});
       gameModel.resetData();
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
@@ -226,7 +225,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           child: Column(
             children: [
               Text(
-                '$privacy Game (${gameModel.participants.length}/5 Players)',
+                '$privacy Game (${gameModel.getNumOfPlayers()}/$maxPlayers Players)',
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
@@ -242,19 +241,20 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       return Consumer<LoginModel>(builder: (context, loginModel, child) {
-        int participantIndex = gameModel.participants.indexOf(username, 0);
+        int playerIndex = gameModel.getPlayerIndexByUsername(username);
         if (username == loginModel.username) {
           matchUsernames = true;
         }
 
         void _toggleIsReady() {
-          int participantIndex = gameModel.participants.indexOf(username, 0);
-          gameModel.areReady[participantIndex] =
-              !(gameModel.areReady[participantIndex])!;
+          int playerIndex = gameModel.getPlayerIndexByUsername(username);
+          bool currentReady = gameModel.players[playerIndex]["is_ready"];
+          currentReady = !currentReady;
+          gameModel.players[playerIndex]["is_ready"] = currentReady;
           FirebaseFirestore.instance
               .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
-              .update({"are_ready": gameModel.areReady});
+              .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
 
         Future<NetworkImage?> _getUserImage() async {
@@ -308,7 +308,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                     Checkbox(
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         activeColor: greenColor,
-                        value: gameModel.areReady[participantIndex],
+                        value: gameModel.players[playerIndex]["is_ready"],
                         onChanged: matchUsernames
                             ? (value) {
                                 _toggleIsReady();
@@ -325,12 +325,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   Consumer<GameModel> _participants() {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
-      if (gameModel.participants.isNotEmpty) {
+      if (gameModel.getNumOfPlayers() > 0) {
         final participantsList = [
-          _participant(gameModel.participants[0], true)
+          _participant(gameModel.players[0]["username"], true)
         ];
-        for (int i = 1; i < gameModel.participants.length; i++) {
-          participantsList.add(_participant(gameModel.participants[i], false));
+        for (int i = 1; i < gameModel.getNumOfPlayers(); i++) {
+          participantsList
+              .add(_participant(gameModel.players[i]["username"], false));
         }
         return ListView(
             physics: const NeverScrollableScrollPhysics(),
@@ -418,16 +419,15 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       } else {
                         lockText = 'UNLOCKED';
                       }
-                      if (!gameModel.participants
-                          .contains(loginModel.username)) {
+                      if (!gameModel.doesUsernameExist(loginModel.username)) {
                         Navigator.of(context).pop(false);
                         _dialogKickedByAdmin();
                       }
                       final questions = List<String>.from(game["questions"]);
                       if (questions.isNotEmpty) {
-                        int participantIndex =
-                            gameModel.participants.indexOf(loginModel.username);
-                        gameModel.userIndex = participantIndex;
+                        int participantIndex = gameModel
+                            .getPlayerIndexByUsername(loginModel.username);
+                        gameModel.playerIndex = participantIndex;
                         WidgetsBinding.instance?.addPostFrameCallback((_) {
                           Navigator.pushReplacement(
                               context,
