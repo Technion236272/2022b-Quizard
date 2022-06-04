@@ -124,7 +124,7 @@ class Play extends StatelessWidget {
     gameModel.addParticipant(loginModel.username);
     gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
     var games =
-        FirebaseFirestore.instance.collection('versions/v1/custom_games');
+        FirebaseFirestore.instance.collection('$strVersion/custom_games');
     final game = <String, dynamic>{
       "admin": gameModel.admin,
       "participants": gameModel.participants,

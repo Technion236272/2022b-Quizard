@@ -46,7 +46,7 @@ class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
                                       onPressed: () async {
                                         await FirebaseFirestore.instance
                                             .collection(
-                                                'versions/v1/custom_games')
+                                                '$strVersion/custom_games')
                                             .doc(gameModel.pinCode)
                                             .delete();
                                         Navigator.of(context).pop(true);
@@ -98,7 +98,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     // Get all categories by all users ONCE
     if (!finishedBuildAllCustomCategories) {
       FirebaseFirestore.instance
-          .collection('versions/v1/users')
+          .collection('$strVersion/users')
           .get()
           .then((users) {
         for (var user in users.docs) {
@@ -151,7 +151,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.customCategories = selectedCustomCategories;
         FirebaseFirestore.instance
-            .collection('versions/v1/custom_games')
+            .collection('$strVersion/custom_games')
             .doc(gameModel.pinCode)
             .update({"custom_categories": selectedCustomCategories});
       },
@@ -235,7 +235,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             onChanged: (val) {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
             },
@@ -314,7 +314,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'UNLOCKED':
               lockText = 'LOCKED';
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": true});
               gameModel.isLocked = true;
@@ -322,7 +322,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'LOCKED':
               lockText = 'UNLOCKED';
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": false});
               gameModel.isLocked = false;
@@ -387,7 +387,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                             gameModel.participants.remove(username);
                             gameModel.areReady.removeAt(participantIndex);
                             var game = FirebaseFirestore.instance
-                                .collection('versions/v1/custom_games')
+                                .collection('$strVersion/custom_games')
                                 .doc(gameModel.pinCode);
                             await game.update({
                               "participants": gameModel.participants,
@@ -422,7 +422,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           gameModel.areReady[participantIndex] =
               !(gameModel.areReady[participantIndex])!;
           FirebaseFirestore.instance
-              .collection('versions/v1/custom_games')
+              .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
               .update({"are_ready": gameModel.areReady});
         }
@@ -430,7 +430,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('versions/v1/users')
+              .collection('$strVersion/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -525,7 +525,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
       var users = FirebaseFirestore.instance.collection('versions/v1/users');
       var officialQuestions = FirebaseFirestore.instance
-          .collection('versions/v1/official_questions');
+          .collection('$strVersion/official_questions');
       for (int i = 0; i < gameModel.selectedCategories.length; i++) {
         final selectedCategory = gameModel.selectedCategories[i];
         if (officialCategories.contains(selectedCategory)) {
@@ -583,7 +583,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       }
 
       await FirebaseFirestore.instance
-          .collection('versions/v1/custom_games')
+          .collection('$strVersion/custom_games')
           .doc(gameModel.pinCode)
           .update({
         "questions": selectedQuestions,
@@ -635,7 +635,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         body: SingleChildScrollView(
             child: StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('versions/v1/custom_games')
+                    .collection('$strVersion/custom_games')
                     .doc(gameModel.pinCode)
                     .snapshots(),
                 builder: (context, snapshot) {

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'consts.dart';
 import 'game.dart';
 
 enum Status { uninitialized, authenticated, authenticating, unauthenticated }
@@ -41,7 +42,7 @@ class AuthModel with ChangeNotifier {
   }
 
   Future<void> setUp(String email, String userName, String userId) async {
-    var users = FirebaseFirestore.instance.collection("versions/v1/users");
+    var users = FirebaseFirestore.instance.collection("$strVersion/users");
     final user = <String, dynamic>{
       "answers": [],
       "categories": [],

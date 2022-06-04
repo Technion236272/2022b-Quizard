@@ -69,7 +69,7 @@ class _AnswerState extends State<Answer> {
         onPressed: () {
           final gameModel = Provider.of<GameModel>(context, listen: false);
           FirebaseFirestore.instance
-              .collection('versions/v1/custom_games')
+              .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
               .get()
               .then((game) {
@@ -84,7 +84,7 @@ class _AnswerState extends State<Answer> {
               });
               selectedAnswers[gameModel.userIndex] = widget.answerText;
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"selected_answers": selectedAnswers});
             }
@@ -152,7 +152,7 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final game = FirebaseFirestore.instance
-        .collection("versions/v1/custom_games")
+        .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
     Consumer<GameModel> _quizBody() {
@@ -270,13 +270,13 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final game = FirebaseFirestore.instance
-        .collection("versions/v1/custom_games")
+        .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
     Future<void> _submitFalseAnswer() async {
       if (gameModel.falseAnswerController.text != "") {
         var game = FirebaseFirestore.instance
-            .collection('versions/v1/custom_games')
+            .collection('$strVersion/custom_games')
             .doc(gameModel.pinCode);
         var falseAnswers = [];
         await game.get().then((value) {
@@ -373,7 +373,7 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
 
     Future<bool> _buildQuestions() async {
       var game = FirebaseFirestore.instance
-          .collection('versions/v1/custom_games')
+          .collection('$strVersion/custom_games')
           .doc(gameModel.pinCode);
 
       await game.get().then((game) {
