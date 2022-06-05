@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/home.dart';
-import 'package:quizard/providers.dart';
+
+import 'home.dart';
+import 'providers.dart';
 import 'consts.dart';
 
 class Question extends StatelessWidget {
@@ -90,10 +91,8 @@ class _AnswerState extends State<Answer> {
                   .doc(gameModel.pinCode)
                   .update({"player$i": gameModel.players[i]});
             }
-            Future.delayed(const Duration(milliseconds: 2000), () {
-              Navigator.of(context).pushReplacement(
-                  MaterialPageRoute<void>(builder: (context) => const Game()));
-            });
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(builder: (context) => const Game()));
           });
         },
       ),
@@ -181,8 +180,7 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           child: SingleChildScrollView(
             child: Column(children: <Widget>[
               _quizBody(),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
                 Icon(
                   Icons.timer,
@@ -235,10 +233,8 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         gameModel.setDataToPlayer("false_answer", submittedFalseAnswer, i);
         await gameRef.update({"player$i": gameModel.players[i]});
         gameModel.enableSubmitFalseAnswer = false;
-        Future.delayed(const Duration(milliseconds: 2000), () {
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute<void>(builder: (context) => const Game()));
-        });
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(builder: (context) => const Game()));
       }
     }
 
@@ -273,17 +269,18 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                       onPressed: gameModel.enableSubmitFalseAnswer
                           ? _submitFalseAnswer
                           : null)),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-              const Text(
-                'Time left:',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-              const Icon(
-                Icons.timer,
-                size: 40.0,
-              )
+              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+                Icon(
+                  Icons.timer,
+                  size: 40.0,
+                ),
+                Text(
+                  '00:17',
+                  style: TextStyle(fontSize: 32),
+                  textAlign: TextAlign.center,
+                ),
+              ])
             ]));
       });
     }
@@ -378,7 +375,116 @@ class _GameState extends State<Game> {
                 }
               }
 
-              // Waiting lobby
+              if (gameModel.currentPhase == 1) {
+                String result = "";
+                int i = gameModel.playerIndex;
+                String falseAnswer = gameModel.players[i]["false_answer"];
+
+                if (falseAnswer != "") {
+                  result = "False answer submitted";
+                }
+
+                return Column(children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 100.0),
+                      child: Center(
+                          child: Text(
+                        result,
+                        style: const TextStyle(fontSize: 24),
+                      ))),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 50.0),
+                      child: Column(
+                        children: [
+                          const Text("Waiting for other players...",
+                              style: TextStyle(fontSize: 24)),
+                          Container(height: 25),
+                          const CircularProgressIndicator()
+                        ],
+                      ))
+                ]);
+              }
+
+              if (gameModel.currentPhase == 2) {
+                var result = Stack(children: const [Text("")]);
+                int i = gameModel.playerIndex;
+                String selectedAnswer = gameModel.players[i]["selected_answer"];
+                int j = gameModel.currentQuestionIndex;
+                String correctAnswer = gameModel.gameAnswers[j];
+                if (selectedAnswer == correctAnswer) {
+                  result = Stack(
+                    children: [
+                      // The text border
+                      Text(
+                        'Correct Answer!',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = defaultColor,
+                        ),
+                      ),
+                      // The text inside
+                      const Text(
+                        'Correct Answer!',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          color: greenColor,
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (selectedAnswer != "") {
+                  result = Stack(
+                    children: [
+                      // The text border
+                      Text(
+                        'Wrong Answer',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = defaultColor,
+                        ),
+                      ),
+                      // The text inside
+                      const Text(
+                        'Wrong Answer',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          color: redColor,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Column(children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 100.0),
+                      child: Center(child: result)),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 50.0),
+                      child: Column(
+                        children: [
+                          const Text("Waiting for other players...",
+                              style: TextStyle(fontSize: 24)),
+                          Container(height: 25),
+                          const CircularProgressIndicator()
+                        ],
+                      ))
+                ]);
+              }
+
               return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 150.0),
                   child: Center(child: CircularProgressIndicator()));

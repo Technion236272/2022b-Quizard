@@ -450,8 +450,6 @@ class GameModel extends ChangeNotifier {
       _selectedCategories = _officialCategories + _customCategories;
       _gameQuestions = List<String>.from(game["questions"]);
       _gameAnswers = List<String>.from(game["answers"]);
-      _currentQuestionIndex = game["question_index"];
-      _currentPhase = game["game_phase"];
     }
   }
 
