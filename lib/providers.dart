@@ -233,7 +233,7 @@ class GameModel extends ChangeNotifier {
   List<String> _gameQuestions = []; // "questions" in Firestore
   List<String> _gameAnswers = []; // "answers" in Firestore
   List<Widget> currentQuizOptions = [];
-
+  List<String> _playersIds = [];
   final _falseAnswerController = TextEditingController();
 
   List<Map<String, dynamic>> get players => _playersMaps;
@@ -245,12 +245,23 @@ class GameModel extends ChangeNotifier {
   List<String> get selectedCategories => _selectedCategories; // For participant
   List<String> get gameQuestions => _gameQuestions;
   List<String> get gameAnswers => _gameAnswers;
+  List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
 
   // dataType should match the field in player's map
   void setDataToPlayer(String dataType, dynamic data, int index) {
     _playersMaps[index][dataType] = data;
     notifyListeners();
+  }
+
+  List<String> getListOfUsernames() {
+    List<String> usernames = [];
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] != "") {
+        usernames.add(_playersMaps[i]["username"]);
+      }
+    }
+    return usernames;
   }
 
   int getNumOfPlayers() {
@@ -365,6 +376,11 @@ class GameModel extends ChangeNotifier {
 
   set gameAnswers(List<String> answers) {
     _gameAnswers = answers;
+    notifyListeners();
+  }
+
+  set playersIds(List<String> urls) {
+    _playersIds = urls;
     notifyListeners();
   }
 

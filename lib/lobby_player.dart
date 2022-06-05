@@ -379,10 +379,10 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       if (snapshot.hasData) {
                         var game = snapshot.data!;
                         if (!game.exists) {
-                          WidgetsBinding.instance?.addPostFrameCallback(
+                          WidgetsBinding.instance.addPostFrameCallback(
                             (_) => Navigator.of(context).pop(),
                           );
-                          WidgetsBinding.instance?.addPostFrameCallback(
+                          WidgetsBinding.instance.addPostFrameCallback(
                             (_) => _dialogGameClosed(),
                           );
                         } else {
@@ -394,10 +394,10 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           }
                           if (!gameModel
                               .doesUsernameExist(loginModel.username)) {
-                            WidgetsBinding.instance?.addPostFrameCallback(
+                            WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
-                            WidgetsBinding.instance?.addPostFrameCallback(
+                            WidgetsBinding.instance.addPostFrameCallback(
                               (_) => _dialogKickedByAdmin(),
                             );
                           }
@@ -407,7 +407,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             int participantIndex = gameModel
                                 .getPlayerIndexByUsername(loginModel.username);
                             gameModel.playerIndex = participantIndex;
-                            WidgetsBinding.instance?.addPostFrameCallback((_) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
