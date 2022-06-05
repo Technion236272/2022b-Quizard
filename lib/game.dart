@@ -2,14 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/home.dart';
 import 'package:quizard/providers.dart';
 import 'package:confetti/confetti.dart';
 import 'consts.dart';
 
 List<String> players = [];
 List<String> photos = [];
-int i = 0;
+
 
 class Question extends StatelessWidget {
   final String _questionText;
@@ -101,7 +100,7 @@ class _AnswerState extends State<Answer> {
   }
 }
 
-// Should be the score-board class.
+
 class ScoreBoard extends StatefulWidget {
   const ScoreBoard(
       {Key? key, required this.pinCode})
@@ -115,94 +114,115 @@ class ScoreBoard extends StatefulWidget {
 
 class _ScoreBoardState extends State<ScoreBoard> {
   late ConfettiController _controllerTopCenter;
+
   @override
   Widget build(BuildContext context) {
-    _controllerTopCenter =
-        ConfettiController(duration: const Duration(seconds: 60));
-    _controllerTopCenter.play();
-    Future<List<String>> _buildPlayers() async {
-      await FirebaseFirestore.instance
-          .collection('versions/v1/custom_games')
-          .doc(widget.pinCode)
-          .get()
-          .then((game) {
-        players = List<String>.from(game["participants"]);
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    final game = FirebaseFirestore.instance
+        .collection("versions/v1/custom_games")
+        .doc(gameModel.pinCode);
+    Future<void> _buildPlayers() async{
+      game.get().then((value)  {
+        players = List<String>.from(value["participants"]);
       });
-      /*
-      photos.fillRange(0, players.length);
       FirebaseFirestore.instance
           .collection('versions/v1/users')
           .get()
           .then((users) async {
-        for (var user in users.docs) {
-          for(int k=0; k<players.length; k++){
-              if (user["username"] == players[k]) {
-                String id = user.id;
-                final ref = FirebaseStorage.instance.ref('images/profiles/$id.jpg');
-                final url = await ref.getDownloadURL();
-                photos[k] = url;
-                break;
-              }
+        for (int k = 0; k < players.length; k++) {
+          for (var user in users.docs) {
+            if (user["username"] == players[k]) {
+              String id = user.id;
+              final ref = FirebaseStorage.instance.ref(
+                  'images/profiles/$id.jpg');
+              final url = await ref.getDownloadURL();
+              photos[k] = url;
+              break;
             }
+          }
         }
       });
-       */
-      return players;
     }
 
+    _controllerTopCenter =
+        ConfettiController(duration: const Duration(seconds: 60));
+    _controllerTopCenter.play();
+
+    Consumer<GameModel> _bodyBuild() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        return StreamBuilder<DocumentSnapshot>(
+            stream: game.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var data = snapshot.data;
+                if (data != null) {
+                  return Center(
+                      child: Container(child:
+                      Column(children: [
+                        const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 100),
+                            child: Image(
+                                image:
+                                AssetImage('images/titles/winner.png'))),
+                        FutureBuilder(
+                            future: _buildPlayers(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot snapshot) {
+                              if (snapshot.data != null) {
+                                return Center(child:
+                                Column(children: [
+                                  ConfettiWidget(
+                                    confettiController: _controllerTopCenter,
+                                    blastDirection: 180,
+                                    numberOfParticles: 20,
+                                    emissionFrequency: 0.002,
+                                    shouldLoop: false,
+                                  ),
+                                  SingleChildScrollView(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        height: 400,
+                                        width: 350,
+                                        decoration: BoxDecoration(
+                                          color: secondaryColor,
+                                          border: Border.all(
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20)),
+                                        ),
+
+
+                                      ))]));
+                              }
+                              return Container();
+                            }
+                        )
+                      ])));
+                }
+              }
+              return const Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 150.0),
+                  child: Center(
+                      child: CircularProgressIndicator()));
+            });
+      });
+    }
     return Scaffold(
-        body: Container(
-            child: Column( children: [
-              const Padding(
-              padding: EdgeInsets.symmetric(vertical: 100),
-              child: Image(
-                  image:
-                  AssetImage('images/titles/winner.png'))),
-                  FutureBuilder(
-                      future: _buildPlayers(),
-                      builder: (BuildContext context, AsyncSnapshot snapshot){
-                      if(snapshot.data == null){
-                        return Container(
-                            child: Center(
-                                child: Text("Loading...")
-                            ));}
-                      else {
-                        return Center(child:
-                        Column(children:[
-                          ConfettiWidget(
-                            confettiController: _controllerTopCenter,
-                            blastDirection: 180,
-                            numberOfParticles: 20,
-                            emissionFrequency: 0.002,
-                            shouldLoop: false,
-                          ),
-                          Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              height: 400,
-                              width: 350,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                ),
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
-                                color: secondaryColor,),
-                              child: ListView.builder(
-                                itemCount: snapshot.data.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (index.isOdd) return new Divider();
-                                     return ListTile(
-                                      trailing: Text("500"),
-                                      title: Text(players[0]),
-                                      leading: CircleAvatar(
-                                      radius: 30,
-                                      backgroundImage: NetworkImage("https://picsum.photos/250?image=9"),
-                                      ),
-                                  );
-                                },
-                          ))]));
-                      }},),
-            ])));
+        appBar: AppBar(
+          toolbarHeight: 50,
+          backgroundColor: backgroundColor,
+          toolbarOpacity: 0,
+          elevation: 0,
+        ),
+        backgroundColor: backgroundColor,
+        body: _bodyBuild()); //MaterialApp
   }
 }
+
+
+
 
 // The second game screen is where we select the right answer (hopefully).
 // The list of questions is here only temporarily.
