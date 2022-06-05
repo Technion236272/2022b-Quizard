@@ -250,7 +250,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           int playerIndex = gameModel.getPlayerIndexByUsername(username);
           bool currentReady = gameModel.players[playerIndex]["is_ready"];
           currentReady = !currentReady;
-          gameModel.players[playerIndex]["is_ready"] = currentReady;
+          gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
               .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)

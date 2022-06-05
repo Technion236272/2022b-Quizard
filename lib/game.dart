@@ -66,15 +66,16 @@ class _AnswerState extends State<Answer> {
           widget.answerText,
           style: const TextStyle(color: defaultColor),
         ),
-        onPressed: () {
+        onPressed: () async {
           final gameModel = Provider.of<GameModel>(context, listen: false);
-          FirebaseFirestore.instance
+          await FirebaseFirestore.instance
               .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
               .get()
-              .then((game) {
-            final selectedAnswers = List<String>.from(game["selected_answers"]);
-            if (selectedAnswers[gameModel.playerIndex] == "") {
+              .then((game) async {
+            int i = gameModel.playerIndex;
+            String selectedAnswer = game["player$i"]["selected_answer"];
+            if (selectedAnswer == "") {
               setState(() {
                 if (widget.questionScore < 10) {
                   buttonColor = redColor;
@@ -82,12 +83,15 @@ class _AnswerState extends State<Answer> {
                   buttonColor = greenColor;
                 }
               });
-              selectedAnswers[gameModel.playerIndex] = widget.answerText;
-              FirebaseFirestore.instance
+              gameModel.setDataToPlayer(
+                  "selected_answer", widget.answerText, i);
+              await FirebaseFirestore.instance
                   .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
-                  .update({"selected_answers": selectedAnswers});
+                  .update({"player$i": gameModel.players[i]});
             }
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(builder: (context) => const Game()));
           });
         },
       ),
@@ -125,8 +129,12 @@ class Result extends StatelessWidget {
                     'Exit Quiz',
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (context) => const HomePage()));
+                    final gameModel =
+                        Provider.of<GameModel>(context, listen: false);
+                    gameModel.resetData();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                            builder: (context) => const HomePage()));
                   },
                 ),
               )
@@ -186,62 +194,6 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           ));
     }
 
-    Consumer<GameModel> _bodyBuild() {
-      return Consumer<GameModel>(builder: (context, gameModel, child) {
-        return StreamBuilder<DocumentSnapshot>(
-            stream: game.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var data = snapshot.data;
-                if (data != null) {
-                  final selectedAnswers =
-                      List<String>.from(data["selected_answers"]);
-                  if (!selectedAnswers.contains('')) {
-                    if (gameModel.currentScreen == 2) {
-                      Future.delayed(const Duration(milliseconds: 2000), () {
-                        gameModel.currentAnswers = [];
-                        final falseAnswers = [];
-                        final selectedAnswersPerRound = [];
-                        int numOfPlayers = gameModel.getNumOfPlayers();
-                        for (int i = 0; i < numOfPlayers; i++) {
-                          falseAnswers.add('');
-                          selectedAnswersPerRound.add('');
-                        }
-                        game.update({
-                          "selected_answers": selectedAnswersPerRound,
-                          "false_answers": falseAnswers
-                        });
-                        WidgetsBinding.instance?.addPostFrameCallback((_) {
-                          gameModel.enableSubmitFalseAnswer = true;
-                          gameModel.falseAnswerController.text = '';
-                          gameModel.currentQuizOptions = [];
-                          gameModel.currentScreen = 1;
-                          gameModel.currentQuestionIndex++;
-                          if (gameModel.currentQuestionIndex < roundsPerGame) {
-                            Navigator.of(context).pop(true);
-                          } else {
-                            gameModel.currentQuestionIndex = 0;
-                            Navigator.of(context).push(MaterialPageRoute<void>(
-                                builder: (context) => const Result()));
-                          }
-                        });
-                        return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 150.0),
-                            child: Center(child: CircularProgressIndicator()));
-                      });
-                    }
-                  }
-                }
-              }
-              if (gameModel.currentScreen == 2) {
-                return _secondScreenBody();
-              } else {
-                return Container();
-              }
-            });
-      });
-    }
-
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: 50,
@@ -250,7 +202,7 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: _bodyBuild()); //MaterialApp
+        body: _secondScreenBody()); //MaterialApp
   }
 }
 
@@ -268,23 +220,19 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-    final game = FirebaseFirestore.instance
+    final gameRef = FirebaseFirestore.instance
         .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
     Future<void> _submitFalseAnswer() async {
       if (gameModel.falseAnswerController.text != "") {
-        var game = FirebaseFirestore.instance
-            .collection('$strVersion/custom_games')
-            .doc(gameModel.pinCode);
-        var falseAnswers = [];
-        await game.get().then((value) {
-          falseAnswers = value["false_answers"];
-        });
-        falseAnswers[gameModel.playerIndex] =
-            gameModel.falseAnswerController.text;
-        await game.update({"false_answers": falseAnswers});
+        int i = gameModel.playerIndex;
+        String submittedFalseAnswer = gameModel.falseAnswerController.text;
+        gameModel.setDataToPlayer("false_answer", submittedFalseAnswer, i);
+        await gameRef.update({"player$i": gameModel.players[i]});
         gameModel.enableSubmitFalseAnswer = false;
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(builder: (context) => const Game()));
       }
     }
 
@@ -334,54 +282,101 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
       });
     }
 
+    return Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 50,
+          backgroundColor: backgroundColor,
+          toolbarOpacity: 0,
+          elevation: 0,
+        ),
+        backgroundColor: backgroundColor,
+        body: SingleChildScrollView(child: _firstScreenBody()));
+  }
+}
+
+class Game extends StatefulWidget {
+  const Game({Key? key}) : super(key: key);
+
+  @override
+  _GameState createState() => _GameState();
+}
+
+class _GameState extends State<Game> {
+  @override
+  Widget build(BuildContext context) {
     Consumer<GameModel> _bodyBuild() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
+        final gameRef = FirebaseFirestore.instance
+            .collection("$strVersion/custom_games")
+            .doc(gameModel.pinCode);
         return StreamBuilder<DocumentSnapshot>(
-            stream: game.snapshots(),
+            stream: gameRef.snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var data = snapshot.data;
                 if (data != null) {
-                  final falseAnswers = List<String>.from(data["false_answers"]);
-                  if (!falseAnswers.contains('')) {
-                    if (gameModel.currentScreen == 1) {
-                      gameModel.currentAnswers = [];
-                      gameModel.currentAnswers.add(gameModel
-                          .gameAnswers[gameModel.currentQuestionIndex]);
-                      gameModel.currentAnswers.addAll(falseAnswers);
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        gameModel.currentScreen = 2;
-                        Navigator.of(context).push(MaterialPageRoute<void>(
-                            builder: (context) => const SecondGameScreen()));
-                      });
-                      return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 150.0),
-                          child: Center(child: CircularProgressIndicator()));
+                  gameModel.update(data);
+                  final falseAnswers = gameModel.getFalseAnswers();
+                  final selectedAnswers = gameModel.getSelectedAnswers();
+
+                  if (!falseAnswers.contains('') &&
+                      gameModel.currentPhase == 1) {
+                    gameRef.update({
+                      "game_phase": 2,
+                    });
+                    gameModel.currentPhase = 2;
+                    WidgetsBinding.instance?.addPostFrameCallback(
+                      (_) => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SecondGameScreen(),
+                        ),
+                      ),
+                    );
+                  } else if (!selectedAnswers.contains('') &&
+                      gameModel.currentPhase == 2) {
+                    gameModel.resetFalseAnswers();
+                    gameModel.resetSelectedAnswers();
+                    for (int i = 0; i < maxPlayers; i++) {
+                      gameRef.update({"player$i": gameModel.players[i]});
+                    }
+                    gameModel.currentPhase = 1;
+                    gameModel.currentQuestionIndex++;
+                    gameRef.update({
+                      "game_phase": 1,
+                      "question_index": gameModel.currentQuestionIndex
+                    });
+                    gameModel.enableSubmitFalseAnswer = true;
+                    gameModel.falseAnswerController.text = '';
+                    gameModel.currentQuizOptions = [];
+                    if (gameModel.currentQuestionIndex < roundsPerGame) {
+                      WidgetsBinding.instance?.addPostFrameCallback(
+                        (_) => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FirstGameScreen(),
+                          ),
+                        ),
+                      );
+                    } else {
+                      WidgetsBinding.instance?.addPostFrameCallback(
+                        (_) => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Result(),
+                          ),
+                        ),
+                      );
                     }
                   }
                 }
               }
-              if (gameModel.currentScreen == 1) {
-                return _firstScreenBody();
-              } else {
-                return Container();
-              }
+              // Waiting lobby
+              return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 150.0),
+                  child: Center(child: CircularProgressIndicator()));
             });
       });
-    }
-
-    Future<bool> _buildQuestions() async {
-      var game = FirebaseFirestore.instance
-          .collection('$strVersion/custom_games')
-          .doc(gameModel.pinCode);
-
-      await game.get().then((game) {
-        final gameModel = Provider.of<GameModel>(context, listen: false);
-        gameModel.gameQuestions = List<String>.from(game["questions"]);
-        gameModel.gameAnswers = List<String>.from(game["answers"]);
-      });
-
-      return true;
     }
 
     return Scaffold(
@@ -392,14 +387,6 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: SingleChildScrollView(
-            child: FutureBuilder(
-                future: _buildQuestions(),
-                builder: (context, questions) {
-                  if (questions.hasData) {
-                    return _bodyBuild();
-                  }
-                  return Container();
-                })));
+        body: SingleChildScrollView(child: _bodyBuild()));
   }
 }

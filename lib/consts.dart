@@ -19,7 +19,7 @@ const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
-const roundsPerGame = 3;
+const roundsPerGame = 5;
 const maxPlayers = 5;
 
 // Strings

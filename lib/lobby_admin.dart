@@ -419,7 +419,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           int playerIndex = gameModel.playerIndex;
           bool currentReady = gameModel.players[playerIndex]["is_ready"];
           currentReady = !currentReady;
-          gameModel.players[playerIndex]["is_ready"] = currentReady;
+          gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
               .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
@@ -593,9 +593,12 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           .update({
         "questions": selectedQuestions,
         "answers": selectedAnswers,
-        "false_answers": falseAnswers,
-        "selected_answers": selectedAnswersPerRound
+        "question_index": 0,
+        "game_phase": 1,
       });
+
+      gameModel.gameQuestions = List<String>.from(selectedQuestions);
+      gameModel.gameAnswers = List<String>.from(selectedAnswers);
 
       return true;
     }

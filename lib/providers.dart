@@ -226,13 +226,12 @@ class GameModel extends ChangeNotifier {
   bool _enableSubmitFalseAnswer = true;
   String _pinCode = '';
   int playerIndex = 0; // Starts from 0 for admin
-  int _currentScreen = 1; // 1 - Enter false answer ; 2 - Choose correct answer
+  int _currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
   List<String> _gameQuestions = []; // "questions" in Firestore
   List<String> _gameAnswers = []; // "answers" in Firestore
-  List<String> currentAnswers = [];
   List<Widget> _currentQuizOptions = [];
 
   final _falseAnswerController = TextEditingController();
@@ -243,7 +242,7 @@ class GameModel extends ChangeNotifier {
   bool get isLocked => _isLocked;
   bool get enableSubmitFalseAnswer => _enableSubmitFalseAnswer;
   String get pinCode => _pinCode;
-  int get currentScreen => _currentScreen;
+  int get currentPhase => _currentPhase;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
@@ -253,7 +252,7 @@ class GameModel extends ChangeNotifier {
   List<Widget> get currentQuizOptions => _currentQuizOptions;
 
   // dataType should match the field in player's map
-  void setDataToPlayer(String dataType, String data, int index) {
+  void setDataToPlayer(String dataType, dynamic data, int index) {
     _playersMaps[index][dataType] = data;
     notifyListeners();
   }
@@ -344,8 +343,8 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set currentScreen(int value) {
-    _currentScreen = value;
+  set currentPhase(int value) {
+    _currentPhase = value;
     notifyListeners();
   }
 
@@ -414,7 +413,7 @@ class GameModel extends ChangeNotifier {
     ];
     _currentQuestionIndex = 0;
     playerIndex = 0;
-    _currentScreen = 1;
+    _currentPhase = 1;
     _enableSubmitFalseAnswer = true;
     _isPrivate = true;
     _isLocked = false;
@@ -424,7 +423,6 @@ class GameModel extends ChangeNotifier {
     _selectedCategories = [];
     _gameQuestions = [];
     _gameAnswers = [];
-    currentAnswers = [];
     _currentQuizOptions = [];
     _falseAnswerController.text = "";
     notifyListeners();
@@ -440,10 +438,51 @@ class GameModel extends ChangeNotifier {
       _officialCategories = List<String>.from(game["official_categories"]);
       _customCategories = List<String>.from(game["custom_categories"]);
       _selectedCategories = _officialCategories + _customCategories;
+      _gameQuestions = List<String>.from(game["questions"]);
+      _gameAnswers = List<String>.from(game["answers"]);
+      _currentQuestionIndex = game["question_index"];
+      _currentPhase = game["game_phase"];
     }
   }
 
+  List<String> getFalseAnswers() {
+    List<String> falseAnswers = [];
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] != "") {
+        falseAnswers.add(players[i]["false_answer"]);
+      }
+    }
+    return falseAnswers;
+  }
+
+  List<String> getSelectedAnswers() {
+    List<String> selectedAnswers = [];
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] != "") {
+        selectedAnswers.add(players[i]["selected_answer"]);
+      }
+    }
+    return selectedAnswers;
+  }
+
+  void resetFalseAnswers() {
+    for (int i = 0; i < maxPlayers; i++) {
+      players[i]["false_answer"] = '';
+    }
+    notifyListeners();
+  }
+
+  void resetSelectedAnswers() {
+    for (int i = 0; i < maxPlayers; i++) {
+      players[i]["selected_answer"] = '';
+    }
+    notifyListeners();
+  }
+
   void quizOptionsUpdate() {
+    List<String> falseAnswers = getFalseAnswers();
+    String correctAnswer = gameAnswers[currentQuestionIndex];
+    List<String> currentAnswers = [correctAnswer] + falseAnswers;
     if (_currentQuizOptions.isEmpty) {
       _currentQuizOptions
           .add(Answer(answerText: currentAnswers[0], questionScore: 10));

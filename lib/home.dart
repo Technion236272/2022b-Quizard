@@ -137,7 +137,9 @@ class Play extends StatelessWidget {
       "official_categories": gameModel.officialCategories,
       "custom_categories": gameModel.customCategories,
       "questions": [],
-      "answers": []
+      "answers": [],
+      "question_index": 0,
+      "game_phase": 1,
     };
     Map<String, dynamic> mapPlayer = {
       "username": "",
