@@ -211,6 +211,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     _timer = Timer(const Duration(seconds: timePerScreen), () {
       int i = gameModel.playerIndex;
       gameModel.setDataToPlayer("selected_answer", " ", i);
+      game.update({"player$i": gameModel.players[i]});
       Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (context) => const Game()));
     });
@@ -402,6 +403,7 @@ class _GameState extends State<Game> {
               final falseAnswers = gameModel.getFalseAnswers();
               final selectedAnswers = gameModel.getSelectedAnswers();
 
+              // Advance to the next screen is necessary
               if (!falseAnswers.contains('') && gameModel.currentPhase == 1) {
                 gameRef.update({
                   "game_phase": 2,
@@ -415,6 +417,7 @@ class _GameState extends State<Game> {
                     ),
                   ),
                 );
+                return Container();
               } else if (!selectedAnswers.contains('') &&
                   gameModel.currentPhase == 2) {
                 gameModel.resetFalseAnswers();
@@ -450,8 +453,10 @@ class _GameState extends State<Game> {
                     ),
                   );
                 }
+                return Container();
               }
 
+              // Wait for all false answers
               if (gameModel.currentPhase == 1) {
                 String result = "";
                 int i = gameModel.playerIndex;
@@ -482,6 +487,7 @@ class _GameState extends State<Game> {
                 ]);
               }
 
+              // Wait for all players to select answers
               if (gameModel.currentPhase == 2) {
                 var result = Stack(children: const [Text("")]);
                 int i = gameModel.playerIndex;
@@ -516,7 +522,7 @@ class _GameState extends State<Game> {
                       ),
                     ],
                   );
-                } else if (selectedAnswer != "") {
+                } else if (selectedAnswer != "" && selectedAnswer != " ") {
                   result = Stack(
                     children: [
                       // The text border
