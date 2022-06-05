@@ -90,8 +90,10 @@ class _AnswerState extends State<Answer> {
                   .doc(gameModel.pinCode)
                   .update({"player$i": gameModel.players[i]});
             }
-            Navigator.of(context).pushReplacement(
-                MaterialPageRoute<void>(builder: (context) => const Game()));
+            Future.delayed(const Duration(milliseconds: 2000), () {
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute<void>(builder: (context) => const Game()));
+            });
           });
         },
       ),
@@ -180,16 +182,18 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
             child: Column(children: <Widget>[
               _quizBody(),
               const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-              const Text(
-                'Time left:',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
               const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-              const Icon(
-                Icons.timer,
-                size: 40.0,
-              )
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+                Icon(
+                  Icons.timer,
+                  size: 40.0,
+                ),
+                Text(
+                  '00:17',
+                  style: TextStyle(fontSize: 32),
+                  textAlign: TextAlign.center,
+                ),
+              ])
             ]), //Scaffold
           ));
     }
@@ -231,8 +235,10 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
         gameModel.setDataToPlayer("false_answer", submittedFalseAnswer, i);
         await gameRef.update({"player$i": gameModel.players[i]});
         gameModel.enableSubmitFalseAnswer = false;
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (context) => const Game()));
+        Future.delayed(const Duration(milliseconds: 2000), () {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(builder: (context) => const Game()));
+        });
       }
     }
 
@@ -316,61 +322,62 @@ class _GameState extends State<Game> {
                 var data = snapshot.data;
                 if (data != null) {
                   gameModel.update(data);
-                  final falseAnswers = gameModel.getFalseAnswers();
-                  final selectedAnswers = gameModel.getSelectedAnswers();
-
-                  if (!falseAnswers.contains('') &&
-                      gameModel.currentPhase == 1) {
-                    gameRef.update({
-                      "game_phase": 2,
-                    });
-                    gameModel.currentPhase = 2;
-                    WidgetsBinding.instance?.addPostFrameCallback(
-                      (_) => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SecondGameScreen(),
-                        ),
-                      ),
-                    );
-                  } else if (!selectedAnswers.contains('') &&
-                      gameModel.currentPhase == 2) {
-                    gameModel.resetFalseAnswers();
-                    gameModel.resetSelectedAnswers();
-                    for (int i = 0; i < maxPlayers; i++) {
-                      gameRef.update({"player$i": gameModel.players[i]});
-                    }
-                    gameModel.currentPhase = 1;
-                    gameModel.currentQuestionIndex++;
-                    gameRef.update({
-                      "game_phase": 1,
-                      "question_index": gameModel.currentQuestionIndex
-                    });
-                    gameModel.enableSubmitFalseAnswer = true;
-                    gameModel.falseAnswerController.text = '';
-                    gameModel.currentQuizOptions = [];
-                    if (gameModel.currentQuestionIndex < roundsPerGame) {
-                      WidgetsBinding.instance?.addPostFrameCallback(
-                        (_) => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const FirstGameScreen(),
-                          ),
-                        ),
-                      );
-                    } else {
-                      WidgetsBinding.instance?.addPostFrameCallback(
-                        (_) => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Result(),
-                          ),
-                        ),
-                      );
-                    }
-                  }
                 }
               }
+
+              final falseAnswers = gameModel.getFalseAnswers();
+              final selectedAnswers = gameModel.getSelectedAnswers();
+
+              if (!falseAnswers.contains('') && gameModel.currentPhase == 1) {
+                gameRef.update({
+                  "game_phase": 2,
+                });
+                gameModel.currentPhase = 2;
+                WidgetsBinding.instance?.addPostFrameCallback(
+                  (_) => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SecondGameScreen(),
+                    ),
+                  ),
+                );
+              } else if (!selectedAnswers.contains('') &&
+                  gameModel.currentPhase == 2) {
+                gameModel.resetFalseAnswers();
+                gameModel.resetSelectedAnswers();
+                for (int i = 0; i < maxPlayers; i++) {
+                  gameRef.update({"player$i": gameModel.players[i]});
+                }
+                gameModel.currentPhase = 1;
+                gameModel.currentQuestionIndex++;
+                gameRef.update({
+                  "game_phase": 1,
+                  "question_index": gameModel.currentQuestionIndex
+                });
+                gameModel.enableSubmitFalseAnswer = true;
+                gameModel.falseAnswerController.text = '';
+                gameModel.currentQuizOptions = [];
+                if (gameModel.currentQuestionIndex < roundsPerGame) {
+                  WidgetsBinding.instance?.addPostFrameCallback(
+                    (_) => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FirstGameScreen(),
+                      ),
+                    ),
+                  );
+                } else {
+                  WidgetsBinding.instance?.addPostFrameCallback(
+                    (_) => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Result(),
+                      ),
+                    ),
+                  );
+                }
+              }
+
               // Waiting lobby
               return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 150.0),
