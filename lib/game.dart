@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,29 @@ import 'package:provider/provider.dart';
 import 'home.dart';
 import 'providers.dart';
 import 'consts.dart';
+
+class Countdown extends AnimatedWidget {
+  const Countdown({Key? key, required this.animation})
+      : super(key: key, listenable: animation);
+
+  final Animation<int> animation;
+
+  @override
+  build(BuildContext context) {
+    Duration clockTimer = Duration(seconds: animation.value);
+
+    String timerText = '${clockTimer.inMinutes.remainder(60).toString()}:'
+        '${clockTimer.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+
+    return Text(
+      timerText,
+      style: const TextStyle(
+        fontSize: 32,
+        color: defaultColor,
+      ),
+    );
+  }
+}
 
 class Question extends StatelessWidget {
   final String _questionText;
@@ -156,13 +181,39 @@ class SecondGameScreen extends StatefulWidget {
   State<SecondGameScreen> createState() => _SecondGameScreenState();
 }
 
-class _SecondGameScreenState extends State<SecondGameScreen> {
+class _SecondGameScreenState extends State<SecondGameScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Timer _timer;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(seconds: timePerScreen));
+    _controller.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final game = FirebaseFirestore.instance
         .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
+
+    _timer = Timer(const Duration(seconds: timePerScreen), () {
+      int i = gameModel.playerIndex;
+      gameModel.setDataToPlayer("selected_answer", " ", i);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(builder: (context) => const Game()));
+    });
 
     Consumer<GameModel> _quizBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
@@ -181,16 +232,16 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
             child: Column(children: <Widget>[
               _quizBody(),
               const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-                Icon(
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(
                   Icons.timer,
                   size: 40.0,
                 ),
-                Text(
-                  '00:17',
-                  style: TextStyle(fontSize: 32),
-                  textAlign: TextAlign.center,
-                ),
+                Countdown(
+                    animation: StepTween(
+                  begin: timePerScreen,
+                  end: 0,
+                ).animate(_controller))
               ])
             ]), //Scaffold
           ));
@@ -218,7 +269,26 @@ class FirstGameScreen extends StatefulWidget {
   State<FirstGameScreen> createState() => _FirstGameScreenState();
 }
 
-class _FirstGameScreenState extends State<FirstGameScreen> {
+class _FirstGameScreenState extends State<FirstGameScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Timer _timer;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(seconds: timePerScreen));
+    _controller.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
@@ -237,6 +307,13 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
             MaterialPageRoute<void>(builder: (context) => const Game()));
       }
     }
+
+    _timer = Timer(const Duration(seconds: timePerScreen), () {
+      if (gameModel.enableSubmitFalseAnswer == true) {
+        gameModel.falseAnswerController.text = " ";
+        _submitFalseAnswer();
+      }
+    });
 
     Consumer<GameModel> _firstScreenBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
@@ -270,16 +347,16 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                           ? _submitFalseAnswer
                           : null)),
               const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-                Icon(
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(
                   Icons.timer,
                   size: 40.0,
                 ),
-                Text(
-                  '00:17',
-                  style: TextStyle(fontSize: 32),
-                  textAlign: TextAlign.center,
-                ),
+                Countdown(
+                    animation: StepTween(
+                  begin: timePerScreen,
+                  end: 0,
+                ).animate(_controller))
               ])
             ]));
       });
