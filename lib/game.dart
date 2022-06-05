@@ -1,13 +1,184 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/providers.dart';
 import 'package:confetti/confetti.dart';
+
+import 'home.dart';
+import 'providers.dart';
 import 'consts.dart';
 
-List<String> players = [];
-List<String> photos = [];
+class ScoreBoard extends StatefulWidget {
+  const ScoreBoard({Key? key}) : super(key: key);
+
+  @override
+  _ScoreBoardState createState() => _ScoreBoardState();
+}
+
+class _ScoreBoardState extends State<ScoreBoard> {
+  late ConfettiController _controllerTopCenter;
+
+  @override
+  Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    Future<bool> _getUsersIds() async {
+      await FirebaseFirestore.instance
+          .collection('$strVersion/users')
+          .get()
+          .then((users) async {
+        List players = gameModel.getListOfUsernames();
+        for (int k = 0; k < players.length; k++) {
+          for (var user in users.docs) {
+            if (user["username"] == players[k]) {
+              String id = user.id;
+              gameModel.playersIds.add(id);
+              break;
+            }
+          }
+        }
+      });
+      return true;
+    }
+
+    _controllerTopCenter =
+        ConfettiController(duration: const Duration(seconds: 60));
+    _controllerTopCenter.play();
+
+    Consumer<GameModel> _bodyBuild() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        Padding _player(String username, String userId) {
+          Future<NetworkImage?> _getUserImage() async {
+            final ref =
+                FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+            final url = await ref.getDownloadURL();
+            return NetworkImage(url);
+          }
+
+          FutureBuilder<NetworkImage?> _getAvatarImage() {
+            return FutureBuilder<NetworkImage?>(
+                future: _getUserImage(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return CircleAvatar(
+                        backgroundImage: snapshot.data,
+                        backgroundColor: thirdColor,
+                        radius: 25);
+                  }
+                  return const CircleAvatar(
+                      backgroundImage: AssetImage('images/avatar.png'),
+                      backgroundColor: thirdColor,
+                      radius: 25);
+                });
+          }
+
+          return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: ListTile(
+                leading: _getAvatarImage(),
+                title: Text(username,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 18)),
+                trailing: const Text("100", style: TextStyle(fontSize: 18)),
+              ));
+        }
+
+        ListView _players() {
+          List<Widget> players = [];
+          final usernames = gameModel.getListOfUsernames();
+          final ids = gameModel.playersIds;
+          for (int i = 0; i < usernames.length; i++) {
+            players.add(_player(usernames[i], ids[i]));
+          }
+          return ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: players);
+        }
+
+        return Center(
+            child: Column(children: [
+          const Padding(
+              padding: EdgeInsets.symmetric(vertical: 100),
+              child: Image(image: AssetImage('images/titles/winner.png'))),
+          FutureBuilder(
+              future: _getUsersIds(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.data != null) {
+                  return Center(
+                      child: Column(children: [
+                    ConfettiWidget(
+                      confettiController: _controllerTopCenter,
+                      blastDirection: 180,
+                      numberOfParticles: 20,
+                      emissionFrequency: 0.002,
+                      shouldLoop: false,
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          child: _players(),
+                          width: 300,
+                          decoration: BoxDecoration(
+                            color: secondaryColor,
+                            border: Border.all(),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20)),
+                          ),
+                        )),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
+                      child: ElevatedButton(
+                        child: const Text(
+                          'End Game',
+                        ),
+                        onPressed: () {
+                          final gameModel =
+                              Provider.of<GameModel>(context, listen: false);
+                          gameModel.resetData();
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute<void>(
+                                  builder: (context) => const HomePage()));
+                        },
+                      ),
+                    )
+                  ]));
+                }
+                return Container();
+              })
+        ]));
+      });
+    }
+
+    return Scaffold(
+        backgroundColor: backgroundColor, body: _bodyBuild()); //MaterialApp
+  }
+}
+
+class Countdown extends AnimatedWidget {
+  const Countdown({Key? key, required this.animation})
+      : super(key: key, listenable: animation);
+
+  final Animation<int> animation;
+
+  @override
+  build(BuildContext context) {
+    Duration clockTimer = Duration(seconds: animation.value);
+
+    String timerText = '${clockTimer.inMinutes.remainder(60).toString()}:'
+        '${clockTimer.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+
+    return Text(
+      timerText,
+      style: const TextStyle(
+        fontSize: 32,
+        color: defaultColor,
+      ),
+    );
+  }
+}
 
 
 class Question extends StatelessWidget {
@@ -71,15 +242,16 @@ class _AnswerState extends State<Answer> {
           widget.answerText,
           style: const TextStyle(color: defaultColor),
         ),
-        onPressed: () {
+        onPressed: () async {
           final gameModel = Provider.of<GameModel>(context, listen: false);
-          FirebaseFirestore.instance
-              .collection('versions/v1/custom_games')
+          await FirebaseFirestore.instance
+              .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
               .get()
-              .then((game) {
-            final selectedAnswers = List<String>.from(game["selected_answers"]);
-            if (selectedAnswers[gameModel.userIndex] == "") {
+              .then((game) async {
+            int i = gameModel.playerIndex;
+            String selectedAnswer = game["player$i"]["selected_answer"];
+            if (selectedAnswer == "") {
               setState(() {
                 if (widget.questionScore < 10) {
                   buttonColor = redColor;
@@ -87,12 +259,15 @@ class _AnswerState extends State<Answer> {
                   buttonColor = greenColor;
                 }
               });
-              selectedAnswers[gameModel.userIndex] = widget.answerText;
-              FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+              gameModel.setDataToPlayer(
+                  "selected_answer", widget.answerText, i);
+              await FirebaseFirestore.instance
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
-                  .update({"selected_answers": selectedAnswers});
+                  .update({"player$i": gameModel.players[i]});
             }
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(builder: (context) => const Game()));
           });
         },
       ),
@@ -217,7 +392,34 @@ class _ScoreBoardState extends State<ScoreBoard> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: _bodyBuild()); //MaterialApp
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Score ' '100',
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 50),
+                child: ElevatedButton(
+                  child: const Text(
+                    'Exit Quiz',
+                  ),
+                  onPressed: () {
+                    final gameModel =
+                        Provider.of<GameModel>(context, listen: false);
+                    gameModel.resetData();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                            builder: (context) => const HomePage()));
+                  },
+                ),
+              )
+            ],
+          ),
+        ));
   }
 }
 
@@ -235,13 +437,40 @@ class SecondGameScreen extends StatefulWidget {
   State<SecondGameScreen> createState() => _SecondGameScreenState();
 }
 
-class _SecondGameScreenState extends State<SecondGameScreen> {
+class _SecondGameScreenState extends State<SecondGameScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Timer _timer;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(seconds: timePerScreen));
+    _controller.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final game = FirebaseFirestore.instance
-        .collection("versions/v1/custom_games")
+        .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
+
+    _timer = Timer(const Duration(seconds: timePerScreen), () {
+      int i = gameModel.playerIndex;
+      gameModel.setDataToPlayer("selected_answer", " ", i);
+      game.update({"player$i": gameModel.players[i]});
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(builder: (context) => const Game()));
+    });
 
     Consumer<GameModel> _quizBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
@@ -259,76 +488,20 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           child: SingleChildScrollView(
             child: Column(children: <Widget>[
               _quizBody(),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-              const Text(
-                'Time left:',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-              const Icon(
-                Icons.timer,
-                size: 40.0,
-              )
+              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(
+                  Icons.timer,
+                  size: 40.0,
+                ),
+                Countdown(
+                    animation: StepTween(
+                  begin: timePerScreen,
+                  end: 0,
+                ).animate(_controller))
+              ])
             ]), //Scaffold
           ));
-    }
-
-    Consumer<GameModel> _bodyBuild() {
-      return Consumer<GameModel>(builder: (context, gameModel, child) {
-        return StreamBuilder<DocumentSnapshot>(
-            stream: game.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var data = snapshot.data;
-                if (data != null) {
-                  final selectedAnswers =
-                      List<String>.from(data["selected_answers"]);
-                  if (!selectedAnswers.contains('')) {
-                    if (gameModel.currentScreen == 2) {
-                      Future.delayed(const Duration(milliseconds: 2000), () {
-                        gameModel.currentAnswers = [];
-                        final falseAnswers = [];
-                        final selectedAnswersPerRound = [];
-                        for (int i = 0;
-                            i < gameModel.participants.length;
-                            i++) {
-                          falseAnswers.add('');
-                          selectedAnswersPerRound.add('');
-                        }
-                        game.update({
-                          "selected_answers": selectedAnswersPerRound,
-                          "false_answers": falseAnswers
-                        });
-                        WidgetsBinding.instance?.addPostFrameCallback((_) {
-                          gameModel.enableSubmitFalseAnswer = true;
-                          gameModel.falseAnswerController.text = '';
-                          gameModel.currentQuizOptions = [];
-                          gameModel.currentScreen = 1;
-                          gameModel.currentQuestionIndex++;
-                          if (gameModel.currentQuestionIndex < roundsPerGame) {
-                            Navigator.of(context).pop(true);
-                          } else {
-                            gameModel.currentQuestionIndex = 0;
-                            Navigator.of(context).push(MaterialPageRoute<void>(
-                                builder: (context) => ScoreBoard(pinCode: gameModel.pinCode)));
-                          }
-                        });
-                        return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 150.0),
-                            child: Center(child: CircularProgressIndicator()));
-                      });
-                    }
-                  }
-                }
-              }
-              if (gameModel.currentScreen == 2) {
-                return _secondScreenBody();
-              } else {
-                return Container();
-              }
-            });
-      });
     }
 
     return Scaffold(
@@ -339,7 +512,7 @@ class _SecondGameScreenState extends State<SecondGameScreen> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: _bodyBuild()); //MaterialApp
+        body: _secondScreenBody()); //MaterialApp
   }
 }
 
@@ -353,29 +526,51 @@ class FirstGameScreen extends StatefulWidget {
   State<FirstGameScreen> createState() => _FirstGameScreenState();
 }
 
-class _FirstGameScreenState extends State<FirstGameScreen> {
+class _FirstGameScreenState extends State<FirstGameScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Timer _timer;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(seconds: timePerScreen));
+    _controller.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-    final game = FirebaseFirestore.instance
-        .collection("versions/v1/custom_games")
+    final gameRef = FirebaseFirestore.instance
+        .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
     Future<void> _submitFalseAnswer() async {
       if (gameModel.falseAnswerController.text != "") {
-        var game = FirebaseFirestore.instance
-            .collection('versions/v1/custom_games')
-            .doc(gameModel.pinCode);
-        var falseAnswers = [];
-        await game.get().then((value) {
-          falseAnswers = value["false_answers"];
-        });
-        falseAnswers[gameModel.userIndex] =
-            gameModel.falseAnswerController.text;
-        await game.update({"false_answers": falseAnswers});
+        int i = gameModel.playerIndex;
+        String submittedFalseAnswer = gameModel.falseAnswerController.text;
+        gameModel.setDataToPlayer("false_answer", submittedFalseAnswer, i);
+        await gameRef.update({"player$i": gameModel.players[i]});
         gameModel.enableSubmitFalseAnswer = false;
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(builder: (context) => const Game()));
       }
     }
+
+    _timer = Timer(const Duration(seconds: timePerScreen), () {
+      if (gameModel.enableSubmitFalseAnswer == true) {
+        gameModel.falseAnswerController.text = " ";
+        _submitFalseAnswer();
+      }
+    });
 
     Consumer<GameModel> _firstScreenBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
@@ -408,69 +603,20 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
                       onPressed: gameModel.enableSubmitFalseAnswer
                           ? _submitFalseAnswer
                           : null)),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 40)),
-              const Text(
-                'Time left:',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-              const Icon(
-                Icons.timer,
-                size: 40.0,
-              )
+              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(
+                  Icons.timer,
+                  size: 40.0,
+                ),
+                Countdown(
+                    animation: StepTween(
+                  begin: timePerScreen,
+                  end: 0,
+                ).animate(_controller))
+              ])
             ]));
       });
-    }
-
-    Consumer<GameModel> _bodyBuild() {
-      return Consumer<GameModel>(builder: (context, gameModel, child) {
-        return StreamBuilder<DocumentSnapshot>(
-            stream: game.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var data = snapshot.data;
-                if (data != null) {
-                  final falseAnswers = List<String>.from(data["false_answers"]);
-                  if (!falseAnswers.contains('')) {
-                    if (gameModel.currentScreen == 1) {
-                      gameModel.currentAnswers = [];
-                      gameModel.currentAnswers.add(gameModel
-                          .gameAnswers[gameModel.currentQuestionIndex]);
-                      gameModel.currentAnswers.addAll(falseAnswers);
-                      WidgetsBinding.instance?.addPostFrameCallback((_) {
-                        gameModel.currentScreen = 2;
-                        Navigator.of(context).push(MaterialPageRoute<void>(
-                            builder: (context) => const SecondGameScreen()));
-                      });
-                      return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 150.0),
-                          child: Center(child: CircularProgressIndicator()));
-                    }
-                  }
-                }
-              }
-              if (gameModel.currentScreen == 1) {
-                return _firstScreenBody();
-              } else {
-                return Container();
-              }
-            });
-      });
-    }
-
-    Future<bool> _buildQuestions() async {
-      var game = FirebaseFirestore.instance
-          .collection('versions/v1/custom_games')
-          .doc(gameModel.pinCode);
-
-      await game.get().then((game) {
-        final gameModel = Provider.of<GameModel>(context, listen: false);
-        gameModel.gameQuestions = List<String>.from(game["questions"]);
-        gameModel.gameAnswers = List<String>.from(game["answers"]);
-      });
-
-      return true;
     }
 
     return Scaffold(
@@ -481,14 +627,218 @@ class _FirstGameScreenState extends State<FirstGameScreen> {
           elevation: 0,
         ),
         backgroundColor: backgroundColor,
-        body: SingleChildScrollView(
-            child: FutureBuilder(
-                future: _buildQuestions(),
-                builder: (context, questions) {
-                  if (questions.hasData) {
-                    return _bodyBuild();
-                  }
-                  return Container();
-                })));
+        body: SingleChildScrollView(child: _firstScreenBody()));
+  }
+}
+
+class Game extends StatefulWidget {
+  const Game({Key? key}) : super(key: key);
+
+  @override
+  _GameState createState() => _GameState();
+}
+
+class _GameState extends State<Game> {
+  @override
+  Widget build(BuildContext context) {
+    Consumer<GameModel> _bodyBuild() {
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        final gameRef = FirebaseFirestore.instance
+            .collection("$strVersion/custom_games")
+            .doc(gameModel.pinCode);
+        return StreamBuilder<DocumentSnapshot>(
+            stream: gameRef.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var data = snapshot.data;
+                if (data != null) {
+                  gameModel.update(data);
+                }
+              }
+
+              final falseAnswers = gameModel.getFalseAnswers();
+              final selectedAnswers = gameModel.getSelectedAnswers();
+
+              // Advance to the next screen is necessary
+              if (!falseAnswers.contains('') && gameModel.currentPhase == 1) {
+                gameRef.update({
+                  "game_phase": 2,
+                });
+                gameModel.currentPhase = 2;
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SecondGameScreen(),
+                    ),
+                  ),
+                );
+                return Container();
+              } else if (!selectedAnswers.contains('') &&
+                  gameModel.currentPhase == 2) {
+                gameModel.resetFalseAnswers();
+                gameModel.resetSelectedAnswers();
+                for (int i = 0; i < maxPlayers; i++) {
+                  gameRef.update({"player$i": gameModel.players[i]});
+                }
+                gameModel.currentPhase = 1;
+                gameModel.currentQuestionIndex++;
+                gameRef.update({
+                  "game_phase": 1,
+                  "question_index": gameModel.currentQuestionIndex
+                });
+                gameModel.enableSubmitFalseAnswer = true;
+                gameModel.falseAnswerController.text = '';
+                gameModel.currentQuizOptions = [];
+                if (gameModel.currentQuestionIndex < roundsPerGame) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FirstGameScreen(),
+                      ),
+                    ),
+                  );
+                } else {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ScoreBoard(),
+                      ),
+                    ),
+                  );
+                }
+                return Container();
+              }
+
+              // Wait for all false answers
+              if (gameModel.currentPhase == 1) {
+                String result = "";
+                int i = gameModel.playerIndex;
+                String falseAnswer = gameModel.players[i]["false_answer"];
+
+                if (falseAnswer != "") {
+                  result = "False answer submitted";
+                }
+
+                return Column(children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 100.0),
+                      child: Center(
+                          child: Text(
+                        result,
+                        style: const TextStyle(fontSize: 24),
+                      ))),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 50.0),
+                      child: Column(
+                        children: [
+                          const Text("Waiting for other players...",
+                              style: TextStyle(fontSize: 24)),
+                          Container(height: 25),
+                          const CircularProgressIndicator()
+                        ],
+                      ))
+                ]);
+              }
+
+              // Wait for all players to select answers
+              if (gameModel.currentPhase == 2) {
+                var result = Stack(children: const [Text("")]);
+                int i = gameModel.playerIndex;
+                String selectedAnswer = gameModel.players[i]["selected_answer"];
+                int j = gameModel.currentQuestionIndex;
+                String correctAnswer = gameModel.gameAnswers[j];
+                if (selectedAnswer == correctAnswer) {
+                  result = Stack(
+                    children: [
+                      // The text border
+                      Text(
+                        'Correct Answer!',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = defaultColor,
+                        ),
+                      ),
+                      // The text inside
+                      const Text(
+                        'Correct Answer!',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          color: greenColor,
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (selectedAnswer != "" && selectedAnswer != " ") {
+                  result = Stack(
+                    children: [
+                      // The text border
+                      Text(
+                        'Wrong Answer',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = defaultColor,
+                        ),
+                      ),
+                      // The text inside
+                      const Text(
+                        'Wrong Answer',
+                        style: TextStyle(
+                          fontSize: 30,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.bold,
+                          color: redColor,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Column(children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 100.0),
+                      child: Center(child: result)),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 50.0),
+                      child: Column(
+                        children: [
+                          const Text("Waiting for other players...",
+                              style: TextStyle(fontSize: 24)),
+                          Container(height: 25),
+                          const CircularProgressIndicator()
+                        ],
+                      ))
+                ]);
+              }
+
+              return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 150.0),
+                  child: Center(child: CircularProgressIndicator()));
+            });
+      });
+    }
+
+    return Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 50,
+          backgroundColor: backgroundColor,
+          toolbarOpacity: 0,
+          elevation: 0,
+        ),
+        backgroundColor: backgroundColor,
+        body: SingleChildScrollView(child: _bodyBuild()));
   }
 }

@@ -79,7 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     Future<void> checkAlreadyRegistered() async {
       FirebaseFirestore.instance
-          .collection('versions/v1/users')
+          .collection('$strVersion/users')
           .get()
           .then((users) {
         for (var user in users.docs) {

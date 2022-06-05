@@ -7,69 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
 import 'game.dart';
+import 'lobby_appbar.dart';
 import 'providers.dart';
 import 'consts.dart';
-
-class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
-  LobbyAppBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final gameModel = Provider.of<GameModel>(context, listen: false);
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Container(
-            color: backgroundColor,
-            child: Padding(
-                padding: const EdgeInsets.all(appbarPadding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: defaultColor,
-                        size: appbarIconSize,
-                      ),
-                      onTap: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Close Game"),
-                                content:
-                                    const Text("Are you sure you wish to close "
-                                        "this game? All current participants "
-                                        "will be kicked automatically"),
-                                actions: <Widget>[
-                                  TextButton(
-                                      onPressed: () async {
-                                        await FirebaseFirestore.instance
-                                            .collection(
-                                                'versions/v1/custom_games')
-                                            .doc(gameModel.pinCode)
-                                            .delete();
-                                        Navigator.of(context).pop(true);
-                                        Navigator.of(context).pop(true);
-                                      },
-                                      child: const Text("YES")),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: const Text("NO"),
-                                  ),
-                                ],
-                              );
-                            });
-                      },
-                    ),
-                  ],
-                ))));
-  }
-
-  @override
-  Size get preferredSize => const Size(0, appbarSize);
-}
 
 class LobbyAdmin extends StatefulWidget {
   const LobbyAdmin({Key? key}) : super(key: key);
@@ -98,7 +38,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     // Get all categories by all users ONCE
     if (!finishedBuildAllCustomCategories) {
       FirebaseFirestore.instance
-          .collection('versions/v1/users')
+          .collection('$strVersion/users')
           .get()
           .then((users) {
         for (var user in users.docs) {
@@ -151,7 +91,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.customCategories = selectedCustomCategories;
         FirebaseFirestore.instance
-            .collection('versions/v1/custom_games')
+            .collection('$strVersion/custom_games')
             .doc(gameModel.pinCode)
             .update({"custom_categories": selectedCustomCategories});
       },
@@ -235,7 +175,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             onChanged: (val) {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
             },
@@ -314,7 +254,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'UNLOCKED':
               lockText = 'LOCKED';
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": true});
               gameModel.isLocked = true;
@@ -322,7 +262,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'LOCKED':
               lockText = 'UNLOCKED';
               FirebaseFirestore.instance
-                  .collection('versions/v1/custom_games')
+                  .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": false});
               gameModel.isLocked = false;
@@ -350,6 +290,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       if (gameModel.isPrivate) {
         privacy = 'Private';
       }
+      int numOfPlayers = gameModel.getNumOfPlayers();
       return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
@@ -357,7 +298,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           child: Column(
             children: [
               Text(
-                '$privacy Game (${gameModel.participants.length}/5 Players)',
+                '$privacy Game ($numOfPlayers/$maxPlayers Players)',
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
@@ -382,16 +323,12 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     actions: <Widget>[
                       TextButton(
                           onPressed: () async {
-                            int participantIndex =
-                                gameModel.participants.indexOf(username, 0);
-                            gameModel.participants.remove(username);
-                            gameModel.areReady.removeAt(participantIndex);
+                            int i = gameModel.removeByUsername(username);
                             var game = FirebaseFirestore.instance
-                                .collection('versions/v1/custom_games')
+                                .collection('$strVersion/custom_games')
                                 .doc(gameModel.pinCode);
                             await game.update({
-                              "participants": gameModel.participants,
-                              "are_ready": gameModel.areReady
+                              "player$i": gameModel.players[i],
                             });
                             Navigator.of(context).pop(true);
                           },
@@ -411,26 +348,26 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     bool matchUsernames = false;
 
     return Consumer<GameModel>(builder: (context, gameModel, child) {
+      int playerIndex = gameModel.getPlayerIndexByUsername(username);
       return Consumer<LoginModel>(builder: (context, loginModel, child) {
-        int participantIndex = gameModel.participants.indexOf(username, 0);
         if (username == loginModel.username) {
           matchUsernames = true;
         }
 
         void _toggleIsReady() {
-          int participantIndex = gameModel.participants.indexOf(username, 0);
-          gameModel.areReady[participantIndex] =
-              !(gameModel.areReady[participantIndex])!;
+          bool currentReady = gameModel.players[playerIndex]["is_ready"];
+          currentReady = !currentReady;
+          gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('versions/v1/custom_games')
+              .collection('$strVersion/custom_games')
               .doc(gameModel.pinCode)
-              .update({"are_ready": gameModel.areReady});
+              .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
 
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('versions/v1/users')
+              .collection('$strVersion/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -479,7 +416,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     Checkbox(
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         activeColor: greenColor,
-                        value: gameModel.areReady[participantIndex],
+                        value: gameModel.players[playerIndex]["is_ready"],
                         onChanged: matchUsernames
                             ? (value) {
                                 _toggleIsReady();
@@ -496,9 +433,15 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
   Consumer<GameModel> _participants() {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
-      final participantsList = [_participant(gameModel.participants[0], true)];
-      for (int i = 1; i < gameModel.participants.length; i++) {
-        participantsList.add(_participant(gameModel.participants[i], false));
+      final participantsList = [
+        _participant(gameModel.players[0]["username"], true)
+      ];
+      for (int i = 1; i < maxPlayers; i++) {
+        String currUsername = gameModel.players[i]["username"];
+        if (currUsername != "") {
+          participantsList
+              .add(_participant(gameModel.players[i]["username"], false));
+        }
       }
       return ListView(
           physics: const NeverScrollableScrollPhysics(),
@@ -577,20 +520,23 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
       final falseAnswers = [];
       final selectedAnswersPerRound = [];
-      for (int i = 0; i < gameModel.participants.length; i++) {
+      for (int i = 0; i < gameModel.getNumOfPlayers(); i++) {
         falseAnswers.add('');
         selectedAnswersPerRound.add('');
       }
 
       await FirebaseFirestore.instance
-          .collection('versions/v1/custom_games')
+          .collection('$strVersion/custom_games')
           .doc(gameModel.pinCode)
           .update({
         "questions": selectedQuestions,
         "answers": selectedAnswers,
-        "false_answers": falseAnswers,
-        "selected_answers": selectedAnswersPerRound
+        "question_index": 0,
+        "game_phase": 1,
       });
+
+      gameModel.gameQuestions = List<String>.from(selectedQuestions);
+      gameModel.gameAnswers = List<String>.from(selectedAnswers);
 
       return true;
     }
@@ -598,9 +544,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     Future<void> _startGame() async {
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
       LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
-      int participantIndex =
-          gameModel.participants.indexOf(loginModel.username);
-      gameModel.userIndex = participantIndex;
+      int playerIndex = gameModel.getPlayerIndexByUsername(loginModel.username);
+      gameModel.playerIndex = playerIndex;
       bool retVal = await _buildQuestions();
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
@@ -612,8 +557,6 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
     return Consumer<GameModel>(
       builder: (context, gameModel, child) {
-        bool canStartGame = !gameModel.areReady.contains(false) &&
-            gameModel.participants.isNotEmpty;
         return Padding(
             padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
             child: ElevatedButton(
@@ -621,38 +564,71 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     primary: defaultColor,
                     minimumSize: const Size.fromHeight(50)), // max width
                 child: const Text('Start Game', style: TextStyle(fontSize: 18)),
-                onPressed: canStartGame ? _startGame : null));
+                // TODO: Make sure that there are at least 2 players
+                onPressed: gameModel.areAllReady() ? _startGame : null));
       },
     );
+  }
+
+  Future<bool> _exitDialog() async {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    return (await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Close Game"),
+                content: const Text("Are you sure you wish to close "
+                    "this game? All current participants "
+                    "will be kicked automatically"),
+                actions: <Widget>[
+                  TextButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('$strVersion/custom_games')
+                            .doc(gameModel.pinCode)
+                            .delete();
+                        Navigator.of(context).pop(true);
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text("YES")),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text("NO"),
+                  ),
+                ],
+              );
+            })) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-
-    return Scaffold(
-        appBar: LobbyAppBar(),
-        body: SingleChildScrollView(
-            child: StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('versions/v1/custom_games')
-                    .doc(gameModel.pinCode)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    var game = snapshot.data!;
-                    if (game.exists) {
-                      gameModel.update(snapshot.data!);
-                    }
-                  }
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(children: [
-                        _officialCategories(),
-                        _customCategories(),
-                        _gameLobby(),
-                        _startGameButton()
-                      ]));
-                })));
+    return WillPopScope(
+        child: Scaffold(
+            appBar: LobbyAppBar(_exitDialog),
+            body: SingleChildScrollView(
+                child: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('$strVersion/custom_games')
+                        .doc(gameModel.pinCode)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        var game = snapshot.data!;
+                        if (game.exists) {
+                          gameModel.update(snapshot.data!);
+                        }
+                      }
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(children: [
+                            _officialCategories(),
+                            _customCategories(),
+                            _gameLobby(),
+                            _startGameButton()
+                          ]));
+                    }))),
+        onWillPop: _exitDialog);
   }
 }

@@ -45,23 +45,17 @@ class JoinGame extends StatelessWidget {
 
   Future<void> _initializeGame(
       GameModel gameModel, LoginModel loginModel) async {
+    gameModel.pinCode = pinCodeController.text.toUpperCase();
+    int newPlayerIndex = -1;
     var games =
-        FirebaseFirestore.instance.collection('versions/v1/custom_games');
-    await games.doc(pinCodeController.text.toUpperCase()).get().then((game) {
-      gameModel.admin = game["admin"];
-      gameModel.participants = List<String>.from(game["participants"]);
-      gameModel.addParticipant(loginModel.username);
+        FirebaseFirestore.instance.collection('$strVersion/custom_games');
+    await games.doc(gameModel.pinCode).get().then((game) {
+      gameModel.update(game);
+      newPlayerIndex = gameModel.addNewPlayer(loginModel.username);
       gameModel.pinCode = pinCodeController.text.toUpperCase();
-      gameModel.areReady = List<bool?>.from(game["are_ready"]);
-      gameModel.areReady.add(false);
-      gameModel.selectedCategories =
-          List<String>.from(game["custom_categories"]) +
-              List<String>.from(game["official_categories"]);
-      gameModel.isPrivate = game["is_private"];
     });
     final game = <String, dynamic>{
-      "participants": gameModel.participants,
-      "are_ready": gameModel.areReady,
+      "player$newPlayerIndex": gameModel.players[newPlayerIndex],
     };
     await games.doc(gameModel.pinCode).update(game);
   }
@@ -69,7 +63,7 @@ class JoinGame extends StatelessWidget {
   Future<void> _goToGameLobby(BuildContext context) async {
     final pinCode = pinCodeController.text.toUpperCase();
     await FirebaseFirestore.instance
-        .collection('versions/v1/custom_games')
+        .collection('$strVersion/custom_games')
         .get()
         .then((games) async {
       bool foundGame = false;
@@ -81,21 +75,19 @@ class JoinGame extends StatelessWidget {
           break;
         }
       }
+      FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
       if (!foundGame) {
-        FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
         constSnackBar("Invalid PIN Code", context);
       } else {
         var wantedGame = games.docs[indexGame];
+        final gameModel = Provider.of<GameModel>(context, listen: false);
+        gameModel.update(wantedGame);
         if (wantedGame["is_locked"] == true) {
-          FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
           constSnackBar("Game is locked", context);
         } else {
-          if (wantedGame["participants"].length == 5) {
-            FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+          if (gameModel.getNumOfPlayers() == maxPlayers) {
             constSnackBar("Game is full", context);
           } else {
-            FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
-            final gameModel = Provider.of<GameModel>(context, listen: false);
             final loginModel = Provider.of<LoginModel>(context, listen: false);
             await _initializeGame(gameModel, loginModel);
             pinCodeController.text = '';

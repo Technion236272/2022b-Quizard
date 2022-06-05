@@ -204,7 +204,7 @@ class ChangeEmailForm extends StatelessWidget {
                         .then((value) {
                       if (value == true) {
                         FirebaseFirestore.instance
-                            .collection('versions/v1/users')
+                            .collection('$strVersion/users')
                             .doc(loginModel.userId)
                             .update({
                           "email": _textController.text,
@@ -271,7 +271,7 @@ class ChangeUsernameForm extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await FirebaseFirestore.instance
-                        .collection('versions/v1/users')
+                        .collection('$strVersion/users')
                         .doc(loginModel.userId)
                         .update({
                       "username": _textController.text,

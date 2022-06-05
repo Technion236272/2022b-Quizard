@@ -120,23 +120,36 @@ class Play extends StatelessWidget {
 
   Future<void> _initializeGame(
       GameModel gameModel, LoginModel loginModel) async {
-    gameModel.admin = loginModel.username;
-    gameModel.addParticipant(loginModel.username);
+    gameModel.setDataToPlayer("username", loginModel.username, 0);
     gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
     var games =
-        FirebaseFirestore.instance.collection('versions/v1/custom_games');
+        FirebaseFirestore.instance.collection('$strVersion/custom_games');
+    Map<String, dynamic> mapAdmin = {
+      "username": loginModel.username,
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    };
     final game = <String, dynamic>{
-      "admin": gameModel.admin,
-      "participants": gameModel.participants,
-      "pin_code": gameModel.pinCode,
+      "player0": mapAdmin,
       "is_private": gameModel.isPrivate,
       "is_locked": gameModel.isLocked,
-      "are_ready": gameModel.areReady,
       "official_categories": gameModel.officialCategories,
       "custom_categories": gameModel.customCategories,
       "questions": [],
-      "answers": []
+      "answers": [],
+      "question_index": 0,
+      "game_phase": 1,
     };
+    Map<String, dynamic> mapPlayer = {
+      "username": "",
+      "is_ready": false,
+      "false_answer": "",
+      "selected_answer": ""
+    };
+    for (int i = 1; i < maxPlayers; i++) {
+      game.addAll({"player$i": mapPlayer});
+    }
     await games.doc(gameModel.pinCode).set(game);
   }
 
