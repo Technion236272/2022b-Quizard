@@ -75,21 +75,19 @@ class JoinGame extends StatelessWidget {
           break;
         }
       }
+      FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
       if (!foundGame) {
-        FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
         constSnackBar("Invalid PIN Code", context);
       } else {
         var wantedGame = games.docs[indexGame];
+        final gameModel = Provider.of<GameModel>(context, listen: false);
+        gameModel.update(wantedGame);
         if (wantedGame["is_locked"] == true) {
-          FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
           constSnackBar("Game is locked", context);
         } else {
-          if (wantedGame["participants"].length == 5) {
-            FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+          if (gameModel.getNumOfPlayers() == maxPlayers) {
             constSnackBar("Game is full", context);
           } else {
-            FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
-            final gameModel = Provider.of<GameModel>(context, listen: false);
             final loginModel = Provider.of<LoginModel>(context, listen: false);
             await _initializeGame(gameModel, loginModel);
             pinCodeController.text = '';

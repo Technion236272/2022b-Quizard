@@ -289,6 +289,20 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  int removeByUsername(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] == username) {
+        _playersMaps[i]["username"] = "";
+        _playersMaps[i]["is_ready"] = false;
+        _playersMaps[i]["selected_answer"] = "";
+        _playersMaps[i]["false_answer"] = "";
+        notifyListeners();
+        return i;
+      }
+    }
+    return -1;
+  }
+
   int getPlayerIndexByUsername(String username) {
     for (int i = 0; i < maxPlayers; i++) {
       if (players[i]["username"] == username) {
@@ -320,7 +334,6 @@ class GameModel extends ChangeNotifier {
 
   set currentQuestionIndex(int value) {
     _currentQuestionIndex = value;
-    notifyListeners();
   }
 
   set isPrivate(bool value) {
@@ -335,7 +348,6 @@ class GameModel extends ChangeNotifier {
 
   set enableSubmitFalseAnswer(bool value) {
     _enableSubmitFalseAnswer = value;
-    notifyListeners();
   }
 
   set pinCode(String value) {
@@ -345,7 +357,6 @@ class GameModel extends ChangeNotifier {
 
   set currentPhase(int value) {
     _currentPhase = value;
-    notifyListeners();
   }
 
   set officialCategories(List<String> categories) {
@@ -375,7 +386,6 @@ class GameModel extends ChangeNotifier {
 
   set currentQuizOptions(List<Widget> values) {
     _currentQuizOptions = values;
-    notifyListeners();
   }
 
   void resetData() {
@@ -469,14 +479,12 @@ class GameModel extends ChangeNotifier {
     for (int i = 0; i < maxPlayers; i++) {
       players[i]["false_answer"] = '';
     }
-    notifyListeners();
   }
 
   void resetSelectedAnswers() {
     for (int i = 0; i < maxPlayers; i++) {
       players[i]["selected_answer"] = '';
     }
-    notifyListeners();
   }
 
   void quizOptionsUpdate() {

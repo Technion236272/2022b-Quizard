@@ -7,69 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
 import 'game.dart';
+import 'lobby_appbar.dart';
 import 'providers.dart';
 import 'consts.dart';
-
-class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
-  LobbyAppBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final gameModel = Provider.of<GameModel>(context, listen: false);
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Container(
-            color: backgroundColor,
-            child: Padding(
-                padding: const EdgeInsets.all(appbarPadding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: defaultColor,
-                        size: appbarIconSize,
-                      ),
-                      onTap: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Close Game"),
-                                content:
-                                    const Text("Are you sure you wish to close "
-                                        "this game? All current participants "
-                                        "will be kicked automatically"),
-                                actions: <Widget>[
-                                  TextButton(
-                                      onPressed: () async {
-                                        await FirebaseFirestore.instance
-                                            .collection(
-                                                '$strVersion/custom_games')
-                                            .doc(gameModel.pinCode)
-                                            .delete();
-                                        Navigator.of(context).pop(true);
-                                        Navigator.of(context).pop(true);
-                                      },
-                                      child: const Text("YES")),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: const Text("NO"),
-                                  ),
-                                ],
-                              );
-                            });
-                      },
-                    ),
-                  ],
-                ))));
-  }
-
-  @override
-  Size get preferredSize => const Size(0, appbarSize);
-}
 
 class LobbyAdmin extends StatefulWidget {
   const LobbyAdmin({Key? key}) : super(key: key);
@@ -383,13 +323,12 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     actions: <Widget>[
                       TextButton(
                           onPressed: () async {
-                            int currIndex = gameModel.playerIndex;
-                            gameModel.removeMyself();
+                            int i = gameModel.removeByUsername(username);
                             var game = FirebaseFirestore.instance
                                 .collection('$strVersion/custom_games')
                                 .doc(gameModel.pinCode);
                             await game.update({
-                              "player$currIndex": gameModel.players[currIndex],
+                              "player$i": gameModel.players[i],
                             });
                             Navigator.of(context).pop(true);
                           },
@@ -409,14 +348,13 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     bool matchUsernames = false;
 
     return Consumer<GameModel>(builder: (context, gameModel, child) {
+      int playerIndex = gameModel.getPlayerIndexByUsername(username);
       return Consumer<LoginModel>(builder: (context, loginModel, child) {
-        int playerIndex = gameModel.playerIndex;
         if (username == loginModel.username) {
           matchUsernames = true;
         }
 
         void _toggleIsReady() {
-          int playerIndex = gameModel.playerIndex;
           bool currentReady = gameModel.players[playerIndex]["is_ready"];
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
@@ -632,33 +570,65 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     );
   }
 
+  Future<bool> _exitDialog() async {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    return (await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Close Game"),
+                content: const Text("Are you sure you wish to close "
+                    "this game? All current participants "
+                    "will be kicked automatically"),
+                actions: <Widget>[
+                  TextButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('$strVersion/custom_games')
+                            .doc(gameModel.pinCode)
+                            .delete();
+                        Navigator.of(context).pop(true);
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text("YES")),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text("NO"),
+                  ),
+                ],
+              );
+            })) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
-
-    return Scaffold(
-        appBar: LobbyAppBar(),
-        body: SingleChildScrollView(
-            child: StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('$strVersion/custom_games')
-                    .doc(gameModel.pinCode)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    var game = snapshot.data!;
-                    if (game.exists) {
-                      gameModel.update(snapshot.data!);
-                    }
-                  }
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(children: [
-                        _officialCategories(),
-                        _customCategories(),
-                        _gameLobby(),
-                        _startGameButton()
-                      ]));
-                })));
+    return WillPopScope(
+        child: Scaffold(
+            appBar: LobbyAppBar(_exitDialog),
+            body: SingleChildScrollView(
+                child: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('$strVersion/custom_games')
+                        .doc(gameModel.pinCode)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        var game = snapshot.data!;
+                        if (game.exists) {
+                          gameModel.update(snapshot.data!);
+                        }
+                      }
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(children: [
+                            _officialCategories(),
+                            _customCategories(),
+                            _gameLobby(),
+                            _startGameButton()
+                          ]));
+                    }))),
+        onWillPop: _exitDialog);
   }
 }
