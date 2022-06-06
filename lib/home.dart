@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:quizard/join_game.dart';
 import 'package:random_string/random_string.dart';
 
+import 'ModelClasses/leader_board_model.dart';
 import 'lobby_admin.dart';
 import 'profile.dart';
 import 'consts.dart';
@@ -80,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         return const Play();
       }
       if (_currentIndex == 2) {
-        return const Leaderboard();
+        return Leaderboard();
       }
       return profileScreen;
     }
@@ -215,29 +217,324 @@ class Play extends StatelessWidget {
   }
 }
 
-class Leaderboard extends StatelessWidget {
+class Leaderboard extends StatefulWidget {
   const Leaderboard({Key? key}) : super(key: key);
+
+  @override
+  State<Leaderboard> createState() => _LeaderboardState();
+}
+
+class _LeaderboardState extends State<Leaderboard>
+    with TickerProviderStateMixin {
+  List<LeaderBoardModel> dailyWinsList = [];
+  List<LeaderBoardModel> monthlyWinsList = [];
+  List<LeaderBoardModel> allTimeWinsList = [];
+  int _lastTab = 0;
+  int myRankDailyWins = 0;
+  int myRankMonthlyWins = 0;
+  int myRankAllTimeWins = 0;
+
+  late TabController _tabController;
+
+  void _onTapTab(int index) {
+    setState(() {
+      _lastTab = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height - 114;
 
-    return Container(
-        color: secondaryBackgroundColor,
-        height: screenHeight,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-              child: const Padding(
-                  padding: EdgeInsets.all(50),
-                  child: Center(
-                      child: Text(
-                    "Coming soon.",
-                    style: TextStyle(fontSize: 24, color: defaultColor),
-                  ))),
-              decoration: const BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(boxRadiusConst))))
-        ]));
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      if(allTimeWinsList.isEmpty){
+        getWinsData(loginModel.userId);
+      }
+      return Container(
+          color: secondaryBackgroundColor,
+          height: screenHeight,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+                height: screenHeight * 0.2,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      loginModel.username,
+                      style: const TextStyle(fontSize: 24, color: defaultColor),
+                    ),
+                    Expanded(child: Container()),
+                    Container(
+                      height: 1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      color: defaultColor.withOpacity(0.1),
+                    ),
+                    Expanded(child: Container()),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "${loginModel.wins}",
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  color: defaultColor.withOpacity(.5)),
+                            ),
+                            const Text(
+                              "Wins",
+                              style:
+                                  TextStyle(fontSize: 18, color: defaultColor),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              myRankAllTimeWins.toString(),
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  color: defaultColor.withOpacity(.5)),
+                            ),
+                            const Text(
+                              "Rank",
+                              style:
+                                  TextStyle(fontSize: 18, color: defaultColor),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    Expanded(child: Container()),
+                  ],
+                ),
+                decoration: const BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(boxRadiusConst)))),
+            Expanded(
+                child: DefaultTabController(
+              initialIndex: _lastTab,
+              length: 3,
+              child: Scaffold(
+                backgroundColor: secondaryColor,
+                appBar: AppBar(
+                  backgroundColor: secondaryBackgroundColor,
+                  automaticallyImplyLeading: false,
+                  toolbarHeight: 0,
+                  elevation: 2,
+                  bottom: TabBar(
+                    controller: _tabController,
+                    onTap: _onTapTab,
+                    labelColor: defaultColor,
+                    indicatorColor: defaultColor,
+                    tabs: const [
+                      Tab(text: "DAILY"),
+                      Tab(
+                        text: "MONTHLY",
+                      ),
+                      Tab(
+                        text: "ALL TIME",
+                      ),
+                    ],
+                  ),
+                ),
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    Container(
+                        color: secondaryBackgroundColor,
+                        child: ListView.builder(
+                            itemCount: dailyWinsList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return leaderBoardListItemWidget(
+                                  screenHeight,
+                                  index + 1,
+                                  dailyWinsList[index].name,
+                                  dailyWinsList[index].profileImageLink,
+                                  dailyWinsList[index].wins);
+                            })),
+                    Container(
+                        color: secondaryBackgroundColor,
+                        child: ListView.builder(
+                            itemCount: monthlyWinsList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return leaderBoardListItemWidget(
+                                  screenHeight,
+                                  index + 1,
+                                  monthlyWinsList[index].name,
+                                  monthlyWinsList[index].profileImageLink,
+                                  monthlyWinsList[index].wins);
+                            })),
+                    Container(
+                        color: secondaryBackgroundColor,
+                        child: ListView.builder(
+                            itemCount: allTimeWinsList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return leaderBoardListItemWidget(
+                                  screenHeight,
+                                  index + 1,
+                                  allTimeWinsList[index].name,
+                                  allTimeWinsList[index].profileImageLink,
+                                  allTimeWinsList[index].wins);
+                            })),
+                  ],
+                ),
+              ),
+            )),
+          ]));
+    });
+  }
+
+  Widget leaderBoardListItemWidget(
+      screenHeight, index, name, profileImageLink, wins) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: MediaQuery.of(context).size.width * 0.1),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  "#$index",
+                  style: const TextStyle(fontSize: 18, color: defaultColor),
+                ),
+              ),
+              Expanded(
+                flex: 9,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(profileImageLink),
+                    ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Text(
+                      name,
+                      style: TextStyle(
+                          fontSize: 18, color: defaultColor.withOpacity(0.5)),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                  flex: 1,
+                  child: Text(
+                    "$wins",
+                    style: const TextStyle(fontSize: 18, color: defaultColor),
+                  )),
+            ],
+          ),
+        ),
+        Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.05),
+            child: Container(
+              height: 1,
+              color: Colors.grey.withOpacity(0.5),
+              width: MediaQuery.of(context).size.width,
+            ))
+      ],
+    );
+  }
+
+  void getWinsData(userId) {
+    FirebaseFirestore.instance
+        .collection('versions/v2/users')
+        .get()
+        .then((users) async {
+      dailyWinsList.clear();
+      monthlyWinsList.clear();
+      allTimeWinsList.clear();
+      List<LeaderBoardModel> tempDailyWinsList = [];
+      List<LeaderBoardModel> tempMonthlyWinsList = [];
+      List<LeaderBoardModel> tempAllTimeWinsList = [];
+
+
+      for (var user in users.docs) {
+        tempAllTimeWinsList.add(LeaderBoardModel(user.id, user["username"],
+            "https://source.unsplash.com/user/c_v_r/1900x800", user["wins"]));
+
+        try {
+          tempDailyWinsList.add(LeaderBoardModel(
+              user.id,
+              user["username"],
+              "https://source.unsplash.com/user/c_v_r/1900x800",
+              user["DailyWins"]));
+        } catch (e) {
+          print("ERROR in getting dailyWins for user id = ${user.id} = $e");
+        }
+
+        try {
+          tempMonthlyWinsList.add(LeaderBoardModel(
+              user.id,
+              user["username"],
+              "https://source.unsplash.com/user/c_v_r/1900x800",
+              user["MonthlyWins"]));
+        } catch (e) {
+          print("ERROR in getting MonthlyWins for user id = ${user.id} = $e");
+        }
+      }
+
+      setState(() {
+
+        tempAllTimeWinsList.sort((a, b) => a.wins.compareTo(b.wins));
+        tempDailyWinsList.sort((a, b) => a.wins.compareTo(b.wins));
+        tempMonthlyWinsList.sort((a, b) => a.wins.compareTo(b.wins));
+
+        allTimeWinsList.addAll(tempAllTimeWinsList.reversed.toList());
+        dailyWinsList.addAll(tempDailyWinsList.reversed.toList());
+        monthlyWinsList.addAll(tempMonthlyWinsList.reversed.toList());
+
+        getMyRanks(userId);
+        print("All Data Added");
+      });
+    });
+  }
+
+  void getMyRanks(myUserId) {
+    for (LeaderBoardModel leaderBoardModel in dailyWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myRankDailyWins = dailyWinsList.indexOf(leaderBoardModel) + 1;
+      }
+    }
+
+    for (LeaderBoardModel leaderBoardModel in monthlyWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myRankMonthlyWins = monthlyWinsList.indexOf(leaderBoardModel) + 1;
+      }
+    }
+
+    for (LeaderBoardModel leaderBoardModel in allTimeWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myRankAllTimeWins = allTimeWinsList.indexOf(leaderBoardModel) + 1;
+      }
+    }
+  }
+
+  String getRank(tabIndex) {
+    if (tabIndex == 0) {
+      return myRankDailyWins.toString();
+    } else if (tabIndex == 1) {
+      return myRankMonthlyWins.toString();
+    } else {
+      return myRankAllTimeWins.toString();
+    }
   }
 }

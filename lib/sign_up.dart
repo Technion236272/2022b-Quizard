@@ -65,6 +65,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       loginModel.setEmail(emailController.text);
       loginModel.setUsername(userNameController.text);
       loginModel.setWins(0);
+
+      loginModel.setDailyWins(0);
+      loginModel.setMonthlyWins(0);
+
       loginModel.setPassword(passwordController.text);
       //TODO: Support also .png files
       final ref = FirebaseStorage.instance.ref('images/profiles/$userId.jpg');

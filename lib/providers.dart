@@ -48,7 +48,9 @@ class AuthModel with ChangeNotifier {
       "email": email,
       "questions": [],
       "username": userName,
-      "wins": 0
+      "wins": 0,
+      "DailyWins": 0,
+      "MonthlyWins": 0
     };
     users.doc(userId).set(user);
     notifyListeners();
@@ -94,6 +96,8 @@ class LoginModel extends ChangeNotifier {
   String _email = '';
   String _password = '';
   int _wins = 0;
+  int _dailyWins = 0;
+  int _monthlyWins = 0;
   String _userImageUrl = '';
   List<Dismissible> cachedQuestionsList = [];
   late Uint8List initAvatarBlock;
@@ -109,6 +113,9 @@ class LoginModel extends ChangeNotifier {
   String get password => _password;
   String get userImageUrl => _userImageUrl;
   int get wins => _wins;
+  int get dailyWins => _dailyWins;
+  int get monthlyWins => _monthlyWins;
+
   TextEditingController get emailOrUsernameController =>
       _emailOrUsernameController;
   TextEditingController get passwordController => _passwordController;
@@ -123,6 +130,8 @@ class LoginModel extends ChangeNotifier {
     _username = '';
     _email = '';
     _wins = 0;
+    _dailyWins = 0;
+    _monthlyWins = 0;
     _userImageUrl = '';
     cachedQuestionsList = [];
     notifyListeners();
@@ -146,6 +155,16 @@ class LoginModel extends ChangeNotifier {
 
   void setWins(int wins) {
     _wins = wins;
+    notifyListeners();
+  }
+
+  void setDailyWins(int dailyWins) {
+    _dailyWins = dailyWins;
+    notifyListeners();
+  }
+
+  void setMonthlyWins(int monthlyWins) {
+    _monthlyWins = monthlyWins;
     notifyListeners();
   }
 

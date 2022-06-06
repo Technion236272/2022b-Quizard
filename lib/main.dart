@@ -97,6 +97,12 @@ class _WelcomePageState extends State<WelcomePage> {
             loginModel.setEmail(user["email"]);
             loginModel.setUsername(user["username"]);
             loginModel.setWins(user["wins"]);
+            try{
+              loginModel.setDailyWins(user["DailyWins"]);
+              loginModel.setMonthlyWins(user["MonthlyWins"]);
+            }catch(e){
+              print("ERROR = $e");
+            }
             loginModel.setUserImageUrl(photoLink);
           }
         }
@@ -132,6 +138,12 @@ class _WelcomePageState extends State<WelcomePage> {
                 loginModel.setEmail(user["email"]);
                 loginModel.setUsername(user["username"]);
                 loginModel.setWins(user["wins"]);
+                try{
+                  loginModel.setDailyWins(user["DailyWins"]);
+                  loginModel.setMonthlyWins(user["MonthlyWins"]);
+                }catch(e){
+                  print("ERROR = $e");
+                }
                 loginModel.setPassword(loginModel.passwordController.text);
                 _goToHomePage();
                 return;
@@ -261,7 +273,9 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "email": value!.email,
                                       "questions": [],
                                       "username": value.displayName,
-                                      "wins": 0
+                                      "wins": 0,
+                                      "DailyWins": 0,
+                                      "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
                                   }
@@ -313,7 +327,9 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "email": value.user?.email,
                                       "questions": [],
                                       "username": value.user?.displayName,
-                                      "wins": 0
+                                      "wins": 0,
+                                      "DailyWins": 0,
+                                      "MonthlyWins": 0
                                     };
                                     users.doc(value.user?.uid).set(user);
                                   }
