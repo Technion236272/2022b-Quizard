@@ -11,6 +11,117 @@ import 'profile.dart';
 import 'consts.dart';
 import 'providers.dart';
 
+
+class Rules extends StatelessWidget {
+  const Rules({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Container(
+        color: backgroundColor,
+        child: Padding(
+        padding: const EdgeInsets.all(appbarPadding),
+        child: Column(
+            children: <Widget>[
+              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+              InkWell(
+                child: Icon(
+                  Icons.arrow_back,
+                  color: defaultColor,
+                  size: appbarIconSize,
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                }
+              )]),
+              const Padding(padding: EdgeInsets.all(20)),
+              const Image(image: AssetImage('images/titles/rules.png')),
+              const Padding(padding: EdgeInsets.all(10)),
+              Container(
+                color: secondaryColor,
+                height: 70,
+                width: 350,
+                child: Column(crossAxisAlignment:CrossAxisAlignment.start,children: const [
+                  Text(
+                      'Players', textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                  const Padding(padding: EdgeInsets.all(2)),
+                  Text(
+                    '2-5',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),),]),
+                padding: const EdgeInsets.all(10),
+              ),
+              const Padding(padding: EdgeInsets.all(5)),
+              Container(
+                color: secondaryColor,
+                height: 70,
+                width: 350,
+                child: Column(crossAxisAlignment:CrossAxisAlignment.start,children: const [
+                  Text(
+                      'Goal', textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                  const Padding(padding: EdgeInsets.all(2)),
+                  Text(
+                    'The player with the highest score wins.',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),),]),
+                padding: const EdgeInsets.all(10),
+              ),
+              const Padding(padding: EdgeInsets.all(5)),
+              Container(
+                color: secondaryColor,
+                height: 260,
+                width: 350,
+                child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:const [
+                   Text(
+                    'Round Gameplay\n',
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                   Text(
+                     '-Each player enters a false answer.',
+                     style: TextStyle(color: Colors.black54, fontSize: 18),),
+                  const Padding(padding: EdgeInsets.all(4)),
+                   Text(
+                     '-All the false answers are shown with the right answer to all players.',
+                     style: TextStyle(color: Colors.black54, fontSize: 18),),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  Text(
+                  '-Players are rewarded with points for choosing the right answer.',
+                  style: TextStyle(color: Colors.black54, fontSize: 18),),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  Text(
+                  '-Players are rewarded with points for every player choosing their false answer.',
+                  style: TextStyle(color: Colors.black54, fontSize: 18),),]),
+                padding: const EdgeInsets.all(10),
+
+              ),
+              const Padding(padding: EdgeInsets.all(5)),
+              Container(
+                color: secondaryColor,
+                height: 150,
+                width: 350,
+                child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:const [
+                  Text(
+                      'Bonuses',
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                  const Padding(padding: EdgeInsets.all(10)),
+                  Text(
+                    '-Players are rewarded for choosing the right answer multiple times in a row.',
+                    style: TextStyle(color: Colors.black54, fontSize: 18),),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  Text(
+                  '-Faster answer means more points.',
+                  style: TextStyle(color: Colors.black54, fontSize: 18),),]),
+                padding: const EdgeInsets.all(10),
+
+              ),
+
+      ]))));
+  }
+}
+
+
 class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
   QuizardAppBar({Key? key}) : super(key: key);
 
@@ -23,7 +134,7 @@ class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
                 padding: const EdgeInsets.all(appbarPadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const <Widget>[
+                  children: <Widget>[
                     InkWell(
                       child: Icon(
                         Icons.language,
@@ -38,7 +149,10 @@ class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
                         color: defaultColor,
                         size: appbarIconSize,
                       ),
-                      onTap: null, // TODO: Go to Rules screen
+                      onTap:() {
+                        Navigator.of(context).push(MaterialPageRoute<void>(
+                            builder: (context) => const Rules()));
+                      }
                     )
                   ],
                 ))));
