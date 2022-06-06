@@ -37,7 +37,7 @@ class Rules extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               )]),
-              const Padding(padding: EdgeInsets.all(20)),
+              const Padding(padding: EdgeInsets.all(18)),
               const Image(image: AssetImage('images/titles/rules.png')),
               const Padding(padding: EdgeInsets.all(10)),
               Container(

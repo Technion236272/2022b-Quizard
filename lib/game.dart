@@ -10,8 +10,6 @@ import 'home.dart';
 import 'providers.dart';
 import 'consts.dart';
 
-
-
 class ScoreBoard extends StatefulWidget {
   const ScoreBoard({Key? key}) : super(key: key);
 
@@ -515,7 +513,7 @@ class _GameState extends State<Game> {
                   "game_phase": 2,
                 });
                 gameModel.currentPhase = 2;
-                WidgetsBinding.instance?.addPostFrameCallback(
+                WidgetsBinding.instance.addPostFrameCallback(
                   (_) => Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -541,7 +539,7 @@ class _GameState extends State<Game> {
                 gameModel.falseAnswerController.text = '';
                 gameModel.currentQuizOptions = [];
                 if (gameModel.currentQuestionIndex < roundsPerGame) {
-                  WidgetsBinding.instance?.addPostFrameCallback(
+                  WidgetsBinding.instance.addPostFrameCallback(
                     (_) => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -550,7 +548,7 @@ class _GameState extends State<Game> {
                     ),
                   );
                 } else {
-                  WidgetsBinding.instance?.addPostFrameCallback(
+                  WidgetsBinding.instance.addPostFrameCallback(
                     (_) => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
