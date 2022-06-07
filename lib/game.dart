@@ -48,7 +48,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
 
     Consumer<GameModel> _bodyBuild() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        Padding _player(String username, String userId) {
+        Padding _player(String username, String userId, int i) {
           Future<NetworkImage?> _getUserImage() async {
             final ref =
                 FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
@@ -80,16 +80,18 @@ class _ScoreBoardState extends State<ScoreBoard> {
                 title: Text(username,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 18)),
-                trailing: const Text("100", style: TextStyle(fontSize: 18)),
+                trailing: Text("${gameModel.players[i]["score"]}",
+                    style: const TextStyle(fontSize: 18)),
               ));
         }
 
         ListView _players() {
           List<Widget> players = [];
           final usernames = gameModel.getListOfUsernames();
+          final indexes = gameModel.getListOfIndexes();
           final ids = gameModel.playersIds;
           for (int i = 0; i < usernames.length; i++) {
-            players.add(_player(usernames[i], ids[i]));
+            players.add(_player(usernames[i], ids[i], indexes[i]));
           }
           return ListView(
               physics: const NeverScrollableScrollPhysics(),
@@ -135,8 +137,12 @@ class _ScoreBoardState extends State<ScoreBoard> {
                           'End Game',
                         ),
                         onPressed: () {
-                          final gameModel =
-                              Provider.of<GameModel>(context, listen: false);
+                          if (gameModel.playerIndex == 0) {
+                            FirebaseFirestore.instance
+                                .collection("$strVersion/custom_games")
+                                .doc(gameModel.pinCode)
+                                .delete();
+                          }
                           gameModel.resetData();
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute<void>(
@@ -165,7 +171,7 @@ class Countdown extends AnimatedWidget {
 
   @override
   build(BuildContext context) {
-    Duration clockTimer = Duration(seconds: animation.value);
+    final clockTimer = Duration(seconds: animation.value);
 
     String timerText = '${clockTimer.inMinutes.remainder(60).toString()}:'
         '${clockTimer.inSeconds.remainder(60).toString().padLeft(2, '0')}';
@@ -173,7 +179,7 @@ class Countdown extends AnimatedWidget {
     return Text(
       timerText,
       style: const TextStyle(
-        fontSize: 32,
+        fontSize: 22,
         color: defaultColor,
       ),
     );
@@ -189,27 +195,37 @@ class Question extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    String strCategory =
+        gameModel.selectedCategories[gameModel.currentQuestionIndex];
     return Column(children: [
-      Container(
-        width: 400,
-        height: 250,
-        decoration: const BoxDecoration(
-          color: secondaryColor,
-        ),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(
-            'Question' ' $_questionIndex\n',
-            style: const TextStyle(fontSize: 22),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            _questionText,
-            style: const TextStyle(fontSize: 28),
-            textAlign: TextAlign.center,
-          ),
-        ]), //Text
-        alignment: Alignment.center,
-      ),
+      Material(
+          elevation: 2,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            width: 400,
+            decoration: const BoxDecoration(
+                color: secondaryColor,
+                borderRadius: BorderRadius.all(Radius.circular(10))),
+            child: Column(mainAxisSize: MainAxisSize.max, children: [
+              Text(
+                strCategory + '\n',
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Question $_questionIndex\n',
+                style: const TextStyle(fontSize: 22),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                _questionText,
+                style: const TextStyle(fontSize: 28),
+                textAlign: TextAlign.center,
+              ),
+            ]), //Text
+            alignment: Alignment.center,
+          )),
       const Padding(padding: EdgeInsets.symmetric(vertical: 18)),
     ]);
   }
@@ -217,10 +233,14 @@ class Question extends StatelessWidget {
 
 class Answer extends StatefulWidget {
   const Answer(
-      {Key? key, required this.answerText, required this.questionScore})
+      {Key? key,
+      required this.answerText,
+      required this.isCorrect,
+      required this.timerController})
       : super(key: key);
   final String answerText;
-  final int questionScore;
+  final AnimationController timerController;
+  final bool isCorrect;
 
   @override
   _AnswerState createState() => _AnswerState();
@@ -231,6 +251,12 @@ class _AnswerState extends State<Answer> {
 
   @override
   Widget build(BuildContext context) {
+    Countdown timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(widget.timerController));
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       width: 400,
@@ -249,17 +275,26 @@ class _AnswerState extends State<Answer> {
               .get()
               .then((game) async {
             int i = gameModel.playerIndex;
+            int addedScore = 0;
             String selectedAnswer = game["player$i"]["selected_answer"];
             if (selectedAnswer == "") {
-              setState(() {
-                if (widget.questionScore < 10) {
-                  buttonColor = redColor;
-                } else {
+              if (widget.isCorrect) {
+                gameModel.selectedCorrectAnswer = true;
+                setState(() {
                   buttonColor = greenColor;
-                }
-              });
+                });
+                addedScore = correctAnswerScore + timerView.animation.value;
+                gameModel.currentRoundScore += addedScore;
+                gameModel.addScore(addedScore);
+              } else {
+                setState(() {
+                  buttonColor = redColor;
+                });
+              }
+
               gameModel.setDataToPlayer(
                   "selected_answer", widget.answerText, i);
+              await Future.delayed(const Duration(seconds: 2));
               await FirebaseFirestore.instance
                   .collection('$strVersion/custom_games')
                   .doc(gameModel.pinCode)
@@ -275,9 +310,6 @@ class _AnswerState extends State<Answer> {
 }
 
 // The second game screen is where we select the right answer (hopefully).
-// The list of questions is here only temporarily.
-// Almost nothing is fully implemented.
-
 class SecondGameScreen extends StatefulWidget {
   const SecondGameScreen({Key? key}) : super(key: key);
 
@@ -289,6 +321,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Timer _timer;
+  bool selectedCorrect = false;
 
   @override
   void dispose() {
@@ -312,61 +345,141 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
-    _timer = Timer(const Duration(seconds: timePerScreen), () {
-      int i = gameModel.playerIndex;
-      gameModel.setDataToPlayer("selected_answer", " ", i);
-      game.update({"player$i": gameModel.players[i]});
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (context) => const Game()));
-    });
-
     Consumer<GameModel> _quizBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        gameModel.quizOptionsUpdate();
+        int i = gameModel.playerIndex;
+        int currentQuestionIndex1 = gameModel.currentQuestionIndex;
+        int currentPhase1 = gameModel.currentPhase;
+
+        _timer = Timer(const Duration(seconds: timePerScreen), () {
+          int currentQuestionIndex2 = gameModel.currentQuestionIndex;
+          int currentPhase2 = gameModel.currentPhase;
+          // if the screen is relevant
+          if (currentPhase1 == currentPhase2 &&
+              currentQuestionIndex1 == currentQuestionIndex2 &&
+              gameModel.players[i]["selected_answer"] == "") {
+            gameModel.setDataToPlayer("selected_answer", " ", i);
+            game.update({"player$i": gameModel.players[i]});
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(builder: (context) => const Game()));
+          }
+        });
+
+        // Prepare question and answers widgets
+        if (gameModel.currentQuestionIndex < gameModel.gameAnswers.length) {
+          List<String> falseAnswers = gameModel.getFalseAnswers();
+          String correctAnswer =
+              gameModel.gameAnswers[gameModel.currentQuestionIndex];
+          List<String> currentAnswers = [correctAnswer] + falseAnswers;
+          if (gameModel.currentQuizOptions.isEmpty) {
+            // Add correct answer
+            gameModel.currentQuizOptions.add(Answer(
+                answerText: currentAnswers[0],
+                isCorrect: true,
+                timerController: _controller));
+
+            // Add false answers
+            for (int i = 1; i < currentAnswers.length; i++) {
+              String currentAnswer = currentAnswers[i];
+              currentAnswer = currentAnswer.replaceAll(' ', '');
+              int j = gameModel.playerIndex;
+              String myFalseAnswer = gameModel.players[j]["false_answer"];
+              if (currentAnswer != "" && currentAnswers[i] != myFalseAnswer) {
+                gameModel.currentQuizOptions.add(Answer(
+                    answerText: currentAnswers[i],
+                    isCorrect: false,
+                    timerController: _controller));
+              }
+            }
+
+            // Shuffle all answers!
+            gameModel.currentQuizOptions.shuffle();
+
+            // We add the question to the top
+            gameModel.currentQuizOptions.insert(
+                0,
+                Question(
+                    gameModel.gameQuestions[gameModel.currentQuestionIndex],
+                    gameModel.currentQuestionIndex + 1));
+          }
+        }
+
         return Column(
-          children: gameModel.currentQuizOptions,
+          children: gameModel.currentQuizOptions +
+              [
+                Visibility(
+                    visible: gameModel.selectedCorrectAnswer,
+                    child: Padding(
+                        padding: const EdgeInsets.only(top: 30),
+                        child: Text("+${gameModel.currentRoundScore}",
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: greenColor,
+                              fontWeight: FontWeight.bold,
+                              shadows: <Shadow>[
+                                Shadow(
+                                  offset: Offset(2.0, 2.0),
+                                  blurRadius: 8.0,
+                                  color: defaultColor,
+                                ),
+                              ],
+                            ))))
+              ],
         );
       });
     }
 
-    Padding _secondScreenBody() {
-      game.get().then((value) {});
-      return Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: SingleChildScrollView(
-            child: Column(children: <Widget>[
-              _quizBody(),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(
-                  Icons.timer,
-                  size: 40.0,
-                ),
-                Countdown(
-                    animation: StepTween(
-                  begin: timePerScreen,
-                  end: 0,
-                ).animate(_controller))
-              ])
-            ]), //Scaffold
-          ));
+    Consumer<GameModel> _secondScreenBody() {
+      Countdown timerView = Countdown(
+          animation: StepTween(
+        begin: timePerScreen,
+        end: 0,
+      ).animate(_controller));
+
+      return Consumer<GameModel>(builder: (context, gameModel, child) {
+        int i = gameModel.playerIndex;
+        return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: SingleChildScrollView(
+              child: Column(children: <Widget>[
+                Padding(
+                    padding: const EdgeInsets.only(top: 30, bottom: 20),
+                    child: Material(
+                        elevation: 2,
+                        child: Container(
+                            padding: const EdgeInsets.all(10),
+                            width: 400,
+                            decoration:
+                                const BoxDecoration(color: playOptionColor),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Score: ${gameModel.players[i]["score"]}",
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                  Row(children: [
+                                    const Icon(
+                                      Icons.timer,
+                                      size: 22.0,
+                                    ),
+                                    timerView
+                                  ])
+                                ])))),
+                _quizBody()
+              ]), //Scaffold
+            ));
+      });
     }
 
     return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 50,
-          backgroundColor: backgroundColor,
-          toolbarOpacity: 0,
-          elevation: 0,
-        ),
         backgroundColor: backgroundColor,
         body: _secondScreenBody()); //MaterialApp
   }
 }
 
 // The first game screen is where we answer a question wrongly.
-// Almost nothing is fully implemented.
-
 class FirstGameScreen extends StatefulWidget {
   const FirstGameScreen({Key? key}) : super(key: key);
 
@@ -402,6 +515,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
         .doc(gameModel.pinCode);
 
     Future<void> _submitFalseAnswer() async {
+      gameModel.selectedCorrectAnswer = false;
       if (gameModel.falseAnswerController.text != "") {
         int i = gameModel.playerIndex;
         String submittedFalseAnswer = gameModel.falseAnswerController.text;
@@ -420,11 +534,44 @@ class _FirstGameScreenState extends State<FirstGameScreen>
       }
     });
 
+    var timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(_controller));
+
     Consumer<GameModel> _firstScreenBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
+        int i = gameModel.playerIndex;
+        gameModel.currentRoundScore = 0;
         return Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(children: <Widget>[
+              Padding(
+                  padding: const EdgeInsets.only(top: 30, bottom: 20),
+                  child: Material(
+                      elevation: 2,
+                      child: Container(
+                          padding: const EdgeInsets.all(10),
+                          width: 400,
+                          decoration:
+                              const BoxDecoration(color: playOptionColor),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Score: ${gameModel.players[i]["score"]}",
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                                Row(children: [
+                                  const Icon(
+                                    Icons.timer,
+                                    size: 22.0,
+                                  ),
+                                  timerView
+                                ])
+                              ])))),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
               Question(gameModel.gameQuestions[gameModel.currentQuestionIndex],
                   gameModel.currentQuestionIndex + 1),
               Padding(
@@ -441,7 +588,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                       ))),
               Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 60, horizontal: 80),
+                      const EdgeInsets.symmetric(vertical: 35, horizontal: 80),
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: defaultColor,
@@ -450,30 +597,12 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                           const Text('Submit', style: TextStyle(fontSize: 18)),
                       onPressed: gameModel.enableSubmitFalseAnswer
                           ? _submitFalseAnswer
-                          : null)),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 45)),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(
-                  Icons.timer,
-                  size: 40.0,
-                ),
-                Countdown(
-                    animation: StepTween(
-                  begin: timePerScreen,
-                  end: 0,
-                ).animate(_controller))
-              ])
+                          : null))
             ]));
       });
     }
 
     return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 50,
-          backgroundColor: backgroundColor,
-          toolbarOpacity: 0,
-          elevation: 0,
-        ),
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(child: _firstScreenBody()));
   }
@@ -680,12 +809,6 @@ class _GameState extends State<Game> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 50,
-          backgroundColor: backgroundColor,
-          toolbarOpacity: 0,
-          elevation: 0,
-        ),
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(child: _bodyBuild()));
   }

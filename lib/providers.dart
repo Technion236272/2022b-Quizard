@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'consts.dart';
-import 'game.dart';
 
 enum Status { uninitialized, authenticated, authenticating, unauthenticated }
 
@@ -212,40 +211,47 @@ class GameModel extends ChangeNotifier {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0
     }
   ];
   int currentQuestionIndex = 0;
   bool _isPrivate = true;
   bool _isLocked = false;
   bool enableSubmitFalseAnswer = true;
-  String _pinCode = '';
+  bool _selectedCorrectAnswer = false;
+  String _pinCode = 'null';
   int playerIndex = 0; // Starts from 0 for admin
   int currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
+  int currentRoundScore = 0;
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
@@ -258,6 +264,7 @@ class GameModel extends ChangeNotifier {
   List<Map<String, dynamic>> get players => _playersMaps;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
+  bool get selectedCorrectAnswer => _selectedCorrectAnswer;
   String get pinCode => _pinCode;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
@@ -266,6 +273,11 @@ class GameModel extends ChangeNotifier {
   List<String> get gameAnswers => _gameAnswers;
   List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
+
+  set selectedCorrectAnswer(bool value) {
+    _selectedCorrectAnswer = value;
+    notifyListeners();
+  }
 
   // dataType should match the field in player's map
   void setDataToPlayer(String dataType, dynamic data, int index) {
@@ -281,6 +293,16 @@ class GameModel extends ChangeNotifier {
       }
     }
     return usernames;
+  }
+
+  List<int> getListOfIndexes() {
+    List<int> indexes = [];
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] != "") {
+        indexes.add(i);
+      }
+    }
+    return indexes;
   }
 
   int getNumOfPlayers() {
@@ -442,7 +464,7 @@ class GameModel extends ChangeNotifier {
     enableSubmitFalseAnswer = true;
     _isPrivate = true;
     _isLocked = false;
-    _pinCode = '';
+    _pinCode = 'null';
     _officialCategories = [];
     _customCategories = [];
     _selectedCategories = [];
@@ -500,37 +522,9 @@ class GameModel extends ChangeNotifier {
     }
   }
 
-  void quizOptionsUpdate() {
-    if (currentQuestionIndex < gameAnswers.length) {
-      List<String> falseAnswers = getFalseAnswers();
-      String correctAnswer = gameAnswers[currentQuestionIndex];
-      List<String> currentAnswers = [correctAnswer] + falseAnswers;
-      if (currentQuizOptions.isEmpty) {
-        // Add correct answer
-        currentQuizOptions
-            .add(Answer(answerText: currentAnswers[0], questionScore: 10));
-
-        // Add false answers
-        for (int i = 1; i < currentAnswers.length; i++) {
-          String currentAnswer = currentAnswers[i];
-          currentAnswer = currentAnswer.replaceAll(' ', '');
-          int j = playerIndex;
-          String myFalseAnswer = players[j]["false_answer"];
-          if (currentAnswer != "" && currentAnswers[i] != myFalseAnswer) {
-            currentQuizOptions
-                .add(Answer(answerText: currentAnswers[i], questionScore: 0));
-          }
-        }
-
-        // Shuffle all answers!
-        currentQuizOptions.shuffle();
-
-        // And don't forget the question...
-        currentQuizOptions.insert(
-            0,
-            Question(
-                gameQuestions[currentQuestionIndex], currentQuestionIndex + 1));
-      }
-    }
+  void addScore(int score) {
+    int i = playerIndex;
+    players[i]["score"] += score;
+    notifyListeners();
   }
 }

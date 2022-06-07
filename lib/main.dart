@@ -97,10 +97,10 @@ class _WelcomePageState extends State<WelcomePage> {
             loginModel.setEmail(user["email"]);
             loginModel.setUsername(user["username"]);
             loginModel.setWins(user["wins"]);
-            try{
+            try {
               loginModel.setDailyWins(user["DailyWins"]);
               loginModel.setMonthlyWins(user["MonthlyWins"]);
-            }catch(e){
+            } catch (e) {
               print("ERROR = $e");
             }
             loginModel.setUserImageUrl(photoLink);
@@ -138,10 +138,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 loginModel.setEmail(user["email"]);
                 loginModel.setUsername(user["username"]);
                 loginModel.setWins(user["wins"]);
-                try{
+                try {
                   loginModel.setDailyWins(user["DailyWins"]);
                   loginModel.setMonthlyWins(user["MonthlyWins"]);
-                }catch(e){
+                } catch (e) {
                   print("ERROR = $e");
                 }
                 loginModel.setPassword(loginModel.passwordController.text);

@@ -413,15 +413,19 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 children: [
                   admin ? const Icon(null) : _kickIcon(username),
                   Row(children: [
-                    Checkbox(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        activeColor: greenColor,
-                        value: gameModel.players[playerIndex]["is_ready"],
-                        onChanged: matchUsernames
-                            ? (value) {
-                                _toggleIsReady();
-                              }
-                            : null),
+                    Transform.scale(
+                        scale: 1.5,
+                        child: Checkbox(
+                            splashRadius: 20,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            activeColor: greenColor,
+                            value: gameModel.players[playerIndex]["is_ready"],
+                            onChanged: matchUsernames
+                                ? (value) {
+                                    _toggleIsReady();
+                                  }
+                                : null)),
                     const Text("Ready")
                   ])
                 ],
