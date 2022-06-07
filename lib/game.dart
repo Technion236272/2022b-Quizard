@@ -232,31 +232,41 @@ class Question extends StatelessWidget {
 }
 
 class Answer extends StatefulWidget {
-  const Answer(
-      {Key? key,
-      required this.answerText,
-      required this.isCorrect,
-      required this.timerController})
+  const Answer({Key? key, required this.answerText, required this.isCorrect})
       : super(key: key);
   final String answerText;
-  final AnimationController timerController;
   final bool isCorrect;
 
   @override
   _AnswerState createState() => _AnswerState();
 }
 
-class _AnswerState extends State<Answer> {
+class _AnswerState extends State<Answer> with TickerProviderStateMixin {
   Color buttonColor = secondaryColor;
+  late Countdown _timerView;
+  late AnimationController _controller;
 
   @override
-  Widget build(BuildContext context) {
-    Countdown timerView = Countdown(
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(seconds: timePerScreen));
+    _controller.forward();
+    _timerView = Countdown(
         animation: StepTween(
       begin: timePerScreen,
       end: 0,
-    ).animate(widget.timerController));
+    ).animate(_controller));
+  }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       width: 400,
@@ -283,9 +293,9 @@ class _AnswerState extends State<Answer> {
                 setState(() {
                   buttonColor = greenColor;
                 });
-                addedScore = correctAnswerScore + timerView.animation.value;
+                addedScore = correctAnswerScore + _timerView.animation.value;
                 gameModel.currentRoundScore += addedScore;
-                gameModel.addScore(addedScore);
+                gameModel.players[i]["score"] += addedScore;
               } else {
                 setState(() {
                   buttonColor = redColor;
@@ -305,6 +315,57 @@ class _AnswerState extends State<Answer> {
           });
         },
       ),
+    );
+  }
+}
+
+// For showing earned score with this show-up effect
+class ShowUp extends StatefulWidget {
+  final Widget child;
+  final int delay;
+
+  const ShowUp({Key? key, required this.child, required this.delay})
+      : super(key: key);
+
+  @override
+  _ShowUpState createState() => _ShowUpState();
+}
+
+class _ShowUpState extends State<ShowUp> with TickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<Offset> _animOffset;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    final curve =
+        CurvedAnimation(curve: Curves.decelerate, parent: _animController);
+    _animOffset =
+        Tween<Offset>(begin: const Offset(0.0, 0.35), end: Offset.zero)
+            .animate(curve);
+
+    Timer(Duration(milliseconds: widget.delay), () {
+      _animController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      child: SlideTransition(
+        position: _animOffset,
+        child: widget.child,
+      ),
+      opacity: _animController,
     );
   }
 }
@@ -373,10 +434,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           List<String> currentAnswers = [correctAnswer] + falseAnswers;
           if (gameModel.currentQuizOptions.isEmpty) {
             // Add correct answer
-            gameModel.currentQuizOptions.add(Answer(
-                answerText: currentAnswers[0],
-                isCorrect: true,
-                timerController: _controller));
+            gameModel.currentQuizOptions
+                .add(Answer(answerText: currentAnswers[0], isCorrect: true));
 
             // Add false answers
             for (int i = 1; i < currentAnswers.length; i++) {
@@ -385,10 +444,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
               int j = gameModel.playerIndex;
               String myFalseAnswer = gameModel.players[j]["false_answer"];
               if (currentAnswer != "" && currentAnswers[i] != myFalseAnswer) {
-                gameModel.currentQuizOptions.add(Answer(
-                    answerText: currentAnswers[i],
-                    isCorrect: false,
-                    timerController: _controller));
+                gameModel.currentQuizOptions.add(
+                    Answer(answerText: currentAnswers[i], isCorrect: false));
               }
             }
 
@@ -411,19 +468,21 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                     visible: gameModel.selectedCorrectAnswer,
                     child: Padding(
                         padding: const EdgeInsets.only(top: 30),
-                        child: Text("+${gameModel.currentRoundScore}",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              color: greenColor,
-                              fontWeight: FontWeight.bold,
-                              shadows: <Shadow>[
-                                Shadow(
-                                  offset: Offset(2.0, 2.0),
-                                  blurRadius: 8.0,
-                                  color: defaultColor,
-                                ),
-                              ],
-                            ))))
+                        child: ShowUp(
+                            delay: 100,
+                            child: Text("+${gameModel.currentRoundScore}",
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: greenColor,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: <Shadow>[
+                                    Shadow(
+                                      offset: Offset(2.0, 2.0),
+                                      blurRadius: 8.0,
+                                      color: defaultColor,
+                                    ),
+                                  ],
+                                )))))
               ],
         );
       });
@@ -548,7 +607,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(children: <Widget>[
               Padding(
-                  padding: const EdgeInsets.only(top: 30, bottom: 20),
+                  padding: const EdgeInsets.only(top: 30, bottom: 10),
                   child: Material(
                       elevation: 2,
                       child: Container(
@@ -732,7 +791,7 @@ class _GameState extends State<Game> {
                     children: [
                       // The text border
                       Text(
-                        'Correct Answer!',
+                        'Correct Answer',
                         style: TextStyle(
                           fontSize: 30,
                           letterSpacing: 3,
@@ -745,7 +804,7 @@ class _GameState extends State<Game> {
                       ),
                       // The text inside
                       const Text(
-                        'Correct Answer!',
+                        'Correct Answer',
                         style: TextStyle(
                           fontSize: 30,
                           letterSpacing: 3,
