@@ -38,9 +38,12 @@ class Rules extends StatelessWidget {
                       ]),
                   const Padding(padding: EdgeInsets.all(18)),
                   const Image(image: AssetImage('images/titles/rules.png')),
-                  const Padding(padding: EdgeInsets.all(10)),
+                  const Padding(padding: EdgeInsets.all(15)),
                   Container(
-                    color: secondaryColor,
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
                     height: 70,
                     width: 350,
                     child: Column(
@@ -54,14 +57,17 @@ class Rules extends StatelessWidget {
                           Text(
                             '2-5',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
                   ),
                   const Padding(padding: EdgeInsets.all(5)),
                   Container(
-                    color: secondaryColor,
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
                     height: 70,
                     width: 350,
                     child: Column(
@@ -75,14 +81,17 @@ class Rules extends StatelessWidget {
                           Text(
                             'The player with the highest score wins.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
                   ),
                   const Padding(padding: EdgeInsets.all(5)),
                   Container(
-                    color: secondaryColor,
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
                     height: 260,
                     width: 350,
                     child: Column(
@@ -94,32 +103,35 @@ class Rules extends StatelessWidget {
                           Text(
                             '-Each player enters a false answer.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-All the false answers are shown with the right answer to all players.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Players are rewarded with points for choosing the right answer.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Players are rewarded with points for every player choosing their false answer.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
                   ),
                   const Padding(padding: EdgeInsets.all(5)),
                   Container(
-                    color: secondaryColor,
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
                     height: 150,
                     width: 350,
                     child: Column(
@@ -132,13 +144,13 @@ class Rules extends StatelessWidget {
                           Text(
                             '-Players are rewarded for choosing the right answer multiple times in a row.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Faster answer means more points.',
                             style:
-                                TextStyle(color: Colors.black54, fontSize: 18),
+                            TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),

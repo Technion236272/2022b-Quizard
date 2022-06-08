@@ -12,6 +12,7 @@ const greenColor = Color.fromRGBO(124, 220, 117, 1);
 const blueColor = Colors.blue;
 const orangeColor = Colors.orange;
 const lightBlueColor = Color(0xFFECEFF1);
+const darkGreyColor = Colors.black54;
 
 // Numbers
 const grabbingHeightConst = 200.0;
