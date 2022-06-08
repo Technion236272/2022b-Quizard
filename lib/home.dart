@@ -259,7 +259,8 @@ class Play extends StatelessWidget {
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     };
     final game = <String, dynamic>{
       "player0": mapAdmin, // Admin is always player0
@@ -269,6 +270,7 @@ class Play extends StatelessWidget {
       "custom_categories": gameModel.customCategories,
       "questions": [],
       "answers": [],
+      "categories": [],
       "question_index": 0,
       "game_phase": 1,
     };
@@ -277,7 +279,8 @@ class Play extends StatelessWidget {
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     };
     for (int i = 1; i < maxPlayers; i++) {
       game.addAll({"player$i": mapPlayer});

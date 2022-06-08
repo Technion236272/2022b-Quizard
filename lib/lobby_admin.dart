@@ -25,7 +25,12 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   List<String> officialCategories = [
     'Animal',
     'Geography',
+    'History',
+    'Movies',
+    'Music',
+    'Politics',
     'Sports',
+    'Technology'
   ];
 
   // pattern: ['category', 'username', questions_num]
@@ -312,7 +317,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   Consumer<GameModel> _kickIcon(String username) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       return GestureDetector(
-          child: const Icon(Icons.block, color: redColor),
+          child: const Icon(Icons.block, color: redColor, size: 34),
           onTap: () {
             showDialog(
                 context: context,
@@ -469,8 +474,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     Future<bool> _buildQuestions() async {
       final allQuestions = [];
       final allAnswers = [];
+      final allCategories = [];
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
-      var users = FirebaseFirestore.instance.collection('versions/v1/users');
+      var users = FirebaseFirestore.instance.collection('$strVersion/users');
       var officialQuestions = FirebaseFirestore.instance
           .collection('versions/v1/official_questions');
       for (int i = 0; i < gameModel.selectedCategories.length; i++) {
@@ -479,6 +485,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           await officialQuestions.doc(selectedCategory).get().then((category) {
             allQuestions.addAll(category["questions"]);
             allAnswers.addAll(category["answers"]);
+            for (int j = 0; j < allQuestions.length; j++) {
+              allCategories.add(selectedCategory);
+            }
           });
         } else {
           final username = selectedCategory.split('(').last.split(')').first;
@@ -502,6 +511,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 if (userCategories[i].toString() == category) {
                   allQuestions.add(userQuestions[i].toString());
                   allAnswers.add(userAnswers[i].toString());
+                  allCategories.add(selectedCategory);
                 }
               }
             });
@@ -515,11 +525,13 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
       final selectedQuestions = [];
       final selectedAnswers = [];
+      final selectedCategories = [];
       List shuffledIndexes = List.generate(allQuestions.length, (i) => i);
       shuffledIndexes.shuffle();
       for (int i = 0; i < roundsPerGame; i++) {
         selectedQuestions.add(allQuestions[shuffledIndexes[i]]);
         selectedAnswers.add(allAnswers[shuffledIndexes[i]]);
+        selectedCategories.add(allCategories[shuffledIndexes[i]]);
       }
 
       final falseAnswers = [];
@@ -535,12 +547,14 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           .update({
         "questions": selectedQuestions,
         "answers": selectedAnswers,
+        "categories": selectedCategories,
         "question_index": 0,
         "game_phase": 1,
       });
 
       gameModel.gameQuestions = List<String>.from(selectedQuestions);
       gameModel.gameAnswers = List<String>.from(selectedAnswers);
+      gameModel.gameCategories = List<String>.from(selectedCategories);
 
       return true;
     }

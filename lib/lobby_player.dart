@@ -233,15 +233,19 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(children: [
-                    Checkbox(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        activeColor: greenColor,
-                        value: gameModel.players[playerIndex]["is_ready"],
-                        onChanged: matchUsernames
-                            ? (value) {
-                                _toggleIsReady();
-                              }
-                            : null),
+                    Transform.scale(
+                        scale: 1.5,
+                        child: Checkbox(
+                            splashRadius: 20,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            activeColor: greenColor,
+                            value: gameModel.players[playerIndex]["is_ready"],
+                            onChanged: matchUsernames
+                                ? (value) {
+                                    _toggleIsReady();
+                                  }
+                                : null)),
                     const Text("Ready")
                   ])
                 ],

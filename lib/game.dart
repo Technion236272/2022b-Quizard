@@ -131,11 +131,14 @@ class _ScoreBoardState extends State<ScoreBoard> {
                           ),
                         )),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
+                      padding: const EdgeInsets.all(100),
                       child: ElevatedButton(
-                        child: const Text(
-                          'End Game',
-                        ),
+                        style: ElevatedButton.styleFrom(
+                            primary: defaultColor,
+                            minimumSize:
+                                const Size.fromHeight(50)), // max width
+                        child: const Text('End Game',
+                            style: TextStyle(fontSize: 18)),
                         onPressed: () {
                           if (gameModel.playerIndex == 0) {
                             FirebaseFirestore.instance
@@ -197,7 +200,7 @@ class Question extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     String strCategory =
-        gameModel.selectedCategories[gameModel.currentQuestionIndex];
+        gameModel.gameCategories[gameModel.currentQuestionIndex];
     return Column(children: [
       Material(
           elevation: 2,
@@ -220,7 +223,7 @@ class Question extends StatelessWidget {
               ),
               Text(
                 _questionText,
-                style: const TextStyle(fontSize: 28),
+                style: const TextStyle(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
             ]), //Text
@@ -267,6 +270,11 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    final gameDoc = FirebaseFirestore.instance
+        .collection('$strVersion/custom_games')
+        .doc(gameModel.pinCode);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       width: 400,
@@ -278,40 +286,36 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
           style: const TextStyle(color: defaultColor),
         ),
         onPressed: () async {
-          final gameModel = Provider.of<GameModel>(context, listen: false);
-          await FirebaseFirestore.instance
-              .collection('$strVersion/custom_games')
-              .doc(gameModel.pinCode)
-              .get()
-              .then((game) async {
+          await gameDoc.get().then((game) async {
             int i = gameModel.playerIndex;
-            int addedScore = 0;
             String selectedAnswer = game["player$i"]["selected_answer"];
-            if (selectedAnswer == "") {
+            // allow press only if pressed an answer for the first time
+            if (selectedAnswer == "" && buttonColor == secondaryColor) {
+              final currentRoundScore =
+                  correctAnswerScore + _timerView.animation.value;
+              gameModel.setDataToPlayer("round_score", currentRoundScore, i);
               if (widget.isCorrect) {
                 gameModel.selectedCorrectAnswer = true;
                 setState(() {
                   buttonColor = greenColor;
                 });
-                addedScore = correctAnswerScore + _timerView.animation.value;
-                gameModel.currentRoundScore += addedScore;
-                gameModel.players[i]["score"] += addedScore;
+                final updatedScore =
+                    gameModel.players[i]["score"] + currentRoundScore;
+                gameModel.setDataToPlayer("score", updatedScore, i);
               } else {
+                gameModel.selectedCorrectAnswer = false;
                 setState(() {
                   buttonColor = redColor;
                 });
               }
-
+              // then update data in both game model and firebase
               gameModel.setDataToPlayer(
                   "selected_answer", widget.answerText, i);
               await Future.delayed(const Duration(seconds: 2));
-              await FirebaseFirestore.instance
-                  .collection('$strVersion/custom_games')
-                  .doc(gameModel.pinCode)
-                  .update({"player$i": gameModel.players[i]});
+              await gameDoc.update({"player$i": gameModel.players[i]});
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute<void>(builder: (context) => const Game()));
             }
-            Navigator.of(context).pushReplacement(
-                MaterialPageRoute<void>(builder: (context) => const Game()));
           });
         },
       ),
@@ -383,6 +387,13 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   late AnimationController _controller;
   late Timer _timer;
   bool selectedCorrect = false;
+  late NavigatorState _navigator;
+
+  @override
+  void didChangeDependencies() {
+    _navigator = Navigator.of(context);
+    super.didChangeDependencies();
+  }
 
   @override
   void dispose() {
@@ -421,7 +432,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
               gameModel.players[i]["selected_answer"] == "") {
             gameModel.setDataToPlayer("selected_answer", " ", i);
             game.update({"player$i": gameModel.players[i]});
-            Navigator.of(context).pushReplacement(
+            _navigator.pushReplacement(
                 MaterialPageRoute<void>(builder: (context) => const Game()));
           }
         });
@@ -461,6 +472,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           }
         }
 
+        final currentRoundScore = gameModel.players[i]["round_score"];
         return Column(
           children: gameModel.currentQuizOptions +
               [
@@ -470,7 +482,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                         padding: const EdgeInsets.only(top: 30),
                         child: ShowUp(
                             delay: 100,
-                            child: Text("+${gameModel.currentRoundScore}",
+                            child: Text("+$currentRoundScore",
                                 style: const TextStyle(
                                   fontSize: 24,
                                   color: greenColor,
@@ -572,11 +584,12 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     final gameRef = FirebaseFirestore.instance
         .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
+    int i = gameModel.playerIndex;
 
     Future<void> _submitFalseAnswer() async {
       gameModel.selectedCorrectAnswer = false;
+      gameModel.setDataToPlayer("round_score", 0, i);
       if (gameModel.falseAnswerController.text != "") {
-        int i = gameModel.playerIndex;
         String submittedFalseAnswer = gameModel.falseAnswerController.text;
         gameModel.setDataToPlayer("false_answer", submittedFalseAnswer, i);
         await gameRef.update({"player$i": gameModel.players[i]});
@@ -601,8 +614,6 @@ class _FirstGameScreenState extends State<FirstGameScreen>
 
     Consumer<GameModel> _firstScreenBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        int i = gameModel.playerIndex;
-        gameModel.currentRoundScore = 0;
         return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(children: <Widget>[
@@ -677,6 +688,36 @@ class Game extends StatefulWidget {
 class _GameState extends State<Game> {
   @override
   Widget build(BuildContext context) {
+    Stack _resultText(String strResult, Color clrResult) {
+      return Stack(
+        children: [
+          // The text border
+          Text(
+            strResult,
+            style: TextStyle(
+              fontSize: 30,
+              letterSpacing: 3,
+              fontWeight: FontWeight.bold,
+              foreground: Paint()
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 4
+                ..color = defaultColor,
+            ),
+          ),
+          // The text inside
+          Text(
+            strResult,
+            style: TextStyle(
+              fontSize: 30,
+              letterSpacing: 3,
+              fontWeight: FontWeight.bold,
+              color: clrResult,
+            ),
+          ),
+        ],
+      );
+    }
+
     Consumer<GameModel> _bodyBuild() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
         final gameRef = FirebaseFirestore.instance
@@ -712,6 +753,21 @@ class _GameState extends State<Game> {
                 return Container();
               } else if (!selectedAnswers.contains('') &&
                   gameModel.currentPhase == 2) {
+                /*
+                int i = gameModel.playerIndex;
+                var updatedScore = gameModel.players[i]["score"];
+                String myFalseAnswer = gameModel.players[i]["false_answer"];
+                if (myFalseAnswer.replaceAll(" ", "") != "") {
+                  for (int j = 0; j < maxPlayers; j++) {
+                    if (myFalseAnswer ==
+                        gameModel.players[j]["selected_answer"]) {
+                      updatedScore += gameModel.players[j]["round_score"];
+                      //gameModel.setDataToPlayer("score", updatedScore, i);
+                    }
+                  }
+                }
+                */
+
                 gameModel.resetFalseAnswers();
                 gameModel.resetSelectedAnswers();
                 for (int i = 0; i < maxPlayers; i++) {
@@ -787,61 +843,9 @@ class _GameState extends State<Game> {
                 int j = gameModel.currentQuestionIndex;
                 String correctAnswer = gameModel.gameAnswers[j];
                 if (selectedAnswer == correctAnswer) {
-                  result = Stack(
-                    children: [
-                      // The text border
-                      Text(
-                        'Correct Answer',
-                        style: TextStyle(
-                          fontSize: 30,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.bold,
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 4
-                            ..color = defaultColor,
-                        ),
-                      ),
-                      // The text inside
-                      const Text(
-                        'Correct Answer',
-                        style: TextStyle(
-                          fontSize: 30,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.bold,
-                          color: greenColor,
-                        ),
-                      ),
-                    ],
-                  );
+                  result = _resultText("Correct Answer", greenColor);
                 } else if (selectedAnswer != "" && selectedAnswer != " ") {
-                  result = Stack(
-                    children: [
-                      // The text border
-                      Text(
-                        'Wrong Answer',
-                        style: TextStyle(
-                          fontSize: 30,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.bold,
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 4
-                            ..color = defaultColor,
-                        ),
-                      ),
-                      // The text inside
-                      const Text(
-                        'Wrong Answer',
-                        style: TextStyle(
-                          fontSize: 30,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.bold,
-                          color: redColor,
-                        ),
-                      ),
-                    ],
-                  );
+                  result = _resultText("Wrong Answer", redColor);
                 }
                 return Column(children: [
                   Padding(

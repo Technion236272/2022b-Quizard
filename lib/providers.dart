@@ -212,35 +212,40 @@ class GameModel extends ChangeNotifier {
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
       "selected_answer": "",
-      "score": 0
+      "score": 0,
+      "round_score": 0
     }
   ];
   int currentQuestionIndex = 0;
@@ -251,12 +256,12 @@ class GameModel extends ChangeNotifier {
   String _pinCode = 'null';
   int playerIndex = 0; // Starts from 0 for admin
   int currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
-  int currentRoundScore = 0;
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
   List<String> _gameQuestions = []; // "questions" in Firestore
   List<String> _gameAnswers = []; // "answers" in Firestore
+  List<String> _gameCategories = []; // "categories" in Firestore
   List<Widget> currentQuizOptions = [];
   List<String> _playersIds = [];
   final _falseAnswerController = TextEditingController();
@@ -271,6 +276,7 @@ class GameModel extends ChangeNotifier {
   List<String> get selectedCategories => _selectedCategories; // For participant
   List<String> get gameQuestions => _gameQuestions;
   List<String> get gameAnswers => _gameAnswers;
+  List<String> get gameCategories => _gameCategories;
   List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
 
@@ -420,6 +426,11 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set gameCategories(List<String> categories) {
+    _gameCategories = categories;
+    notifyListeners();
+  }
+
   set playersIds(List<String> urls) {
     _playersIds = urls;
     notifyListeners();
@@ -431,31 +442,41 @@ class GameModel extends ChangeNotifier {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       }
     ];
     currentQuestionIndex = 0;
@@ -470,6 +491,7 @@ class GameModel extends ChangeNotifier {
     _selectedCategories = [];
     _gameQuestions = [];
     _gameAnswers = [];
+    _gameCategories = [];
     currentQuizOptions = [];
     _falseAnswerController.text = "";
     notifyListeners();
@@ -487,6 +509,7 @@ class GameModel extends ChangeNotifier {
       _selectedCategories = _officialCategories + _customCategories;
       _gameQuestions = List<String>.from(game["questions"]);
       _gameAnswers = List<String>.from(game["answers"]);
+      _gameCategories = List<String>.from(game["categories"]);
     }
   }
 
