@@ -18,7 +18,7 @@ void main() async {
   await Firebase.initializeApp(
       // options: DefaultFirebaseOptions.currentPlatform,
       );
-
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
     ChangeNotifierProvider(create: (context) => GameModel())
@@ -27,7 +27,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -97,10 +96,10 @@ class _WelcomePageState extends State<WelcomePage> {
             loginModel.setEmail(user["email"]);
             loginModel.setUsername(user["username"]);
             loginModel.setWins(user["wins"]);
-            try{
+            try {
               loginModel.setDailyWins(user["DailyWins"]);
               loginModel.setMonthlyWins(user["MonthlyWins"]);
-            }catch(e){
+            } catch (e) {
               print("ERROR = $e");
             }
             loginModel.setUserImageUrl(photoLink);
@@ -138,10 +137,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 loginModel.setEmail(user["email"]);
                 loginModel.setUsername(user["username"]);
                 loginModel.setWins(user["wins"]);
-                try{
+                try {
                   loginModel.setDailyWins(user["DailyWins"]);
                   loginModel.setMonthlyWins(user["MonthlyWins"]);
-                }catch(e){
+                } catch (e) {
                   print("ERROR = $e");
                 }
                 loginModel.setPassword(loginModel.passwordController.text);
