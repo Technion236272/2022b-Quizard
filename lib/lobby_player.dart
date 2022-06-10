@@ -5,7 +5,7 @@ import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
-import 'game.dart';
+import 'game/first_screen.dart';
 import 'lobby_appbar.dart';
 import 'providers.dart';
 import 'consts.dart';

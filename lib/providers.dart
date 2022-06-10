@@ -248,14 +248,14 @@ class GameModel extends ChangeNotifier {
       "round_score": 0
     }
   ];
-  int currentQuestionIndex = 0;
+  int currentQuestionIndex = 0; // incrementing on init of first screen
   bool _isPrivate = true;
   bool _isLocked = false;
-  bool enableSubmitFalseAnswer = true;
   bool _selectedCorrectAnswer = false;
+  String _selectedAnswer = "";
+  bool _timeOut = false;
   String _pinCode = 'null';
   int playerIndex = 0; // Starts from 0 for admin
-  int currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
@@ -270,6 +270,8 @@ class GameModel extends ChangeNotifier {
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
   bool get selectedCorrectAnswer => _selectedCorrectAnswer;
+  String get selectedAnswer => _selectedAnswer;
+  bool get timeOut => _timeOut;
   String get pinCode => _pinCode;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
@@ -280,8 +282,23 @@ class GameModel extends ChangeNotifier {
   List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
 
+  set players(List<Map<String, dynamic>> players) {
+    _playersMaps = players;
+    notifyListeners();
+  }
+
+  set timeOut(bool value) {
+    _timeOut = value;
+    notifyListeners();
+  }
+
   set selectedCorrectAnswer(bool value) {
     _selectedCorrectAnswer = value;
+    notifyListeners();
+  }
+
+  set selectedAnswer(String value) {
+    _selectedAnswer = value;
     notifyListeners();
   }
 
@@ -481,8 +498,6 @@ class GameModel extends ChangeNotifier {
     ];
     currentQuestionIndex = 0;
     playerIndex = 0;
-    currentPhase = 1;
-    enableSubmitFalseAnswer = true;
     _isPrivate = true;
     _isLocked = false;
     _pinCode = 'null';
@@ -494,6 +509,8 @@ class GameModel extends ChangeNotifier {
     _gameCategories = [];
     currentQuizOptions = [];
     _falseAnswerController.text = "";
+    _selectedCorrectAnswer = false;
+    _selectedAnswer = "";
     notifyListeners();
   }
 
