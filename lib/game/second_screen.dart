@@ -21,8 +21,8 @@ class SecondGameScreen extends StatefulWidget {
 class _SecondGameScreenState extends State<SecondGameScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  //late Timer _timer;
   final List<Widget> _quizBodyWidgets = [];
+  late Future<void> _delayNavigator;
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void dispose() {
     _controller.dispose();
-    //_timer.cancel();
+    _delayNavigator.ignore();
     super.dispose();
   }
 
@@ -225,8 +225,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                       incremented = true;
                     }
                     if (gameModel.currentQuestionIndex >= roundsPerGame) {
-                      Future.delayed(
-                          const Duration(milliseconds: 2000),
+                      _delayNavigator = Future.delayed(
+                          const Duration(seconds: delayScoreResult),
                           () => WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.pushReplacement<void, void>(
                                   context,
@@ -235,8 +235,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                                         const ScoreBoard(),
                                   ))));
                     } else {
-                      Future.delayed(
-                          const Duration(milliseconds: 2000),
+                      _delayNavigator = Future.delayed(
+                          const Duration(seconds: delayScoreResult),
                           () => WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.pushReplacement<void, void>(
                                   context,

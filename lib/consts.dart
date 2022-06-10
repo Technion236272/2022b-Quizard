@@ -22,8 +22,9 @@ const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
 const roundsPerGame = 3;
 const maxPlayers = 5;
-const timePerScreen = 20;
+const timePerScreen = 20; // in seconds
 const correctAnswerScore = 10;
+const delayScoreResult = 2; // in seconds
 
 // Strings
 const strVersion = "versions/v2";
