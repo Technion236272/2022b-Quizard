@@ -17,7 +17,7 @@ class ScoreBoard extends StatefulWidget {
 
 class _ScoreBoardState extends State<ScoreBoard> {
   late ConfettiController _controllerTopCenter;
-  List<String> _playersIds = [];
+  final List<String> _playersIds = [];
 
   @override
   Widget build(BuildContext context) {
@@ -165,12 +165,6 @@ class _ScoreBoardState extends State<ScoreBoard> {
                         child: const Text('End Game',
                             style: TextStyle(fontSize: 18)),
                         onPressed: () {
-                          if (gameModel.playerIndex == 0) {
-                            FirebaseFirestore.instance
-                                .collection("$strVersion/custom_games")
-                                .doc(gameModel.pinCode)
-                                .update({"is_locked": true});
-                          }
                           gameModel.resetData();
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute<void>(

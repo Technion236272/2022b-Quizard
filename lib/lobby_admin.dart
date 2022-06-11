@@ -548,7 +548,6 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         "questions": selectedQuestions,
         "answers": selectedAnswers,
         "categories": selectedCategories,
-        "question_index": 0,
       });
 
       gameModel.gameQuestions = List<String>.from(selectedQuestions);
@@ -567,6 +566,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
       } else {
+        await FirebaseFirestore.instance
+            .collection('$strVersion/custom_games')
+            .doc(gameModel.pinCode)
+            .update({"is_locked": true});
         Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (context) => const FirstGameScreen()));
       }
