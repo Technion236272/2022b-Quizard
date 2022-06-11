@@ -22,7 +22,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   final List<Widget> _quizBodyWidgets = [];
-  Future<void>? _delayNavigator;
+  Timer? _delayNavigator;
   bool _calculatedFinalScores = false;
 
   @override
@@ -36,7 +36,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void dispose() {
     _controller.dispose();
-    _delayNavigator?.ignore();
+    _delayNavigator?.cancel();
     super.dispose();
   }
 
@@ -64,7 +64,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
       List<String> _getFalseAnswers() {
         List<String> falseAnswers = [];
         for (int i = 0; i < maxPlayers; i++) {
-          if (players[i]["username"] != "") {
+          if (players[i]["username"] != "" &&
+              !falseAnswers.contains(players[i]["false_answer"])) {
             falseAnswers.add(players[i]["false_answer"]);
           }
         }
@@ -291,25 +292,23 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                       gameModel.currentQuestionIndex++;
 
                       if (gameModel.currentQuestionIndex >= roundsPerGame) {
-                        _delayNavigator = Future.delayed(
-                            const Duration(seconds: delayScoreResult),
-                            () => WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => Navigator.pushReplacement<void, void>(
-                                    context,
-                                    MaterialPageRoute<void>(
-                                      builder: (BuildContext context) =>
-                                          const ScoreBoard(),
-                                    ))));
+                        _delayNavigator = Timer(
+                            const Duration(seconds: delayScoreResult), () {
+                          Navigator.pushReplacement<void, void>(
+                              context,
+                              MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const ScoreBoard()));
+                        });
                       } else {
-                        _delayNavigator = Future.delayed(
-                            const Duration(seconds: delayScoreResult),
-                            () => WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => Navigator.pushReplacement<void, void>(
-                                    context,
-                                    MaterialPageRoute<void>(
-                                      builder: (BuildContext context) =>
-                                          const FirstGameScreen(),
-                                    ))));
+                        _delayNavigator = Timer(
+                            const Duration(seconds: delayScoreResult), () {
+                          Navigator.pushReplacement<void, void>(
+                              context,
+                              MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const FirstGameScreen()));
+                        });
                       }
 
                       incremented = true;

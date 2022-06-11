@@ -307,41 +307,47 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //sorted by scores
-  List<String> getListOfUsernames() {
-    List<List<dynamic>> usernamesWithScore = [];
-    for (int i = 0; i < maxPlayers; i++) {
-      if (_playersMaps[i]["username"] != "") {
-        usernamesWithScore.add([
-          _playersMaps[i]["username"].toString(),
-          _playersMaps[i]["score"].toInt()
-        ]);
+  List _bubbleSortByScore(List<List<dynamic>> list) {
+    for (int i = 0; i < list.length - 1; i++) {
+      for (int j = 0; j < list.length - i - 1; j++) {
+        if (list[j][1].toInt() < list[j + 1][1].toInt()) {
+          final temp = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = temp;
+        }
       }
     }
-    usernamesWithScore
-        .sort((player1, player2) => player2[1].compareTo(player1[1]));
-    List<String> usernames = [];
-    for (int i = 0; i < usernamesWithScore.length; i++) {
-      usernames.add(usernamesWithScore[i][0].toString());
-    }
-    return usernames;
+    return list;
   }
 
-  //sorted by scores
-  List<int> getListOfIndexes() {
-    List<List<dynamic>> indexesWithScore = [];
+  List<dynamic> getPlayersSortedByScore(bool indexesOnly) {
+    List<List<dynamic>> playersList = [];
+    // build usernames with scores
     for (int i = 0; i < maxPlayers; i++) {
       if (_playersMaps[i]["username"] != "") {
-        indexesWithScore.add([i, _playersMaps[i]["score"].toInt()]);
+        if (!indexesOnly) {
+          playersList.add([
+            _playersMaps[i]["username"].toString(),
+            _playersMaps[i]["score"].toInt()
+          ]);
+        } else {
+          playersList.add([i, _playersMaps[i]["score"].toInt()]);
+        }
       }
     }
-    indexesWithScore
-        .sort((player1, player2) => player2[1].compareTo(player1[1]));
-    List<int> indexes = [];
-    for (int i = 0; i < indexesWithScore.length; i++) {
-      indexes.add(indexesWithScore[i][0]);
+
+    final sortedList = _bubbleSortByScore(playersList);
+
+    var retValList = [];
+    for (int i = 0; i < sortedList.length; i++) {
+      if (indexesOnly) {
+        retValList.add(sortedList[i][0].toInt());
+      } else {
+        retValList.add(sortedList[i][0].toString());
+      }
     }
-    return indexes;
+
+    return retValList;
   }
 
   int getNumOfPlayers() {

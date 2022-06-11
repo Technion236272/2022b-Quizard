@@ -31,10 +31,19 @@ class _ScoreBoardState extends State<ScoreBoard> {
         return false;
       }
       await FirebaseFirestore.instance
+          .collection("$strVersion/custom_games")
+          .doc(gameModel.pinCode)
+          .get()
+          .then((game) {
+        for (int k = 0; k < maxPlayers; k++) {
+          gameModel.setDataToPlayer("score", game["player$k.score"], k);
+        }
+      });
+      await FirebaseFirestore.instance
           .collection('$strVersion/users')
           .get()
           .then((users) async {
-        List players = gameModel.getListOfUsernames();
+        List players = gameModel.getPlayersSortedByScore(false);
         for (int k = 0; k < players.length; k++) {
           for (var user in users.docs) {
             if (user["username"] == players[k] &&
@@ -111,8 +120,8 @@ class _ScoreBoardState extends State<ScoreBoard> {
 
         ListView _players() {
           List<Widget> players = [];
-          final usernames = gameModel.getListOfUsernames();
-          final indexes = gameModel.getListOfIndexes();
+          final usernames = gameModel.getPlayersSortedByScore(false);
+          final indexes = gameModel.getPlayersSortedByScore(true);
           for (int i = 0; i < usernames.length; i++) {
             players.add(_player(usernames[i], _playersIds[i], indexes[i]));
           }
