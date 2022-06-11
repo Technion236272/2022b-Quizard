@@ -62,7 +62,15 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     int i = gameModel.playerIndex;
 
     Future<void> _submitFalseAnswer() async {
-      // Preparation for the next screen
+      // don't proceed if that's the correct answer
+      if (gameModel.falseAnswerController.text.toLowerCase() ==
+          gameModel.gameAnswers[gameModel.currentQuestionIndex].toLowerCase()) {
+        FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+        constSnackBar("Psst, that's the correct answer", context);
+        return;
+      }
+
+      // preparation for the next screen
       gameModel.selectedAnswer = "";
 
       // act only if their is a concrete input, or if time is over
