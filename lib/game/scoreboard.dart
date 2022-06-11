@@ -17,6 +17,7 @@ class ScoreBoard extends StatefulWidget {
 
 class _ScoreBoardState extends State<ScoreBoard> {
   late ConfettiController _controllerTopCenter;
+  List<String> _playersIds = [];
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,10 @@ class _ScoreBoardState extends State<ScoreBoard> {
         .collection("$strVersion/custom_games")
         .doc(gameModel.pinCode);
 
-    Future<bool> _getUsersIds() async {
+    Future<bool> _getUsersIdsOnce() async {
+      if (_playersIds.isNotEmpty) {
+        return false;
+      }
       await FirebaseFirestore.instance
           .collection('$strVersion/users')
           .get()
@@ -33,9 +37,9 @@ class _ScoreBoardState extends State<ScoreBoard> {
         List players = gameModel.getListOfUsernames();
         for (int k = 0; k < players.length; k++) {
           for (var user in users.docs) {
-            if (user["username"] == players[k]) {
-              String id = user.id;
-              gameModel.playersIds.add(id);
+            if (user["username"] == players[k] &&
+                !_playersIds.contains(user.id)) {
+              _playersIds.add(user.id);
               break;
             }
           }
@@ -50,27 +54,25 @@ class _ScoreBoardState extends State<ScoreBoard> {
 
     Consumer<GameModel> _bodyBuild() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        Future<Text> _scoreFuture(int i) async {
-          return await gameRef.get().then((game) {
+        Stream<Text> _streamScore(int i) async* {
+          yield await gameRef.get().then((game) async {
             return Text("${game["player$i"]["score"]}",
                 style: const TextStyle(fontSize: 18));
           });
         }
 
-        FutureBuilder<Text> _score(int i) {
-          return FutureBuilder<Text>(
-              future: _scoreFuture(i),
+        StreamBuilder<Text> _score(int i) {
+          return StreamBuilder<Text>(
+              stream: _streamScore(i),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  if (snapshot.data != null) {
-                    return snapshot.data!;
-                  }
+                if (snapshot.hasData && snapshot.data != null) {
+                  return snapshot.data!;
                 }
                 return const Text("");
               });
         }
 
-        Padding _player(String username, String userId, int i) {
+        Padding _player(String username, String userId, int j) {
           Future<NetworkImage?> _getUserImage() async {
             final ref =
                 FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
@@ -82,7 +84,8 @@ class _ScoreBoardState extends State<ScoreBoard> {
             return FutureBuilder<NetworkImage?>(
                 future: _getUserImage(),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
+                  if (snapshot.hasData &&
+                      snapshot.connectionState != ConnectionState.waiting) {
                     return CircleAvatar(
                         backgroundImage: snapshot.data,
                         backgroundColor: thirdColor,
@@ -102,7 +105,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
                 title: Text(username,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 18)),
-                trailing: _score(i),
+                trailing: _score(j),
               ));
         }
 
@@ -110,9 +113,8 @@ class _ScoreBoardState extends State<ScoreBoard> {
           List<Widget> players = [];
           final usernames = gameModel.getListOfUsernames();
           final indexes = gameModel.getListOfIndexes();
-          final ids = gameModel.playersIds;
           for (int i = 0; i < usernames.length; i++) {
-            players.add(_player(usernames[i], ids[i], indexes[i]));
+            players.add(_player(usernames[i], _playersIds[i], indexes[i]));
           }
           return ListView(
               physics: const NeverScrollableScrollPhysics(),
@@ -127,9 +129,11 @@ class _ScoreBoardState extends State<ScoreBoard> {
               padding: EdgeInsets.symmetric(vertical: 100),
               child: Image(image: AssetImage('images/titles/winner.png'))),
           FutureBuilder(
-              future: _getUsersIds(),
+              future: _getUsersIdsOnce(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.data != null) {
+                if (snapshot.hasData &&
+                    snapshot.data != null &&
+                    snapshot.connectionState != ConnectionState.waiting) {
                   return Center(
                       child: Column(children: [
                     ConfettiWidget(
@@ -161,14 +165,12 @@ class _ScoreBoardState extends State<ScoreBoard> {
                         child: const Text('End Game',
                             style: TextStyle(fontSize: 18)),
                         onPressed: () {
-                          /*
                           if (gameModel.playerIndex == 0) {
                             FirebaseFirestore.instance
                                 .collection("$strVersion/custom_games")
                                 .doc(gameModel.pinCode)
-                                .delete();
+                                .update({"is_locked": true});
                           }
-                           */
                           gameModel.resetData();
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute<void>(

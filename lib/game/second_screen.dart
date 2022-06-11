@@ -22,7 +22,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   final List<Widget> _quizBodyWidgets = [];
-  late Future<void> _delayNavigator;
+  Future<void>? _delayNavigator;
+  bool _calculatedFinalScores = false;
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void dispose() {
     _controller.dispose();
-    _delayNavigator.ignore();
+    _delayNavigator?.ignore();
     super.dispose();
   }
 
@@ -165,30 +166,98 @@ class _SecondGameScreenState extends State<SecondGameScreen>
       });
     }
 
-    Consumer<GameModel> _concludeMatchWidget() {
+    Consumer<GameModel> _concludeMatchWidget(
+        List<Map<String, dynamic>> players) {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        if (!gameModel.selectedCorrectAnswer) {
-          return Container();
+        if (!_calculatedFinalScores && i == 0) {
+          // only admin calculates final scores for everyone
+          List<int> listOfScoresPerSlot = [];
+          for (int l = 0; l < maxPlayers; l++) {
+            listOfScoresPerSlot.add(players[l]["score"]);
+          }
+
+          // calculate false answers rewards
+          for (int j = 0; j < maxPlayers; j++) {
+            int jReward = 0;
+            if (players[j]["username"] != "") {
+              for (int k = 0; k < maxPlayers; k++) {
+                // add for player j all the false answers scores
+                String jFalseAnswer = players[j]["false_answer"];
+                String kSelectedAnswer = players[k]["selected_answer"];
+                if (jFalseAnswer == kSelectedAnswer && j != k) {
+                  int kRoundScore = players[k]["round_score"];
+                  jReward += kRoundScore;
+                }
+              }
+            }
+            listOfScoresPerSlot[j] += jReward;
+          }
+
+          // calculate correct answers rewards
+          String correctAnswer =
+              gameModel.gameAnswers[gameModel.currentQuestionIndex - 1];
+          for (int j = 0; j < maxPlayers; j++) {
+            int jReward = 0;
+            if (players[j]["username"] != "") {
+              String jSelectedAnswer = players[j]["selected_answer"];
+              if (jSelectedAnswer == correctAnswer) {
+                int jRoundScore = players[j]["round_score"];
+                jReward += jRoundScore;
+              }
+            }
+            listOfScoresPerSlot[j] += jReward;
+          }
+
+          // update final scores - ASSUMING 5 PLAYERS MAX - CHANGE IT IF NOT!
+          gameRef.update({
+            "player0.score": listOfScoresPerSlot[0],
+            "player1.score": listOfScoresPerSlot[1],
+            "player2.score": listOfScoresPerSlot[2],
+            "player3.score": listOfScoresPerSlot[3],
+            "player4.score": listOfScoresPerSlot[4],
+          });
+
+          _calculatedFinalScores = true;
         }
 
-        final currentRoundScore = gameModel.players[i]["round_score"];
-        return Padding(
-            padding: const EdgeInsets.only(top: 30),
-            child: ShowUp(
-                delay: 100,
-                child: Text("+$currentRoundScore",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      color: greenColor,
-                      fontWeight: FontWeight.bold,
-                      shadows: <Shadow>[
-                        Shadow(
-                          offset: Offset(2.0, 2.0),
-                          blurRadius: 8.0,
-                          color: defaultColor,
-                        ),
-                      ],
-                    ))));
+        if (gameModel.roundScoreView > 0) {
+          return Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: ShowUp(
+                  delay: 100,
+                  child: Text("+${gameModel.roundScoreView}",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        color: greenColor,
+                        fontWeight: FontWeight.bold,
+                        shadows: <Shadow>[
+                          Shadow(
+                            offset: Offset(2.0, 2.0),
+                            blurRadius: 8.0,
+                            color: defaultColor,
+                          ),
+                        ],
+                      ))));
+        } else {
+          // else show in red color
+          return const Padding(
+              padding: EdgeInsets.only(top: 30),
+              child: ShowUp(
+                  delay: 100,
+                  child: Text("+0",
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: redColor,
+                        fontWeight: FontWeight.bold,
+                        shadows: <Shadow>[
+                          Shadow(
+                            offset: Offset(2.0, 2.0),
+                            blurRadius: 8.0,
+                            color: defaultColor,
+                          ),
+                        ],
+                      ))));
+        }
       });
     }
 
@@ -218,34 +287,34 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                 if (players != null) {
                   if (_areAllSelectedAnswer(players)) {
                     // from here, all players pressed an answer
-                    // so the gameModel.players is updated!
-                    // must go for next question
                     if (!incremented) {
                       gameModel.currentQuestionIndex++;
+
+                      if (gameModel.currentQuestionIndex >= roundsPerGame) {
+                        _delayNavigator = Future.delayed(
+                            const Duration(seconds: delayScoreResult),
+                            () => WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => Navigator.pushReplacement<void, void>(
+                                    context,
+                                    MaterialPageRoute<void>(
+                                      builder: (BuildContext context) =>
+                                          const ScoreBoard(),
+                                    ))));
+                      } else {
+                        _delayNavigator = Future.delayed(
+                            const Duration(seconds: delayScoreResult),
+                            () => WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => Navigator.pushReplacement<void, void>(
+                                    context,
+                                    MaterialPageRoute<void>(
+                                      builder: (BuildContext context) =>
+                                          const FirstGameScreen(),
+                                    ))));
+                      }
+
                       incremented = true;
                     }
-                    if (gameModel.currentQuestionIndex >= roundsPerGame) {
-                      _delayNavigator = Future.delayed(
-                          const Duration(seconds: delayScoreResult),
-                          () => WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => Navigator.pushReplacement<void, void>(
-                                  context,
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) =>
-                                        const ScoreBoard(),
-                                  ))));
-                    } else {
-                      _delayNavigator = Future.delayed(
-                          const Duration(seconds: delayScoreResult),
-                          () => WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => Navigator.pushReplacement<void, void>(
-                                  context,
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) =>
-                                        const FirstGameScreen(),
-                                  ))));
-                    }
-                    return _concludeMatchWidget();
+                    return _concludeMatchWidget(players);
                   } else if (gameModel.selectedAnswer != "" &&
                       players[i]["selected_answer"] != "") {
                     // if not all selected answers, but i did select!

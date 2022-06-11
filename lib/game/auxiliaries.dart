@@ -126,27 +126,21 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
             _colorButton = orangeColor;
           });
 
-          int currentRoundScore = 0;
-          int totalScore = 0;
-          await gameRef.get().then((game) {
-            totalScore = game["player$i"]["score"];
-          });
+          // score of round == time left
+          // score is calculated by admin only after everyone selected answer
+          // round score view only reflects score of correct answer
 
           if (widget.isCorrect) {
-            gameModel.selectedCorrectAnswer = true;
-            currentRoundScore = correctAnswerScore + _timerView.animation.value;
-            totalScore += currentRoundScore;
-          } else {
-            gameModel.selectedCorrectAnswer = false;
+            gameModel.roundScoreView = _timerView.animation.value; // else 0
           }
-
+          int timeLeft = _timerView.animation.value;
+          gameModel.selectedCorrectAnswer = widget.isCorrect;
           gameModel.selectedAnswer = widget.answerText;
           gameModel.setDataToPlayer("selected_answer", widget.answerText, i);
-          gameModel.setDataToPlayer("round_score", currentRoundScore, i);
+          gameModel.setDataToPlayer("round_score", timeLeft, i);
 
           await gameRef.update({
-            "player$i.score": totalScore,
-            "player$i.round_score": currentRoundScore,
+            "player$i.round_score": timeLeft,
             "player$i.selected_answer": widget.answerText
           });
         }

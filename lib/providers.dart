@@ -248,7 +248,8 @@ class GameModel extends ChangeNotifier {
       "round_score": 0
     }
   ];
-  int currentQuestionIndex = 0; // incrementing on init of first screen
+  int currentQuestionIndex = 0;
+  int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
   bool _isPrivate = true;
   bool _isLocked = false;
   bool _selectedCorrectAnswer = false;
@@ -263,7 +264,6 @@ class GameModel extends ChangeNotifier {
   List<String> _gameAnswers = []; // "answers" in Firestore
   List<String> _gameCategories = []; // "categories" in Firestore
   List<Widget> currentQuizOptions = [];
-  List<String> _playersIds = [];
   final _falseAnswerController = TextEditingController();
 
   List<Map<String, dynamic>> get players => _playersMaps;
@@ -279,7 +279,6 @@ class GameModel extends ChangeNotifier {
   List<String> get gameQuestions => _gameQuestions;
   List<String> get gameAnswers => _gameAnswers;
   List<String> get gameCategories => _gameCategories;
-  List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
 
   set players(List<Map<String, dynamic>> players) {
@@ -308,22 +307,39 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //sorted by scores
   List<String> getListOfUsernames() {
-    List<String> usernames = [];
+    List<List<dynamic>> usernamesWithScore = [];
     for (int i = 0; i < maxPlayers; i++) {
       if (_playersMaps[i]["username"] != "") {
-        usernames.add(_playersMaps[i]["username"]);
+        usernamesWithScore.add([
+          _playersMaps[i]["username"].toString(),
+          _playersMaps[i]["score"].toInt()
+        ]);
       }
+    }
+    usernamesWithScore
+        .sort((player1, player2) => player2[1].compareTo(player1[1]));
+    List<String> usernames = [];
+    for (int i = 0; i < usernamesWithScore.length; i++) {
+      usernames.add(usernamesWithScore[i][0].toString());
     }
     return usernames;
   }
 
+  //sorted by scores
   List<int> getListOfIndexes() {
-    List<int> indexes = [];
+    List<List<dynamic>> indexesWithScore = [];
     for (int i = 0; i < maxPlayers; i++) {
       if (_playersMaps[i]["username"] != "") {
-        indexes.add(i);
+        indexesWithScore.add([i, _playersMaps[i]["score"].toInt()]);
       }
+    }
+    indexesWithScore
+        .sort((player1, player2) => player2[1].compareTo(player1[1]));
+    List<int> indexes = [];
+    for (int i = 0; i < indexesWithScore.length; i++) {
+      indexes.add(indexesWithScore[i][0]);
     }
     return indexes;
   }
@@ -448,11 +464,6 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set playersIds(List<String> urls) {
-    _playersIds = urls;
-    notifyListeners();
-  }
-
   void resetData() {
     _playersMaps = [
       {
@@ -498,6 +509,7 @@ class GameModel extends ChangeNotifier {
     ];
     currentQuestionIndex = 0;
     playerIndex = 0;
+    roundScoreView = 0;
     _isPrivate = true;
     _isLocked = false;
     _pinCode = 'null';
