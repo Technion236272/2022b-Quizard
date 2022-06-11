@@ -42,8 +42,7 @@ class Rules extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                    ),
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
                     height: 70,
                     width: 350,
                     child: Column(
@@ -57,7 +56,7 @@ class Rules extends StatelessWidget {
                           Text(
                             '2-5',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -66,8 +65,7 @@ class Rules extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                    ),
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
                     height: 70,
                     width: 350,
                     child: Column(
@@ -81,7 +79,7 @@ class Rules extends StatelessWidget {
                           Text(
                             'The player with the highest score wins.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -90,8 +88,7 @@ class Rules extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                    ),
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
                     height: 260,
                     width: 350,
                     child: Column(
@@ -103,25 +100,25 @@ class Rules extends StatelessWidget {
                           Text(
                             '-Each player enters a false answer.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-All the false answers are shown with the right answer to all players.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Players are rewarded with points for choosing the right answer.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Players are rewarded with points for every player choosing their false answer.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -130,8 +127,7 @@ class Rules extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))
-                    ),
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
                     height: 150,
                     width: 350,
                     child: Column(
@@ -144,13 +140,13 @@ class Rules extends StatelessWidget {
                           Text(
                             '-Players are rewarded for choosing the right answer multiple times in a row.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                           Padding(padding: EdgeInsets.all(4)),
                           Text(
                             '-Faster answer means more points.',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 18),
+                                TextStyle(color: darkGreyColor, fontSize: 18),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -283,8 +279,6 @@ class Play extends StatelessWidget {
       "questions": [],
       "answers": [],
       "categories": [],
-      "question_index": 0,
-      "game_phase": 1,
     };
     Map<String, dynamic> mapPlayer = {
       "username": "",
@@ -292,7 +286,6 @@ class Play extends StatelessWidget {
       "false_answer": "",
       "selected_answer": "",
       "score": 0,
-      "round_score": 0
     };
     for (int i = 1; i < maxPlayers; i++) {
       game.addAll({"player$i": mapPlayer});
@@ -313,12 +306,13 @@ class Play extends StatelessWidget {
             gameModel.resetData();
             gameModel.isPrivate = true;
             _initializeGame(gameModel, loginModel);
-            await Future.delayed(const Duration(milliseconds: 250));
+            await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
           }
           if (imgPath.contains('join_existing')) {
-            await Future.delayed(const Duration(milliseconds: 250));
+            gameModel.resetData();
+            await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (context) => JoinGame()));
           }

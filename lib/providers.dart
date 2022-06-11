@@ -249,13 +249,14 @@ class GameModel extends ChangeNotifier {
     }
   ];
   int currentQuestionIndex = 0;
+  int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
   bool _isPrivate = true;
   bool _isLocked = false;
-  bool enableSubmitFalseAnswer = true;
   bool _selectedCorrectAnswer = false;
+  String _selectedAnswer = "";
+  bool _timeOut = false;
   String _pinCode = 'null';
   int playerIndex = 0; // Starts from 0 for admin
-  int currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
@@ -263,13 +264,14 @@ class GameModel extends ChangeNotifier {
   List<String> _gameAnswers = []; // "answers" in Firestore
   List<String> _gameCategories = []; // "categories" in Firestore
   List<Widget> currentQuizOptions = [];
-  List<String> _playersIds = [];
   final _falseAnswerController = TextEditingController();
 
   List<Map<String, dynamic>> get players => _playersMaps;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
   bool get selectedCorrectAnswer => _selectedCorrectAnswer;
+  String get selectedAnswer => _selectedAnswer;
+  bool get timeOut => _timeOut;
   String get pinCode => _pinCode;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
@@ -277,11 +279,25 @@ class GameModel extends ChangeNotifier {
   List<String> get gameQuestions => _gameQuestions;
   List<String> get gameAnswers => _gameAnswers;
   List<String> get gameCategories => _gameCategories;
-  List<String> get playersIds => _playersIds;
   TextEditingController get falseAnswerController => _falseAnswerController;
+
+  set players(List<Map<String, dynamic>> players) {
+    _playersMaps = players;
+    notifyListeners();
+  }
+
+  set timeOut(bool value) {
+    _timeOut = value;
+    notifyListeners();
+  }
 
   set selectedCorrectAnswer(bool value) {
     _selectedCorrectAnswer = value;
+    notifyListeners();
+  }
+
+  set selectedAnswer(String value) {
+    _selectedAnswer = value;
     notifyListeners();
   }
 
@@ -291,24 +307,47 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> getListOfUsernames() {
-    List<String> usernames = [];
-    for (int i = 0; i < maxPlayers; i++) {
-      if (_playersMaps[i]["username"] != "") {
-        usernames.add(_playersMaps[i]["username"]);
+  List _bubbleSortByScore(List<List<dynamic>> list) {
+    for (int i = 0; i < list.length - 1; i++) {
+      for (int j = 0; j < list.length - i - 1; j++) {
+        if (list[j][1].toInt() < list[j + 1][1].toInt()) {
+          final temp = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = temp;
+        }
       }
     }
-    return usernames;
+    return list;
   }
 
-  List<int> getListOfIndexes() {
-    List<int> indexes = [];
+  List<dynamic> getPlayersSortedByScore(bool indexesOnly) {
+    List<List<dynamic>> playersList = [];
+    // build usernames with scores
     for (int i = 0; i < maxPlayers; i++) {
       if (_playersMaps[i]["username"] != "") {
-        indexes.add(i);
+        if (!indexesOnly) {
+          playersList.add([
+            _playersMaps[i]["username"].toString(),
+            _playersMaps[i]["score"].toInt()
+          ]);
+        } else {
+          playersList.add([i, _playersMaps[i]["score"].toInt()]);
+        }
       }
     }
-    return indexes;
+
+    final sortedList = _bubbleSortByScore(playersList);
+
+    var retValList = [];
+    for (int i = 0; i < sortedList.length; i++) {
+      if (indexesOnly) {
+        retValList.add(sortedList[i][0].toInt());
+      } else {
+        retValList.add(sortedList[i][0].toString());
+      }
+    }
+
+    return retValList;
   }
 
   int getNumOfPlayers() {
@@ -431,11 +470,6 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set playersIds(List<String> urls) {
-    _playersIds = urls;
-    notifyListeners();
-  }
-
   void resetData() {
     _playersMaps = [
       {
@@ -481,8 +515,7 @@ class GameModel extends ChangeNotifier {
     ];
     currentQuestionIndex = 0;
     playerIndex = 0;
-    currentPhase = 1;
-    enableSubmitFalseAnswer = true;
+    roundScoreView = 0;
     _isPrivate = true;
     _isLocked = false;
     _pinCode = 'null';
@@ -494,6 +527,8 @@ class GameModel extends ChangeNotifier {
     _gameCategories = [];
     currentQuizOptions = [];
     _falseAnswerController.text = "";
+    _selectedCorrectAnswer = false;
+    _selectedAnswer = "";
     notifyListeners();
   }
 
