@@ -412,20 +412,10 @@ class Settings extends StatelessWidget {
               case _aboutDialogText:
                 showAboutDialog(
                   context: context,
-                  applicationIcon: null, //TODO: Add our icon
+                  applicationIcon: const FlutterLogo(), //TODO: Add our icon
                   applicationName: 'Quizard',
                   applicationVersion: appVersion,
                   applicationLegalese: '© 2022 Quizard',
-                  /*
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const Text('App information'), //TODO: Add information
-                    const Text('App Privacy Policy'), //TODO: Add PP
-                    const Text('App Terms of Service') //TODO: Add ToS
-                  ],
-                   */
                 );
                 break;
             }
