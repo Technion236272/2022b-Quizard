@@ -101,6 +101,7 @@ class _WelcomePageState extends State<WelcomePage> {
               loginModel.setMonthlyWins(user["MonthlyWins"]);
             } catch (e) {
               print("ERROR = $e");
+
             }
             loginModel.setUserImageUrl(photoLink);
           }
@@ -140,8 +141,9 @@ class _WelcomePageState extends State<WelcomePage> {
                 try {
                   loginModel.setDailyWins(user["DailyWins"]);
                   loginModel.setMonthlyWins(user["MonthlyWins"]);
-                } catch (e) {
-                  print("ERROR = $e");
+                }catch(e){
+                  debugPrint("ERROR = $e");
+                }
                 }
                 loginModel.setPassword(loginModel.passwordController.text);
                 _goToHomePage();
@@ -274,6 +276,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
+                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
@@ -328,6 +331,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.user?.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
+                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.user?.uid).set(user);
