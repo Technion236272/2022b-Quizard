@@ -145,6 +145,8 @@ class _WelcomePageState extends State<WelcomePage> {
                 }
 
                 loginModel.setPassword(loginModel.passwordController.text);
+                loginModel.emailOrUsernameController.text = "";
+                loginModel.passwordController.text = "";
                 _goToHomePage();
                 return;
               }
@@ -171,6 +173,9 @@ class _WelcomePageState extends State<WelcomePage> {
         loginModel.setInitBlocksAvatar(blogImage!);
         Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (context) => const SignUpScreen()));
+        setState(() {
+          _loadingSignUp = false;
+        });
       }
     }
 

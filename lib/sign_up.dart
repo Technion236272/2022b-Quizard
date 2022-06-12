@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home.dart';
-import 'main.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -175,11 +174,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               size: 32.0,
                             ),
                             onTap: () {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const WelcomePage(),
-                                  ));
+                              Navigator.of(context).pop();
                             })
                       ],
                     ),
