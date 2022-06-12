@@ -19,117 +19,118 @@ class AddQuestionForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              onTap: () {
-                // Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-              },
-              controller: _categoryController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter any category';
-                }
-                return null;
-              },
-              maxLength: 20,
-              minLines: 1,
-              maxLines: 1,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-              ),
-            ),
-            TextFormField(
-              onTap: () {
-                // Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-              },
-              controller: _questionController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter any question';
-                }
-                return null;
-              },
-              maxLength: 50,
-              minLines: 1,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Question',
-              ),
-            ),
-            TextFormField(
-              onTap: () {
-                // Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-              },
-              controller: _answerController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter any answer';
-                }
-                return null;
-              },
-              maxLength: 20,
-              minLines: 1,
-              maxLines: 1,
-              decoration: const InputDecoration(
-                labelText: 'Answer',
-              ),
-            ),
-            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await FirebaseFirestore.instance
-                          .collection('$firestoreMainPath/users')
-                          .doc(loginModel.userId)
-                          .get()
-                          .then((value) {
-                        List questions = value["questions"];
-                        questions.add(_questionController.text);
-                        List answers = value["answers"];
-                        answers.add(_answerController.text);
-                        List categories = value["categories"];
-                        categories.add(_categoryController.text);
-                        FirebaseFirestore.instance
-                            .collection('$firestoreMainPath/users')
-                            .doc(loginModel.userId)
-                            .update({
-                          "questions": questions,
-                          "answers": answers,
-                          "categories": categories
-                        }).then((_) => Navigator.of(context).pop(true));
-                        Provider.of<LoginModel>(context, listen: false)
-                            .notifyAddedQuestion();
-                      });
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  onTap: () {
+                    // Show navigation buttons
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                        overlays: [SystemUiOverlay.bottom]);
+                  },
+                  controller: _categoryController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter any category';
                     }
+                    return null;
                   },
-                  child: const Text('Submit'),
+                  maxLength: 20,
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
+                TextFormField(
+                  onTap: () {
+                    // Show navigation buttons
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                        overlays: [SystemUiOverlay.bottom]);
                   },
-                  child: const Text('Cancel'),
+                  controller: _questionController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter any question';
+                    }
+                    return null;
+                  },
+                  maxLength: 50,
+                  minLines: 1,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Question',
+                  ),
                 ),
-              ),
-            ])
-          ],
-        ),
-      );
+                TextFormField(
+                  onTap: () {
+                    // Show navigation buttons
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                        overlays: [SystemUiOverlay.bottom]);
+                  },
+                  controller: _answerController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter any answer';
+                    }
+                    return null;
+                  },
+                  maxLength: 20,
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: const InputDecoration(
+                    labelText: 'Answer',
+                  ),
+                ),
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await FirebaseFirestore.instance
+                              .collection('$firestoreMainPath/users')
+                              .doc(loginModel.userId)
+                              .get()
+                              .then((value) {
+                            List questions = value["questions"];
+                            questions.add(_questionController.text);
+                            List answers = value["answers"];
+                            answers.add(_answerController.text);
+                            List categories = value["categories"];
+                            categories.add(_categoryController.text);
+                            FirebaseFirestore.instance
+                                .collection('$firestoreMainPath/users')
+                                .doc(loginModel.userId)
+                                .update({
+                              "questions": questions,
+                              "answers": answers,
+                              "categories": categories
+                            }).then((_) => Navigator.of(context).pop(true));
+                            Provider.of<LoginModel>(context, listen: false)
+                                .notifyAddedQuestion();
+                          });
+                        }
+                      },
+                      child: const Text('Submit'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                ])
+              ],
+            ),
+          ));
     });
   }
 }
