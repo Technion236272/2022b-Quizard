@@ -55,8 +55,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .signUp(emailController.text.trim(), passwordController.text.trim());
       final userId = uid!;
       loginModel.setUserId(userId);
+      await setAvatar();
       await AuthModel.instance().setUp(
-          emailController.text.trim(), userNameController.text.trim(), uid);
+          emailController.text.trim(), userNameController.text.trim(), uid,loginModel.userImageUrl);
     }
 
     Future<void> _goToHomePage() async {
@@ -101,8 +102,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
         }
       }).then((value) async {
+      //  await setAvatar();
         await register();
-        await setAvatar();
         await _goToHomePage();
       });
     }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -595,27 +596,44 @@ class _LeaderboardState extends State<Leaderboard>
 
 
       for (var user in users.docs) {
+        var url = "";
+        try{
+          final ref = FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+           url = await ref.getDownloadURL();
+        }catch(e){
+          url  = "";
+          print("No image found");
+        }
+
+
+        if(url == ""){
+          try{
+            url = user["photoLink"];
+          }catch(e){
+            print("PhotoLink not present");
+          }
+
+        }
+
         tempAllTimeWinsList.add(LeaderBoardModel(user.id, user["username"],
-            "https://source.unsplash.com/user/c_v_r/1900x800", user["wins"]));
+            url, user["wins"]));
 
         try {
           tempDailyWinsList.add(LeaderBoardModel(
-              user.id,
-              user["username"],
-              "https://source.unsplash.com/user/c_v_r/1900x800",
+              user.id, user["username"],
+              url,
               user["DailyWins"]));
         } catch (e) {
-          print("ERROR in getting dailyWins for user id = ${user.id} = $e");
+          debugPrint("ERROR in getting dailyWins for user id = ${user.id} = $e");
         }
 
         try {
           tempMonthlyWinsList.add(LeaderBoardModel(
-              user.id,
-              user["username"],
-              "https://source.unsplash.com/user/c_v_r/1900x800",
+              user.id, user["username"],
+              url,
               user["MonthlyWins"]));
         } catch (e) {
-          print("ERROR in getting MonthlyWins for user id = ${user.id} = $e");
+          debugPrint("ERROR in getting MonthlyWins for user id = ${user.id} = $e");
         }
       }
 
@@ -630,7 +648,7 @@ class _LeaderboardState extends State<Leaderboard>
         monthlyWinsList.addAll(tempMonthlyWinsList.reversed.toList());
 
         getMyRanks(userId);
-        print("All Data Added");
+        debugPrint("All Data Added");
       });
     });
   }
