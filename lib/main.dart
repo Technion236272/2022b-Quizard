@@ -48,7 +48,7 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  var loading = false;
+  bool _loadingSignUp = false;
 
   @override
   void initState() {
@@ -101,7 +101,6 @@ class _WelcomePageState extends State<WelcomePage> {
               loginModel.setMonthlyWins(user["MonthlyWins"]);
             } catch (e) {
               print("ERROR = $e");
-
             }
             loginModel.setUserImageUrl(photoLink);
           }
@@ -141,7 +140,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 try {
                   loginModel.setDailyWins(user["DailyWins"]);
                   loginModel.setMonthlyWins(user["MonthlyWins"]);
-                }catch(e){
+                } catch (e) {
                   debugPrint("ERROR = $e");
                 }
 
@@ -160,14 +159,19 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     void _signUpPrep() async {
-      final loginModel = Provider.of<LoginModel>(context, listen: false);
-      final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
-      final url = await ref.getDownloadURL();
-      loginModel.setUserImageUrl(url);
-      final blogImage = await ref.getData();
-      loginModel.setInitBlocksAvatar(blogImage!);
-      Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => const SignUpScreen()));
+      if (!_loadingSignUp) {
+        setState(() {
+          _loadingSignUp = true;
+        });
+        final loginModel = Provider.of<LoginModel>(context, listen: false);
+        final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
+        final url = await ref.getDownloadURL();
+        loginModel.setUserImageUrl(url);
+        final blogImage = await ref.getData();
+        loginModel.setInitBlocksAvatar(blogImage!);
+        Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (context) => const SignUpScreen()));
+      }
     }
 
     // Consumer for disabling button while logging in
@@ -276,7 +280,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
@@ -331,7 +336,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.user?.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.user?.uid).set(user);

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home.dart';
+import 'main.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -56,8 +57,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final userId = uid!;
       loginModel.setUserId(userId);
       await setAvatar();
-      await AuthModel.instance().setUp(
-          emailController.text.trim(), userNameController.text.trim(), uid,loginModel.userImageUrl);
+      await AuthModel.instance().setUp(emailController.text.trim(),
+          userNameController.text.trim(), uid, loginModel.userImageUrl);
     }
 
     Future<void> _goToHomePage() async {
@@ -102,7 +103,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
         }
       }).then((value) async {
-      //  await setAvatar();
         await register();
         await _goToHomePage();
       });
@@ -163,7 +163,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
           body: SingleChildScrollView(
-              reverse: true, // Helps to see the whole form. amazing!
+              reverse: true, // Helps to see the whole form
               child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(children: <Widget>[
@@ -175,7 +175,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               size: 32.0,
                             ),
                             onTap: () {
-                              Navigator.of(context).pop();
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const WelcomePage(),
+                                  ));
                             })
                       ],
                     ),
