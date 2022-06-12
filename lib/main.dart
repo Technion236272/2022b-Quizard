@@ -144,7 +144,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 }catch(e){
                   debugPrint("ERROR = $e");
                 }
-                }
+
                 loginModel.setPassword(loginModel.passwordController.text);
                 _goToHomePage();
                 return;
