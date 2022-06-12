@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
+import 'firebase_options.dart';
 import 'home.dart';
 import 'providers.dart';
 import 'sign_up.dart';
@@ -16,27 +19,55 @@ import 'sign_up.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      // options: DefaultFirebaseOptions.currentPlatform,
-      );
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
     ChangeNotifierProvider(create: (context) => GameModel())
-  ], child: const MyApp()));
+  ], child: const Root()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class Root extends StatefulWidget {
+  // This widget is the root of the application.
+  const Root({Key? key}) : super(key: key);
+
+  @override
+  _RootState createState() => _RootState();
+}
+
+class _RootState extends State<Root> {
+  late StreamSubscription? _userStateListener;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _userStateListener =
+        FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        debugPrint('DEBUG: User is signed out');
+      } else {
+        debugPrint('DEBUG: User is signed in');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _userStateListener?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: Theme.of(context).copyWith(
-        colorScheme:
-            Theme.of(context).colorScheme.copyWith(primary: defaultColor),
-        scaffoldBackgroundColor: backgroundColor,
-      ),
-      home: const WelcomePage(),
-    );
+        theme: Theme.of(context).copyWith(
+          colorScheme:
+              Theme.of(context).colorScheme.copyWith(primary: defaultColor),
+          scaffoldBackgroundColor: backgroundColor,
+        ),
+        home: const WelcomePage());
   }
 }
 
