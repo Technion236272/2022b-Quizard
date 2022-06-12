@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
@@ -24,24 +25,61 @@ class AddQuestionForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _categoryController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any category';
+                }
+                return null;
+              },
+              maxLength: 20,
               minLines: 1,
+              maxLines: 1,
               decoration: const InputDecoration(
                 labelText: 'Category',
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _questionController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any question';
+                }
+                return null;
+              },
+              maxLength: 50,
               minLines: 1,
-              maxLines: 5,
+              maxLines: 2,
               decoration: const InputDecoration(
                 labelText: 'Question',
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _answerController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any answer';
+                }
+                return null;
+              },
+              maxLength: 20,
               minLines: 1,
-              maxLines: 2,
+              maxLines: 1,
               decoration: const InputDecoration(
                 labelText: 'Answer',
               ),
@@ -51,28 +89,30 @@ class AddQuestionForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
-                        .doc(loginModel.userId)
-                        .get()
-                        .then((value) {
-                      List questions = value["questions"];
-                      questions.add(_questionController.text);
-                      List answers = value["answers"];
-                      answers.add(_answerController.text);
-                      List categories = value["categories"];
-                      categories.add(_categoryController.text);
-                      FirebaseFirestore.instance
-                          .collection('$strVersion/users')
+                    if (_formKey.currentState!.validate()) {
+                      await FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/users')
                           .doc(loginModel.userId)
-                          .update({
-                        "questions": questions,
-                        "answers": answers,
-                        "categories": categories
-                      }).then((_) => Navigator.of(context).pop(true));
-                      Provider.of<LoginModel>(context, listen: false)
-                          .notifyAddedQuestion();
-                    });
+                          .get()
+                          .then((value) {
+                        List questions = value["questions"];
+                        questions.add(_questionController.text);
+                        List answers = value["answers"];
+                        answers.add(_answerController.text);
+                        List categories = value["categories"];
+                        categories.add(_categoryController.text);
+                        FirebaseFirestore.instance
+                            .collection('$firestoreMainPath/users')
+                            .doc(loginModel.userId)
+                            .update({
+                          "questions": questions,
+                          "answers": answers,
+                          "categories": categories
+                        }).then((_) => Navigator.of(context).pop(true));
+                        Provider.of<LoginModel>(context, listen: false)
+                            .notifyAddedQuestion();
+                      });
+                    }
                   },
                   child: const Text('Submit'),
                 ),
@@ -156,7 +196,7 @@ class _QuestionsState extends State<Questions> {
                         child: ElevatedButton(
                           onPressed: () async {
                             await FirebaseFirestore.instance
-                                .collection('$strVersion/users')
+                                .collection('$firestoreMainPath/users')
                                 .doc(userId)
                                 .get()
                                 .then((value) {
@@ -174,7 +214,7 @@ class _QuestionsState extends State<Questions> {
                                 }
                               }
                               FirebaseFirestore.instance
-                                  .collection('$strVersion/users')
+                                  .collection('$firestoreMainPath/users')
                                   .doc(userId)
                                   .update({
                                 "questions": questions,
@@ -217,7 +257,7 @@ class _QuestionsState extends State<Questions> {
               TextButton(
                   onPressed: () async {
                     await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
+                        .collection('$firestoreMainPath/users')
                         .doc(userId)
                         .get()
                         .then((value) {
@@ -235,7 +275,7 @@ class _QuestionsState extends State<Questions> {
                         }
                       }
                       FirebaseFirestore.instance
-                          .collection('$strVersion/users')
+                          .collection('$firestoreMainPath/users')
                           .doc(userId)
                           .update({
                         "questions": questions,
@@ -260,7 +300,7 @@ class _QuestionsState extends State<Questions> {
       BuildContext context, String userId) async {
     List<Dismissible> trivia = <Dismissible>[];
     await FirebaseFirestore.instance
-        .collection('$strVersion/users')
+        .collection('$firestoreMainPath/users')
         .doc(userId)
         .get()
         .then((value) {
@@ -322,6 +362,7 @@ class _QuestionsState extends State<Questions> {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           floatingActionButton: FloatingActionButton(
               backgroundColor: blueColor,
               child: const Icon(Icons.add),
@@ -333,7 +374,9 @@ class _QuestionsState extends State<Questions> {
                         title: const Text("Add Question"),
                         content: AddQuestionForm());
                   },
-                );
+                ).then((value) => SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.manual,
+                    overlays: []));
               }),
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
@@ -344,8 +387,8 @@ class _QuestionsState extends State<Questions> {
                       : loginModel.userId),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
+                  loginModel.cachedQuestionsList = snapshot.data;
                   if (snapshot.data.isNotEmpty) {
-                    loginModel.cachedQuestionsList = snapshot.data;
                     return ListView(children: loginModel.cachedQuestionsList);
                   } else {
                     return const Padding(

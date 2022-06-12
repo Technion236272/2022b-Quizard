@@ -32,7 +32,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
 
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
     gameRef.update({
@@ -57,15 +57,16 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 
     Future<void> _submitFalseAnswer() async {
+      FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+
       // don't proceed if that's the correct answer
       if (gameModel.falseAnswerController.text.toLowerCase() ==
           gameModel.gameAnswers[gameModel.currentQuestionIndex].toLowerCase()) {
-        FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
         constSnackBar("Psst, that's the correct answer", context);
         return;
       }
@@ -83,6 +84,8 @@ class _FirstGameScreenState extends State<FirstGameScreen>
         gameModel.timeOut = false;
         String submittedFalseAnswer = gameModel.falseAnswerController.text;
         int currentScore = 0;
+        // smoother on dismiss keyboard and submit with this delay
+        await Future.delayed(const Duration(milliseconds: 500));
         await gameRef.get().then((game) {
           currentScore = game["player$i"]["score"];
         });
@@ -237,6 +240,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     return Scaffold(
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(
+            reverse: true, // Helps to see the whole form
             child: Column(children: [_firstScreenBody(), _waitMessage()])));
   }
 }

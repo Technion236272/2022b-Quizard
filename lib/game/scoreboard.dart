@@ -23,7 +23,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
 
     Future<bool> _getUsersIdsOnce() async {
@@ -31,7 +31,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         return false;
       }
       await FirebaseFirestore.instance
-          .collection("$strVersion/custom_games")
+          .collection("$firestoreMainPath/custom_games")
           .doc(gameModel.pinCode)
           .get()
           .then((game) {
@@ -40,7 +40,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         }
       });
       await FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) async {
         List players = gameModel.getPlayersSortedByScore(false);

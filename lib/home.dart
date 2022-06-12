@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -262,8 +261,8 @@ class Play extends StatelessWidget {
       GameModel gameModel, LoginModel loginModel) async {
     gameModel.setDataToPlayer("username", loginModel.username, 0);
     gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
-    var games =
-        FirebaseFirestore.instance.collection('$strVersion/custom_games');
+    var games = FirebaseFirestore.instance
+        .collection('$firestoreMainPath/custom_games');
     Map<String, dynamic> mapAdmin = {
       "username": loginModel.username,
       "is_ready": false,
@@ -317,6 +316,9 @@ class Play extends StatelessWidget {
             await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (context) => JoinGame()));
+            // Show navigation buttons
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: [SystemUiOverlay.bottom]);
           }
         },
         child: Padding(
@@ -624,43 +626,40 @@ class _LeaderboardState extends State<Leaderboard>
 
       for (var user in users.docs) {
         var url = "";
-        try{
-          final ref = FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
-           url = await ref.getDownloadURL();
-        }catch(e){
-          url  = "";
+        try {
+          final ref =
+              FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+          url = await ref.getDownloadURL();
+        } catch (e) {
+          url = "";
           print("No image found");
         }
 
-
-        if(url == ""){
-          try{
+        if (url == "") {
+          try {
             url = user["photoLink"];
-          }catch(e){
+          } catch (e) {
             print("PhotoLink not present");
           }
-
         }
 
-        tempAllTimeWinsList.add(LeaderBoardModel(user.id, user["username"],
-            url, user["wins"]));
+        tempAllTimeWinsList.add(
+            LeaderBoardModel(user.id, user["username"], url, user["wins"]));
 
         try {
           tempDailyWinsList.add(LeaderBoardModel(
-              user.id, user["username"],
-              url,
-              user["DailyWins"]));
+              user.id, user["username"], url, user["DailyWins"]));
         } catch (e) {
-          debugPrint("ERROR in getting dailyWins for user id = ${user.id} = $e");
+          debugPrint(
+              "ERROR in getting dailyWins for user id = ${user.id} = $e");
         }
 
         try {
           tempMonthlyWinsList.add(LeaderBoardModel(
-              user.id, user["username"],
-              url,
-              user["MonthlyWins"]));
+              user.id, user["username"], url, user["MonthlyWins"]));
         } catch (e) {
-          debugPrint("ERROR in getting MonthlyWins for user id = ${user.id} = $e");
+          debugPrint(
+              "ERROR in getting MonthlyWins for user id = ${user.id} = $e");
         }
       }
 

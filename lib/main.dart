@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
+import 'firebase_options.dart';
 import 'home.dart';
 import 'providers.dart';
 import 'sign_up.dart';
@@ -16,27 +19,55 @@ import 'sign_up.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      // options: DefaultFirebaseOptions.currentPlatform,
-      );
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => LoginModel()),
     ChangeNotifierProvider(create: (context) => GameModel())
-  ], child: const MyApp()));
+  ], child: const Root()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class Root extends StatefulWidget {
+  // This widget is the root of the application.
+  const Root({Key? key}) : super(key: key);
+
+  @override
+  _RootState createState() => _RootState();
+}
+
+class _RootState extends State<Root> {
+  late StreamSubscription? _userStateListener;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _userStateListener =
+        FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        debugPrint('DEBUG: User is signed out');
+      } else {
+        debugPrint('DEBUG: User is signed in');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _userStateListener?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: Theme.of(context).copyWith(
-        colorScheme:
-            Theme.of(context).colorScheme.copyWith(primary: defaultColor),
-        scaffoldBackgroundColor: backgroundColor,
-      ),
-      home: const WelcomePage(),
-    );
+        theme: Theme.of(context).copyWith(
+          colorScheme:
+              Theme.of(context).colorScheme.copyWith(primary: defaultColor),
+          scaffoldBackgroundColor: backgroundColor,
+        ),
+        home: const WelcomePage());
   }
 }
 
@@ -48,7 +79,7 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  var loading = false;
+  bool _loadingSignUp = false;
 
   @override
   void initState() {
@@ -87,7 +118,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
     void login(photoLink) {
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) async {
         for (var user in users.docs) {
@@ -101,7 +132,6 @@ class _WelcomePageState extends State<WelcomePage> {
               loginModel.setMonthlyWins(user["MonthlyWins"]);
             } catch (e) {
               print("ERROR = $e");
-
             }
             loginModel.setUserImageUrl(photoLink);
           }
@@ -123,7 +153,7 @@ class _WelcomePageState extends State<WelcomePage> {
       }
 
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) async {
         for (var user in users.docs) {
@@ -141,11 +171,13 @@ class _WelcomePageState extends State<WelcomePage> {
                 try {
                   loginModel.setDailyWins(user["DailyWins"]);
                   loginModel.setMonthlyWins(user["MonthlyWins"]);
-                }catch(e){
+                } catch (e) {
                   debugPrint("ERROR = $e");
                 }
 
                 loginModel.setPassword(loginModel.passwordController.text);
+                loginModel.emailOrUsernameController.text = "";
+                loginModel.passwordController.text = "";
                 _goToHomePage();
                 return;
               }
@@ -160,14 +192,22 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     void _signUpPrep() async {
-      final loginModel = Provider.of<LoginModel>(context, listen: false);
-      final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
-      final url = await ref.getDownloadURL();
-      loginModel.setUserImageUrl(url);
-      final blogImage = await ref.getData();
-      loginModel.setInitBlocksAvatar(blogImage!);
-      Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => const SignUpScreen()));
+      if (!_loadingSignUp) {
+        setState(() {
+          _loadingSignUp = true;
+        });
+        final loginModel = Provider.of<LoginModel>(context, listen: false);
+        final ref = FirebaseStorage.instance.ref('images/profiles/avatar.png');
+        final url = await ref.getDownloadURL();
+        loginModel.setUserImageUrl(url);
+        final blogImage = await ref.getData();
+        loginModel.setInitBlocksAvatar(blogImage!);
+        Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (context) => const SignUpScreen()));
+        setState(() {
+          _loadingSignUp = false;
+        });
+      }
     }
 
     // Consumer for disabling button while logging in
@@ -255,7 +295,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               signInWithGoogle().then((value) {
                                 bool userExist = false;
                                 FirebaseFirestore.instance
-                                    .collection('$strVersion/users')
+                                    .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
                                   for (var user in users.docs) {
@@ -267,7 +307,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                   }
                                   if (!userExist) {
                                     var users = FirebaseFirestore.instance
-                                        .collection("$strVersion/users");
+                                        .collection("$firestoreMainPath/users");
                                     final userToAdd = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
@@ -276,7 +316,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
@@ -310,7 +351,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               signinWithFacebook().then((value) {
                                 bool userExist = false;
                                 FirebaseFirestore.instance
-                                    .collection('$strVersion/users')
+                                    .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
                                   for (var user in users.docs) {
@@ -322,7 +363,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                   }
                                   if (!userExist) {
                                     var users = FirebaseFirestore.instance
-                                        .collection("$strVersion/users");
+                                        .collection("$firestoreMainPath/users");
                                     final user = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
@@ -331,7 +372,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "username": value.user?.displayName,
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.user?.uid).set(user);

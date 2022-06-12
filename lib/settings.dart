@@ -45,6 +45,11 @@ class ChangePasswordForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _oldPasswordController,
               minLines: 1,
               obscureText: true,
@@ -64,6 +69,11 @@ class ChangePasswordForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _newPasswordController,
               minLines: 1,
               obscureText: true,
@@ -80,6 +90,11 @@ class ChangePasswordForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _repeatPasswordController,
               minLines: 1,
               obscureText: true,
@@ -188,6 +203,11 @@ class ChangeEmailForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _textController,
               minLines: 1,
               decoration: const InputDecoration(
@@ -204,7 +224,7 @@ class ChangeEmailForm extends StatelessWidget {
                         .then((value) {
                       if (value == true) {
                         FirebaseFirestore.instance
-                            .collection('$strVersion/users')
+                            .collection('$firestoreMainPath/users')
                             .doc(loginModel.userId)
                             .update({
                           "email": _textController.text,
@@ -259,6 +279,11 @@ class ChangeUsernameForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _textController,
               minLines: 1,
               decoration: const InputDecoration(
@@ -271,7 +296,7 @@ class ChangeUsernameForm extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
+                        .collection('$firestoreMainPath/users')
                         .doc(loginModel.userId)
                         .update({
                       "username": _textController.text,
@@ -314,6 +339,7 @@ class Settings extends StatelessWidget {
   static const _changeUsernameText = 'Change Username';
   static const _changeEmailText = 'Change Email';
   static const _changePasswordText = 'Change Password';
+  static const _aboutDialogText = 'About';
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(
@@ -349,30 +375,48 @@ class Settings extends StatelessWidget {
                 break;
               case _changeUsernameText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changeUsernameText),
-                          content: ChangeUsernameForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changeUsernameText),
+                              content: ChangeUsernameForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
                 break;
               case _changeEmailText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changeEmailText),
-                          content: ChangeEmailForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changeEmailText),
+                              content: ChangeEmailForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
                 break;
               case _changePasswordText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changePasswordText),
-                          content: ChangePasswordForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changePasswordText),
+                              content: ChangePasswordForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
+                break;
+              case _aboutDialogText:
+                showAboutDialog(
+                  context: context,
+                  applicationIcon: const FlutterLogo(), //TODO: Add our icon
+                  applicationName: 'Quizard',
+                  applicationVersion: appVersion,
+                  applicationLegalese: '© 2022 Quizard',
+                );
                 break;
             }
           },
@@ -416,6 +460,7 @@ class Settings extends StatelessWidget {
                         _settingsButton(_changeUsernameText, context),
                         _settingsButton(_changeEmailText, context),
                         _settingsButton(_changePasswordText, context),
+                        _settingsButton(_aboutDialogText, context),
                       ]),
                       _logOutButton(context),
                     ]))));

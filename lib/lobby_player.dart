@@ -114,8 +114,18 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar(
-                  'Copied ${gameModel.pinCode} to clipboard', context);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(
+                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                    duration: const Duration(days: 365),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {},
+                    ),
+                  ))
+                  .closed
+                  .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -136,7 +146,16 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
       _settingsButton('CHAT'),
       _settingsButton('PIN CODE'),
       _settingsButton('INVITE'),
-      _settingsButton(lockText)
+      TextButton(
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0),
+                      side: const BorderSide(color: defaultColor))),
+              backgroundColor:
+                  MaterialStateProperty.all<Color>(lightBlueColor)),
+          onPressed: null,
+          child: Text(lockText))
     ]);
   }
 
@@ -180,7 +199,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('$strVersion/custom_games')
+              .collection('$firestoreMainPath/custom_games')
               .doc(gameModel.pinCode)
               .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
@@ -188,7 +207,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('$strVersion/users')
+              .collection('$firestoreMainPath/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -350,7 +369,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           };
                           int myIndex = gameModel.playerIndex;
                           var games = FirebaseFirestore.instance
-                              .collection('$strVersion/custom_games');
+                              .collection('$firestoreMainPath/custom_games');
                           await games
                               .doc(gameModel.pinCode)
                               .update({"player$myIndex": emptyPlayer});
@@ -376,7 +395,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             body: SingleChildScrollView(
                 child: StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('$strVersion/custom_games')
+                        .collection('$firestoreMainPath/custom_games')
                         .doc(gameModel.pinCode)
                         .snapshots(),
                     builder: (context, snapshot) {

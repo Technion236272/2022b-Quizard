@@ -20,6 +20,7 @@ class Profile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: Container(
               decoration: const BoxDecoration(
                 color: secondaryColor,

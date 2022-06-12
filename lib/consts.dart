@@ -26,7 +26,8 @@ const timePerScreen = 20; // in seconds
 const delayScoreResult = 3; // in seconds
 
 // Strings
-const strVersion = "versions/v2";
+const firestoreMainPath = "versions/v2";
+const appVersion = "1.0.0"; // For AboutDialog - update if necessary!
 
 // SnackBar
 void constSnackBar(String text, BuildContext context) {

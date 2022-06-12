@@ -56,8 +56,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final userId = uid!;
       loginModel.setUserId(userId);
       await setAvatar();
-      await AuthModel.instance().setUp(
-          emailController.text.trim(), userNameController.text.trim(), uid,loginModel.userImageUrl);
+      await AuthModel.instance().setUp(emailController.text.trim(),
+          userNameController.text.trim(), uid, loginModel.userImageUrl);
     }
 
     Future<void> _goToHomePage() async {
@@ -84,7 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     Future<void> checkAlreadyRegistered() async {
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) {
         for (var user in users.docs) {
@@ -102,7 +102,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
         }
       }).then((value) async {
-      //  await setAvatar();
         await register();
         await _goToHomePage();
       });
@@ -163,7 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
           body: SingleChildScrollView(
-              reverse: true, // Helps to see the whole form. amazing!
+              reverse: true, // Helps to see the whole form
               child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(children: <Widget>[

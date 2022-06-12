@@ -39,11 +39,19 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     ['', '', 0]
   ];
 
+  @override
+  void initState() {
+    super.initState();
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom]);
+  }
+
   ChipsInput _selectCategoryInput() {
     // Get all categories by all users ONCE
     if (!finishedBuildAllCustomCategories) {
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) {
         for (var user in users.docs) {
@@ -96,7 +104,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.customCategories = selectedCustomCategories;
         FirebaseFirestore.instance
-            .collection('$strVersion/custom_games')
+            .collection('$firestoreMainPath/custom_games')
             .doc(gameModel.pinCode)
             .update({"custom_categories": selectedCustomCategories});
       },
@@ -180,7 +188,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             onChanged: (val) {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
-                  .collection('$strVersion/custom_games')
+                  .collection('$firestoreMainPath/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
             },
@@ -250,8 +258,18 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar(
-                  'Copied ${gameModel.pinCode} to clipboard', context);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(
+                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                    duration: const Duration(days: 365),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {},
+                    ),
+                  ))
+                  .closed
+                  .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -259,7 +277,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'UNLOCKED':
               lockText = 'LOCKED';
               FirebaseFirestore.instance
-                  .collection('$strVersion/custom_games')
+                  .collection('$firestoreMainPath/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": true});
               gameModel.isLocked = true;
@@ -267,7 +285,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'LOCKED':
               lockText = 'UNLOCKED';
               FirebaseFirestore.instance
-                  .collection('$strVersion/custom_games')
+                  .collection('$firestoreMainPath/custom_games')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": false});
               gameModel.isLocked = false;
@@ -330,7 +348,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                           onPressed: () async {
                             int i = gameModel.removeByUsername(username);
                             var game = FirebaseFirestore.instance
-                                .collection('$strVersion/custom_games')
+                                .collection('$firestoreMainPath/custom_games')
                                 .doc(gameModel.pinCode);
                             await game.update({
                               "player$i": gameModel.players[i],
@@ -364,7 +382,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('$strVersion/custom_games')
+              .collection('$firestoreMainPath/custom_games')
               .doc(gameModel.pinCode)
               .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
@@ -372,7 +390,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('$strVersion/users')
+              .collection('$firestoreMainPath/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -476,7 +494,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       final allAnswers = [];
       final allCategories = [];
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
-      var users = FirebaseFirestore.instance.collection('$strVersion/users');
+      var users =
+          FirebaseFirestore.instance.collection('$firestoreMainPath/users');
       var officialQuestions = FirebaseFirestore.instance
           .collection('versions/v1/official_questions');
       for (int i = 0; i < gameModel.selectedCategories.length; i++) {
@@ -542,7 +561,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       }
 
       await FirebaseFirestore.instance
-          .collection('$strVersion/custom_games')
+          .collection('$firestoreMainPath/custom_games')
           .doc(gameModel.pinCode)
           .update({
         "questions": selectedQuestions,
@@ -566,8 +585,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
       } else {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
-            .collection('$strVersion/custom_games')
+            .collection('$firestoreMainPath/custom_games')
             .doc(gameModel.pinCode)
             .update({"is_locked": true});
         Navigator.of(context).push(MaterialPageRoute<void>(
@@ -604,11 +624,13 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                   TextButton(
                       onPressed: () async {
                         await FirebaseFirestore.instance
-                            .collection('$strVersion/custom_games')
+                            .collection('$firestoreMainPath/custom_games')
                             .doc(gameModel.pinCode)
                             .delete();
                         Navigator.of(context).pop(true);
                         Navigator.of(context).pop(true);
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                            overlays: []);
                       },
                       child: const Text("YES")),
                   TextButton(
@@ -630,7 +652,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             body: SingleChildScrollView(
                 child: StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('$strVersion/custom_games')
+                        .collection('$firestoreMainPath/custom_games')
                         .doc(gameModel.pinCode)
                         .snapshots(),
                     builder: (context, snapshot) {
