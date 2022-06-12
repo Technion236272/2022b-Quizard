@@ -25,23 +25,45 @@ class AddQuestionForm extends StatelessWidget {
           children: [
             TextFormField(
               controller: _categoryController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any category';
+                }
+                return null;
+              },
+              maxLength: 20,
               minLines: 1,
+              maxLines: 1,
               decoration: const InputDecoration(
                 labelText: 'Category',
               ),
             ),
             TextFormField(
               controller: _questionController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any question';
+                }
+                return null;
+              },
+              maxLength: 50,
               minLines: 1,
-              maxLines: 5,
+              maxLines: 2,
               decoration: const InputDecoration(
                 labelText: 'Question',
               ),
             ),
             TextFormField(
               controller: _answerController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter any answer';
+                }
+                return null;
+              },
+              maxLength: 20,
               minLines: 1,
-              maxLines: 2,
+              maxLines: 1,
               decoration: const InputDecoration(
                 labelText: 'Answer',
               ),
@@ -51,28 +73,30 @@ class AddQuestionForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
-                        .doc(loginModel.userId)
-                        .get()
-                        .then((value) {
-                      List questions = value["questions"];
-                      questions.add(_questionController.text);
-                      List answers = value["answers"];
-                      answers.add(_answerController.text);
-                      List categories = value["categories"];
-                      categories.add(_categoryController.text);
-                      FirebaseFirestore.instance
+                    if (_formKey.currentState!.validate()) {
+                      await FirebaseFirestore.instance
                           .collection('$strVersion/users')
                           .doc(loginModel.userId)
-                          .update({
-                        "questions": questions,
-                        "answers": answers,
-                        "categories": categories
-                      }).then((_) => Navigator.of(context).pop(true));
-                      Provider.of<LoginModel>(context, listen: false)
-                          .notifyAddedQuestion();
-                    });
+                          .get()
+                          .then((value) {
+                        List questions = value["questions"];
+                        questions.add(_questionController.text);
+                        List answers = value["answers"];
+                        answers.add(_answerController.text);
+                        List categories = value["categories"];
+                        categories.add(_categoryController.text);
+                        FirebaseFirestore.instance
+                            .collection('$strVersion/users')
+                            .doc(loginModel.userId)
+                            .update({
+                          "questions": questions,
+                          "answers": answers,
+                          "categories": categories
+                        }).then((_) => Navigator.of(context).pop(true));
+                        Provider.of<LoginModel>(context, listen: false)
+                            .notifyAddedQuestion();
+                      });
+                    }
                   },
                   child: const Text('Submit'),
                 ),
@@ -322,6 +346,7 @@ class _QuestionsState extends State<Questions> {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
+          resizeToAvoidBottomInset: false,
           floatingActionButton: FloatingActionButton(
               backgroundColor: blueColor,
               child: const Icon(Icons.add),
