@@ -32,7 +32,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
 
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
     gameRef.update({
@@ -57,7 +57,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 

@@ -118,7 +118,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
     void login(photoLink) {
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) async {
         for (var user in users.docs) {
@@ -153,7 +153,7 @@ class _WelcomePageState extends State<WelcomePage> {
       }
 
       FirebaseFirestore.instance
-          .collection('$strVersion/users')
+          .collection('$firestoreMainPath/users')
           .get()
           .then((users) async {
         for (var user in users.docs) {
@@ -295,7 +295,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               signInWithGoogle().then((value) {
                                 bool userExist = false;
                                 FirebaseFirestore.instance
-                                    .collection('$strVersion/users')
+                                    .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
                                   for (var user in users.docs) {
@@ -307,7 +307,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                   }
                                   if (!userExist) {
                                     var users = FirebaseFirestore.instance
-                                        .collection("$strVersion/users");
+                                        .collection("$firestoreMainPath/users");
                                     final userToAdd = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
@@ -351,7 +351,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               signinWithFacebook().then((value) {
                                 bool userExist = false;
                                 FirebaseFirestore.instance
-                                    .collection('$strVersion/users')
+                                    .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
                                   for (var user in users.docs) {
@@ -363,7 +363,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                   }
                                   if (!userExist) {
                                     var users = FirebaseFirestore.instance
-                                        .collection("$strVersion/users");
+                                        .collection("$firestoreMainPath/users");
                                     final user = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],

@@ -224,7 +224,7 @@ class ChangeEmailForm extends StatelessWidget {
                         .then((value) {
                       if (value == true) {
                         FirebaseFirestore.instance
-                            .collection('$strVersion/users')
+                            .collection('$firestoreMainPath/users')
                             .doc(loginModel.userId)
                             .update({
                           "email": _textController.text,
@@ -296,7 +296,7 @@ class ChangeUsernameForm extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
+                        .collection('$firestoreMainPath/users')
                         .doc(loginModel.userId)
                         .update({
                       "username": _textController.text,
@@ -339,6 +339,7 @@ class Settings extends StatelessWidget {
   static const _changeUsernameText = 'Change Username';
   static const _changeEmailText = 'Change Email';
   static const _changePasswordText = 'Change Password';
+  static const _aboutDialogText = 'About';
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(
@@ -408,6 +409,25 @@ class Settings extends StatelessWidget {
                         SystemUiMode.manual,
                         overlays: []));
                 break;
+              case _aboutDialogText:
+                showAboutDialog(
+                  context: context,
+                  applicationIcon: null, //TODO: Add our icon
+                  applicationName: 'Quizard',
+                  applicationVersion: appVersion,
+                  applicationLegalese: '© 2022 Quizard',
+                  /*
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text('App information'), //TODO: Add information
+                    const Text('App Privacy Policy'), //TODO: Add PP
+                    const Text('App Terms of Service') //TODO: Add ToS
+                  ],
+                   */
+                );
+                break;
             }
           },
         ));
@@ -450,6 +470,7 @@ class Settings extends StatelessWidget {
                         _settingsButton(_changeUsernameText, context),
                         _settingsButton(_changeEmailText, context),
                         _settingsButton(_changePasswordText, context),
+                        _settingsButton(_aboutDialogText, context),
                       ]),
                       _logOutButton(context),
                     ]))));

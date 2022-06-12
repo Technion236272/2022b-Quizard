@@ -44,7 +44,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$strVersion/custom_games")
+        .collection("$firestoreMainPath/custom_games")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 

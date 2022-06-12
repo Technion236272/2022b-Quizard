@@ -50,8 +50,8 @@ class JoinGame extends StatelessWidget {
       GameModel gameModel, LoginModel loginModel) async {
     gameModel.pinCode = pinCodeController.text.toUpperCase();
     int newPlayerIndex = -1;
-    var games =
-        FirebaseFirestore.instance.collection('$strVersion/custom_games');
+    var games = FirebaseFirestore.instance
+        .collection('$firestoreMainPath/custom_games');
     await games.doc(gameModel.pinCode).get().then((game) {
       gameModel.update(game);
       newPlayerIndex = gameModel.addNewPlayer(loginModel.username);
@@ -66,7 +66,7 @@ class JoinGame extends StatelessWidget {
   Future<void> _goToGameLobby(BuildContext context) async {
     final pinCode = pinCodeController.text.toUpperCase();
     await FirebaseFirestore.instance
-        .collection('$strVersion/custom_games')
+        .collection('$firestoreMainPath/custom_games')
         .get()
         .then((games) async {
       bool foundGame = false;

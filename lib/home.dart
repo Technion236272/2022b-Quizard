@@ -261,8 +261,8 @@ class Play extends StatelessWidget {
       GameModel gameModel, LoginModel loginModel) async {
     gameModel.setDataToPlayer("username", loginModel.username, 0);
     gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
-    var games =
-        FirebaseFirestore.instance.collection('$strVersion/custom_games');
+    var games = FirebaseFirestore.instance
+        .collection('$firestoreMainPath/custom_games');
     Map<String, dynamic> mapAdmin = {
       "username": loginModel.username,
       "is_ready": false,

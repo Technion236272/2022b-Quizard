@@ -91,7 +91,7 @@ class AddQuestionForm extends StatelessWidget {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       await FirebaseFirestore.instance
-                          .collection('$strVersion/users')
+                          .collection('$firestoreMainPath/users')
                           .doc(loginModel.userId)
                           .get()
                           .then((value) {
@@ -102,7 +102,7 @@ class AddQuestionForm extends StatelessWidget {
                         List categories = value["categories"];
                         categories.add(_categoryController.text);
                         FirebaseFirestore.instance
-                            .collection('$strVersion/users')
+                            .collection('$firestoreMainPath/users')
                             .doc(loginModel.userId)
                             .update({
                           "questions": questions,
@@ -196,7 +196,7 @@ class _QuestionsState extends State<Questions> {
                         child: ElevatedButton(
                           onPressed: () async {
                             await FirebaseFirestore.instance
-                                .collection('$strVersion/users')
+                                .collection('$firestoreMainPath/users')
                                 .doc(userId)
                                 .get()
                                 .then((value) {
@@ -214,7 +214,7 @@ class _QuestionsState extends State<Questions> {
                                 }
                               }
                               FirebaseFirestore.instance
-                                  .collection('$strVersion/users')
+                                  .collection('$firestoreMainPath/users')
                                   .doc(userId)
                                   .update({
                                 "questions": questions,
@@ -257,7 +257,7 @@ class _QuestionsState extends State<Questions> {
               TextButton(
                   onPressed: () async {
                     await FirebaseFirestore.instance
-                        .collection('$strVersion/users')
+                        .collection('$firestoreMainPath/users')
                         .doc(userId)
                         .get()
                         .then((value) {
@@ -275,7 +275,7 @@ class _QuestionsState extends State<Questions> {
                         }
                       }
                       FirebaseFirestore.instance
-                          .collection('$strVersion/users')
+                          .collection('$firestoreMainPath/users')
                           .doc(userId)
                           .update({
                         "questions": questions,
@@ -300,7 +300,7 @@ class _QuestionsState extends State<Questions> {
       BuildContext context, String userId) async {
     List<Dismissible> trivia = <Dismissible>[];
     await FirebaseFirestore.instance
-        .collection('$strVersion/users')
+        .collection('$firestoreMainPath/users')
         .doc(userId)
         .get()
         .then((value) {

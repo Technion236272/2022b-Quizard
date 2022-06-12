@@ -92,7 +92,7 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection('$strVersion/custom_games')
+        .collection('$firestoreMainPath/custom_games')
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 

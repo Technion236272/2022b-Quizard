@@ -199,7 +199,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('$strVersion/custom_games')
+              .collection('$firestoreMainPath/custom_games')
               .doc(gameModel.pinCode)
               .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
@@ -207,7 +207,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
         Future<NetworkImage?> _getUserImage() async {
           String userId = '';
           await FirebaseFirestore.instance
-              .collection('$strVersion/users')
+              .collection('$firestoreMainPath/users')
               .get()
               .then((users) {
             for (var user in users.docs) {
@@ -369,7 +369,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           };
                           int myIndex = gameModel.playerIndex;
                           var games = FirebaseFirestore.instance
-                              .collection('$strVersion/custom_games');
+                              .collection('$firestoreMainPath/custom_games');
                           await games
                               .doc(gameModel.pinCode)
                               .update({"player$myIndex": emptyPlayer});
@@ -395,7 +395,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             body: SingleChildScrollView(
                 child: StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('$strVersion/custom_games')
+                        .collection('$firestoreMainPath/custom_games')
                         .doc(gameModel.pinCode)
                         .snapshots(),
                     builder: (context, snapshot) {
