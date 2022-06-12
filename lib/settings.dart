@@ -395,7 +395,7 @@ class Settings extends StatelessWidget {
                 // Hide StatusBar, Show navigation buttons
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
-                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
               });
             }));
   }

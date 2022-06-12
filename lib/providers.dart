@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'consts.dart';
-import 'game.dart';
 
 enum Status { uninitialized, authenticated, authenticating, unauthenticated }
 
@@ -213,60 +212,95 @@ class GameModel extends ChangeNotifier {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     },
     {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     }
   ];
   int currentQuestionIndex = 0;
+  int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
   bool _isPrivate = true;
   bool _isLocked = false;
-  bool enableSubmitFalseAnswer = true;
-  String _pinCode = '';
+  bool _selectedCorrectAnswer = false;
+  String _selectedAnswer = "";
+  bool _timeOut = false;
+  String _pinCode = 'null';
   int playerIndex = 0; // Starts from 0 for admin
-  int currentPhase = 1; // 1 - Enter false answer ; 2 - Choose correct answer
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
   List<String> _selectedCategories = []; // selected = official + custom
   List<String> _gameQuestions = []; // "questions" in Firestore
   List<String> _gameAnswers = []; // "answers" in Firestore
+  List<String> _gameCategories = []; // "categories" in Firestore
   List<Widget> currentQuizOptions = [];
-  List<String> _playersIds = [];
   final _falseAnswerController = TextEditingController();
 
   List<Map<String, dynamic>> get players => _playersMaps;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
+  bool get selectedCorrectAnswer => _selectedCorrectAnswer;
+  String get selectedAnswer => _selectedAnswer;
+  bool get timeOut => _timeOut;
   String get pinCode => _pinCode;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
   List<String> get gameQuestions => _gameQuestions;
   List<String> get gameAnswers => _gameAnswers;
-  List<String> get playersIds => _playersIds;
+  List<String> get gameCategories => _gameCategories;
   TextEditingController get falseAnswerController => _falseAnswerController;
+
+  set players(List<Map<String, dynamic>> players) {
+    _playersMaps = players;
+    notifyListeners();
+  }
+
+  set timeOut(bool value) {
+    _timeOut = value;
+    notifyListeners();
+  }
+
+  set selectedCorrectAnswer(bool value) {
+    _selectedCorrectAnswer = value;
+    notifyListeners();
+  }
+
+  set selectedAnswer(String value) {
+    _selectedAnswer = value;
+    notifyListeners();
+  }
 
   // dataType should match the field in player's map
   void setDataToPlayer(String dataType, dynamic data, int index) {
@@ -274,14 +308,47 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> getListOfUsernames() {
-    List<String> usernames = [];
-    for (int i = 0; i < maxPlayers; i++) {
-      if (_playersMaps[i]["username"] != "") {
-        usernames.add(_playersMaps[i]["username"]);
+  List _bubbleSortByScore(List<List<dynamic>> list) {
+    for (int i = 0; i < list.length - 1; i++) {
+      for (int j = 0; j < list.length - i - 1; j++) {
+        if (list[j][1].toInt() < list[j + 1][1].toInt()) {
+          final temp = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = temp;
+        }
       }
     }
-    return usernames;
+    return list;
+  }
+
+  List<dynamic> getPlayersSortedByScore(bool indexesOnly) {
+    List<List<dynamic>> playersList = [];
+    // build usernames with scores
+    for (int i = 0; i < maxPlayers; i++) {
+      if (_playersMaps[i]["username"] != "") {
+        if (!indexesOnly) {
+          playersList.add([
+            _playersMaps[i]["username"].toString(),
+            _playersMaps[i]["score"].toInt()
+          ]);
+        } else {
+          playersList.add([i, _playersMaps[i]["score"].toInt()]);
+        }
+      }
+    }
+
+    final sortedList = _bubbleSortByScore(playersList);
+
+    var retValList = [];
+    for (int i = 0; i < sortedList.length; i++) {
+      if (indexesOnly) {
+        retValList.add(sortedList[i][0].toInt());
+      } else {
+        retValList.add(sortedList[i][0].toString());
+      }
+    }
+
+    return retValList;
   }
 
   int getNumOfPlayers() {
@@ -399,8 +466,8 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set playersIds(List<String> urls) {
-    _playersIds = urls;
+  set gameCategories(List<String> categories) {
+    _gameCategories = categories;
     notifyListeners();
   }
 
@@ -410,47 +477,59 @@ class GameModel extends ChangeNotifier {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       },
       {
         "username": "",
         "is_ready": false,
         "false_answer": "",
-        "selected_answer": ""
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
       }
     ];
     currentQuestionIndex = 0;
     playerIndex = 0;
-    currentPhase = 1;
-    enableSubmitFalseAnswer = true;
+    roundScoreView = 0;
     _isPrivate = true;
     _isLocked = false;
-    _pinCode = '';
+    _pinCode = 'null';
     _officialCategories = [];
     _customCategories = [];
     _selectedCategories = [];
     _gameQuestions = [];
     _gameAnswers = [];
+    _gameCategories = [];
     currentQuizOptions = [];
     _falseAnswerController.text = "";
+    _selectedCorrectAnswer = false;
+    _selectedAnswer = "";
     notifyListeners();
   }
 
@@ -466,6 +545,7 @@ class GameModel extends ChangeNotifier {
       _selectedCategories = _officialCategories + _customCategories;
       _gameQuestions = List<String>.from(game["questions"]);
       _gameAnswers = List<String>.from(game["answers"]);
+      _gameCategories = List<String>.from(game["categories"]);
     }
   }
 
@@ -501,37 +581,9 @@ class GameModel extends ChangeNotifier {
     }
   }
 
-  void quizOptionsUpdate() {
-    if (currentQuestionIndex < gameAnswers.length) {
-      List<String> falseAnswers = getFalseAnswers();
-      String correctAnswer = gameAnswers[currentQuestionIndex];
-      List<String> currentAnswers = [correctAnswer] + falseAnswers;
-      if (currentQuizOptions.isEmpty) {
-        // Add correct answer
-        currentQuizOptions
-            .add(Answer(answerText: currentAnswers[0], questionScore: 10));
-
-        // Add false answers
-        for (int i = 1; i < currentAnswers.length; i++) {
-          String currentAnswer = currentAnswers[i];
-          currentAnswer = currentAnswer.replaceAll(' ', '');
-          int j = playerIndex;
-          String myFalseAnswer = players[j]["false_answer"];
-          if (currentAnswer != "" && currentAnswers[i] != myFalseAnswer) {
-            currentQuizOptions
-                .add(Answer(answerText: currentAnswers[i], questionScore: 0));
-          }
-        }
-
-        // Shuffle all answers!
-        currentQuizOptions.shuffle();
-
-        // And don't forget the question...
-        currentQuizOptions.insert(
-            0,
-            Question(
-                gameQuestions[currentQuestionIndex], currentQuestionIndex + 1));
-      }
-    }
+  void addScore(int score) {
+    int i = playerIndex;
+    players[i]["score"] += score;
+    notifyListeners();
   }
 }

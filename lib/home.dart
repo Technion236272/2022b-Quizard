@@ -14,7 +14,6 @@ import 'profile.dart';
 import 'consts.dart';
 import 'providers.dart';
 
-
 class Rules extends StatelessWidget {
   const Rules({Key? key}) : super(key: key);
 
@@ -22,108 +21,141 @@ class Rules extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-        color: backgroundColor,
-        child: Padding(
-        padding: const EdgeInsets.all(appbarPadding),
-        child: Column(
-            children: <Widget>[
-              Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-              InkWell(
-                child: Icon(
-                  Icons.arrow_back,
-                  color: defaultColor,
-                  size: appbarIconSize,
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                }
-              )]),
-              const Padding(padding: EdgeInsets.all(18)),
-              const Image(image: AssetImage('images/titles/rules.png')),
-              const Padding(padding: EdgeInsets.all(10)),
-              Container(
-                color: secondaryColor,
-                height: 70,
-                width: 350,
-                child: Column(crossAxisAlignment:CrossAxisAlignment.start,children: const [
-                  Text(
-                      'Players', textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
-                  const Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    '2-5',
-                    style: TextStyle(color: Colors.black54, fontSize: 18),),]),
-                padding: const EdgeInsets.all(10),
-              ),
-              const Padding(padding: EdgeInsets.all(5)),
-              Container(
-                color: secondaryColor,
-                height: 70,
-                width: 350,
-                child: Column(crossAxisAlignment:CrossAxisAlignment.start,children: const [
-                  Text(
-                      'Goal', textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
-                  const Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    'The player with the highest score wins.',
-                    style: TextStyle(color: Colors.black54, fontSize: 18),),]),
-                padding: const EdgeInsets.all(10),
-              ),
-              const Padding(padding: EdgeInsets.all(5)),
-              Container(
-                color: secondaryColor,
-                height: 260,
-                width: 350,
-                child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:const [
-                   Text(
-                    'Round Gameplay\n',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
-                   Text(
-                     '-Each player enters a false answer.',
-                     style: TextStyle(color: Colors.black54, fontSize: 18),),
-                  const Padding(padding: EdgeInsets.all(4)),
-                   Text(
-                     '-All the false answers are shown with the right answer to all players.',
-                     style: TextStyle(color: Colors.black54, fontSize: 18),),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  Text(
-                  '-Players are rewarded with points for choosing the right answer.',
-                  style: TextStyle(color: Colors.black54, fontSize: 18),),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  Text(
-                  '-Players are rewarded with points for every player choosing their false answer.',
-                  style: TextStyle(color: Colors.black54, fontSize: 18),),]),
-                padding: const EdgeInsets.all(10),
-
-              ),
-              const Padding(padding: EdgeInsets.all(5)),
-              Container(
-                color: secondaryColor,
-                height: 150,
-                width: 350,
-                child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:const [
-                  Text(
-                      'Bonuses',
-                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
-                  const Padding(padding: EdgeInsets.all(10)),
-                  Text(
-                    '-Players are rewarded for choosing the right answer multiple times in a row.',
-                    style: TextStyle(color: Colors.black54, fontSize: 18),),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  Text(
-                  '-Faster answer means more points.',
-                  style: TextStyle(color: Colors.black54, fontSize: 18),),]),
-                padding: const EdgeInsets.all(10),
-
-              ),
-
-      ]))));
+            color: backgroundColor,
+            child: Padding(
+                padding: const EdgeInsets.all(appbarPadding),
+                child: Column(children: <Widget>[
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        InkWell(
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: defaultColor,
+                              size: appbarIconSize,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            })
+                      ]),
+                  const Padding(padding: EdgeInsets.all(18)),
+                  const Image(image: AssetImage('images/titles/rules.png')),
+                  const Padding(padding: EdgeInsets.all(15)),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    height: 70,
+                    width: 350,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Players',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 19, fontWeight: FontWeight.bold)),
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text(
+                            '2-5',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                        ]),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  const Padding(padding: EdgeInsets.all(5)),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    height: 70,
+                    width: 350,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Goal',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 19, fontWeight: FontWeight.bold)),
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text(
+                            'The player with the highest score wins.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                        ]),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  const Padding(padding: EdgeInsets.all(5)),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    height: 260,
+                    width: 350,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Round Gameplay\n',
+                              style: TextStyle(
+                                  fontSize: 19, fontWeight: FontWeight.bold)),
+                          Text(
+                            '-Each player enters a false answer.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                          Padding(padding: EdgeInsets.all(4)),
+                          Text(
+                            '-All the false answers are shown with the right answer to all players.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                          Padding(padding: EdgeInsets.all(4)),
+                          Text(
+                            '-Players are rewarded with points for choosing the right answer.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                          Padding(padding: EdgeInsets.all(4)),
+                          Text(
+                            '-Players are rewarded with points for every player choosing their false answer.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                        ]),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  const Padding(padding: EdgeInsets.all(5)),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    height: 150,
+                    width: 350,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Bonuses',
+                              style: TextStyle(
+                                  fontSize: 19, fontWeight: FontWeight.bold)),
+                          Padding(padding: EdgeInsets.all(10)),
+                          Text(
+                            '-Players are rewarded for choosing the right answer multiple times in a row.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                          Padding(padding: EdgeInsets.all(4)),
+                          Text(
+                            '-Faster answer means more points.',
+                            style:
+                                TextStyle(color: darkGreyColor, fontSize: 18),
+                          ),
+                        ]),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                ]))));
   }
 }
-
 
 class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
   QuizardAppBar({Key? key}) : super(key: key);
@@ -139,24 +171,15 @@ class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     InkWell(
-                      child: Icon(
-                        Icons.language,
-                        color: defaultColor,
-                        size: appbarIconSize,
-                      ),
-                      onTap: null, // TODO: Go to Change Language screen
-                    ),
-                    InkWell(
-                      child: Icon(
-                        Icons.info_outline,
-                        color: defaultColor,
-                        size: appbarIconSize,
-                      ),
-                      onTap:() {
-                        Navigator.of(context).push(MaterialPageRoute<void>(
-                            builder: (context) => const Rules()));
-                      }
-                    )
+                        child: const Icon(
+                          Icons.info_outline,
+                          color: defaultColor,
+                          size: appbarIconSize,
+                        ),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute<void>(
+                              builder: (context) => const Rules()));
+                        })
                   ],
                 ))));
   }
@@ -197,7 +220,7 @@ class _HomePageState extends State<HomePage> {
         return const Play();
       }
       if (_currentIndex == 2) {
-        return Leaderboard();
+        return const Leaderboard();
       }
       return profileScreen;
     }
@@ -245,24 +268,26 @@ class Play extends StatelessWidget {
       "username": loginModel.username,
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
+      "round_score": 0
     };
     final game = <String, dynamic>{
-      "player0": mapAdmin,
+      "player0": mapAdmin, // Admin is always player0
       "is_private": gameModel.isPrivate,
       "is_locked": gameModel.isLocked,
       "official_categories": gameModel.officialCategories,
       "custom_categories": gameModel.customCategories,
       "questions": [],
       "answers": [],
-      "question_index": 0,
-      "game_phase": 1,
+      "categories": [],
     };
     Map<String, dynamic> mapPlayer = {
       "username": "",
       "is_ready": false,
       "false_answer": "",
-      "selected_answer": ""
+      "selected_answer": "",
+      "score": 0,
     };
     for (int i = 1; i < maxPlayers; i++) {
       game.addAll({"player$i": mapPlayer});
@@ -275,7 +300,7 @@ class Play extends StatelessWidget {
     InkWell _playOptionButton(String imgPath) {
       return InkWell(
         splashColor: defaultColor,
-        onTap: () {
+        onTap: () async {
           // TODO: Support all games!
           final gameModel = Provider.of<GameModel>(context, listen: false);
           final loginModel = Provider.of<LoginModel>(context, listen: false);
@@ -283,10 +308,13 @@ class Play extends StatelessWidget {
             gameModel.resetData();
             gameModel.isPrivate = true;
             _initializeGame(gameModel, loginModel);
+            await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyAdmin()));
           }
           if (imgPath.contains('join_existing')) {
+            gameModel.resetData();
+            await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (context) => JoinGame()));
           }
@@ -381,7 +409,7 @@ class _LeaderboardState extends State<Leaderboard>
     final screenHeight = MediaQuery.of(context).size.height - 114;
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      if(allTimeWinsList.isEmpty){
+      if (allTimeWinsList.isEmpty) {
         getWinsData(loginModel.userId);
       }
       return Container(
@@ -594,7 +622,6 @@ class _LeaderboardState extends State<Leaderboard>
       List<LeaderBoardModel> tempMonthlyWinsList = [];
       List<LeaderBoardModel> tempAllTimeWinsList = [];
 
-
       for (var user in users.docs) {
         var url = "";
         try{
@@ -638,7 +665,6 @@ class _LeaderboardState extends State<Leaderboard>
       }
 
       setState(() {
-
         tempAllTimeWinsList.sort((a, b) => a.wins.compareTo(b.wins));
         tempDailyWinsList.sort((a, b) => a.wins.compareTo(b.wins));
         tempMonthlyWinsList.sort((a, b) => a.wins.compareTo(b.wins));

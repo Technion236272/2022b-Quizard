@@ -5,7 +5,7 @@ import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
-import 'game.dart';
+import 'game/first_screen.dart';
 import 'lobby_appbar.dart';
 import 'providers.dart';
 import 'consts.dart';
@@ -233,15 +233,19 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(children: [
-                    Checkbox(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        activeColor: greenColor,
-                        value: gameModel.players[playerIndex]["is_ready"],
-                        onChanged: matchUsernames
-                            ? (value) {
-                                _toggleIsReady();
-                              }
-                            : null),
+                    Transform.scale(
+                        scale: 1.5,
+                        child: Checkbox(
+                            splashRadius: 20,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            activeColor: greenColor,
+                            value: gameModel.players[playerIndex]["is_ready"],
+                            onChanged: matchUsernames
+                                ? (value) {
+                                    _toggleIsReady();
+                                  }
+                                : null)),
                     const Text("Ready")
                   ])
                 ],

@@ -12,6 +12,7 @@ const greenColor = Color.fromRGBO(124, 220, 117, 1);
 const blueColor = Colors.blue;
 const orangeColor = Colors.orange;
 const lightBlueColor = Color(0xFFECEFF1);
+const darkGreyColor = Colors.black54;
 
 // Numbers
 const grabbingHeightConst = 200.0;
@@ -19,9 +20,10 @@ const boxRadiusConst = 30.0;
 const appbarIconSize = 32.0;
 const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
-const roundsPerGame = 7;
-const maxPlayers = 5;
-const timePerScreen = 20;
+const roundsPerGame = 5;
+const maxPlayers = 5; // DO NOT CHANGE
+const timePerScreen = 20; // in seconds
+const delayScoreResult = 3; // in seconds
 
 // Strings
 const strVersion = "versions/v2";
