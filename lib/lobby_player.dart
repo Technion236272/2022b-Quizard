@@ -114,8 +114,18 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar(
-                  'Copied ${gameModel.pinCode} to clipboard', context);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(
+                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                    duration: const Duration(days: 365),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {},
+                    ),
+                  ))
+                  .closed
+                  .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -136,7 +146,16 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
       _settingsButton('CHAT'),
       _settingsButton('PIN CODE'),
       _settingsButton('INVITE'),
-      _settingsButton(lockText)
+      TextButton(
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0),
+                      side: const BorderSide(color: defaultColor))),
+              backgroundColor:
+                  MaterialStateProperty.all<Color>(lightBlueColor)),
+          onPressed: null,
+          child: Text(lockText))
     ]);
   }
 
