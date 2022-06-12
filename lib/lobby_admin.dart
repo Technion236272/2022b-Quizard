@@ -258,8 +258,18 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              constSnackBar(
-                  'Copied ${gameModel.pinCode} to clipboard', context);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(
+                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                    duration: const Duration(days: 365),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {},
+                    ),
+                  ))
+                  .closed
+                  .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
