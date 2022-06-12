@@ -316,6 +316,9 @@ class Play extends StatelessWidget {
             await Future.delayed(const Duration(milliseconds: 200));
             Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (context) => JoinGame()));
+            // Show navigation buttons
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: [SystemUiOverlay.bottom]);
           }
         },
         child: Padding(

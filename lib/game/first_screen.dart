@@ -237,6 +237,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     return Scaffold(
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(
+            reverse: true, // Helps to see the whole form
             child: Column(children: [_firstScreenBody(), _waitMessage()])));
   }
 }

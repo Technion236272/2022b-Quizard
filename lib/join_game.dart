@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:quizard/providers.dart';
 
@@ -27,6 +28,8 @@ class JoinGameAppBar extends StatelessWidget with PreferredSizeWidget {
                         size: appbarIconSize,
                       ),
                       onTap: () {
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                            overlays: []);
                         Navigator.of(context).pop(true);
                       },
                     ),
@@ -93,6 +96,9 @@ class JoinGame extends StatelessWidget {
             pinCodeController.text = '';
             Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => const LobbyPlayer()));
+            // Hide navigation buttons
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: []);
           }
         }
       }
@@ -101,62 +107,69 @@ class JoinGame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: JoinGameAppBar(),
-        body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(children: [
-              const Image(image: AssetImage('images/titles/quizard.png')),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text(
-                  'Please enter a PIN Code',
-                  style: TextStyle(fontSize: 18),
+    return WillPopScope(
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: JoinGameAppBar(),
+          body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(children: [
+                const Image(image: AssetImage('images/titles/quizard.png')),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Text(
+                    'Please enter a PIN Code',
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ),
-              ),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: TextFormField(
-                      enableSuggestions: false,
-                      maxLength: 6,
-                      controller: pinCodeController,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: secondaryColor,
-                        border: OutlineInputBorder(),
-                        hintText: 'PIN Code',
-                      ))),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50)), // max width
-                    child:
-                        const Text('Join Game', style: TextStyle(fontSize: 18)),
-                    onPressed: () {
-                      _goToGameLobby(context);
-                    },
-                  )),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(children: const <Widget>[
-                    // OR Divider
-                    Expanded(child: Divider(color: defaultColor)),
-                    Text("  OR  "),
-                    Expanded(child: Divider(color: defaultColor)),
-                  ])),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50)), // max width
-                    child: const Text('Find me an open game',
-                        style: TextStyle(fontSize: 18)),
-                    onPressed: () {
-                      constSnackBar("Coming soon", context);
-                    },
-                  )),
-            ])));
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: TextFormField(
+                        enableSuggestions: false,
+                        maxLength: 6,
+                        controller: pinCodeController,
+                        decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: secondaryColor,
+                          border: OutlineInputBorder(),
+                          hintText: 'PIN Code',
+                        ))),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50)), // max width
+                      child: const Text('Join Game',
+                          style: TextStyle(fontSize: 18)),
+                      onPressed: () {
+                        _goToGameLobby(context);
+                      },
+                    )),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(children: const <Widget>[
+                      // OR Divider
+                      Expanded(child: Divider(color: defaultColor)),
+                      Text("  OR  "),
+                      Expanded(child: Divider(color: defaultColor)),
+                    ])),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50)), // max width
+                      child: const Text('Find me an open game',
+                          style: TextStyle(fontSize: 18)),
+                      onPressed: () {
+                        constSnackBar("Coming soon", context);
+                      },
+                    )),
+              ]))),
+      onWillPop: () async {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+            overlays: []);
+        return Future<bool>.value(true);
+      },
+    );
   }
 }

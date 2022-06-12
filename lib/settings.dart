@@ -45,6 +45,11 @@ class ChangePasswordForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _oldPasswordController,
               minLines: 1,
               obscureText: true,
@@ -64,6 +69,11 @@ class ChangePasswordForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _newPasswordController,
               minLines: 1,
               obscureText: true,
@@ -80,6 +90,11 @@ class ChangePasswordForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _repeatPasswordController,
               minLines: 1,
               obscureText: true,
@@ -188,6 +203,11 @@ class ChangeEmailForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _textController,
               minLines: 1,
               decoration: const InputDecoration(
@@ -259,6 +279,11 @@ class ChangeUsernameForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _textController,
               minLines: 1,
               decoration: const InputDecoration(
@@ -349,30 +374,39 @@ class Settings extends StatelessWidget {
                 break;
               case _changeUsernameText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changeUsernameText),
-                          content: ChangeUsernameForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changeUsernameText),
+                              content: ChangeUsernameForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
                 break;
               case _changeEmailText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changeEmailText),
-                          content: ChangeEmailForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changeEmailText),
+                              content: ChangeEmailForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
                 break;
               case _changePasswordText:
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: const Text(_changePasswordText),
-                          content: ChangePasswordForm());
-                    });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: const Text(_changePasswordText),
+                              content: ChangePasswordForm());
+                        })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
                 break;
             }
           },

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
@@ -24,6 +25,11 @@ class AddQuestionForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _categoryController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -39,6 +45,11 @@ class AddQuestionForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _questionController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -54,6 +65,11 @@ class AddQuestionForm extends StatelessWidget {
               ),
             ),
             TextFormField(
+              onTap: () {
+                // Show navigation buttons
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.bottom]);
+              },
               controller: _answerController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -358,7 +374,9 @@ class _QuestionsState extends State<Questions> {
                         title: const Text("Add Question"),
                         content: AddQuestionForm());
                   },
-                );
+                ).then((value) => SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.manual,
+                    overlays: []));
               }),
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
@@ -369,8 +387,8 @@ class _QuestionsState extends State<Questions> {
                       : loginModel.userId),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
+                  loginModel.cachedQuestionsList = snapshot.data;
                   if (snapshot.data.isNotEmpty) {
-                    loginModel.cachedQuestionsList = snapshot.data;
                     return ListView(children: loginModel.cachedQuestionsList);
                   } else {
                     return const Padding(

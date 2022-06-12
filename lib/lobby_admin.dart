@@ -39,6 +39,14 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     ['', '', 0]
   ];
 
+  @override
+  void initState() {
+    super.initState();
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom]);
+  }
+
   ChipsInput _selectCategoryInput() {
     // Get all categories by all users ONCE
     if (!finishedBuildAllCustomCategories) {
@@ -566,6 +574,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       if (!retVal) {
         constSnackBar("Not enough questions to build a game", context);
       } else {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
             .collection('$strVersion/custom_games')
             .doc(gameModel.pinCode)
@@ -609,6 +618,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                             .delete();
                         Navigator.of(context).pop(true);
                         Navigator.of(context).pop(true);
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                            overlays: []);
                       },
                       child: const Text("YES")),
                   TextButton(
