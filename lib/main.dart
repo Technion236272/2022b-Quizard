@@ -67,7 +67,73 @@ class _RootState extends State<Root> {
               Theme.of(context).colorScheme.copyWith(primary: defaultColor),
           scaffoldBackgroundColor: backgroundColor,
         ),
-        home: const WelcomePage());
+        home: FirebaseAuth.instance.currentUser != null
+            ? const LoadHomePage()
+            : const WelcomePage());
+  }
+}
+
+// sign in automatically if app was closed
+class LoadHomePage extends StatelessWidget {
+  const LoadHomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Future<bool> _prepHomePage() async {
+      final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final currentUser = AuthModel.instance().user!;
+      return await FirebaseFirestore.instance
+          .collection("$firestoreMainPath/users")
+          .get()
+          .then((users) async {
+        for (var user in users.docs) {
+          if (currentUser.uid == user.id) {
+            loginModel.setUserId(user.id);
+            loginModel.setEmail(user["email"]);
+            loginModel.setUsername(user["username"]);
+            loginModel.setWins(user["wins"]);
+            try {
+              loginModel.setDailyWins(user["DailyWins"]);
+              loginModel.setMonthlyWins(user["MonthlyWins"]);
+            } catch (e) {
+              debugPrint("ERROR = $e");
+            }
+            if (currentUser.photoURL != null) {
+              loginModel.setUserImageUrl(currentUser.photoURL!);
+            }
+            final ref =
+                FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+            final url = await ref.getDownloadURL();
+            loginModel.setUserImageUrl(url);
+            loginModel.logIn();
+            return true;
+          }
+        }
+        return false;
+      });
+    }
+
+    return Scaffold(
+        body: FutureBuilder(
+            future: _prepHomePage(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                if (snapshot.data == true) {
+                  return const HomePage();
+                }
+              }
+              return Center(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                    Text("Loading your \ngreatest challenge...",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 24)),
+                    Padding(padding: EdgeInsets.symmetric(vertical: 20)),
+                    CircularProgressIndicator()
+                  ]));
+            }));
   }
 }
 
