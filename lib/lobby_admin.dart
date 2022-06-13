@@ -12,7 +12,9 @@ import 'providers.dart';
 import 'consts.dart';
 
 class LobbyAdmin extends StatefulWidget {
-  const LobbyAdmin({Key? key}) : super(key: key);
+  const LobbyAdmin({Key? key, required this.isPrivate}) : super(key: key);
+
+  final bool isPrivate;
 
   @override
   State<LobbyAdmin> createState() => _LobbyAdminState();
@@ -310,7 +312,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       String privacy = 'Public';
       final gameModel = Provider.of<GameModel>(context, listen: false);
-      if (gameModel.isPrivate) {
+      if (widget.isPrivate) {
         privacy = 'Private';
       }
       int numOfPlayers = gameModel.getNumOfPlayers();

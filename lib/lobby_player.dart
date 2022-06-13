@@ -361,21 +361,20 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   actions: <Widget>[
                     TextButton(
                         onPressed: () async {
+                          int myIndex = gameModel.playerIndex;
+                          String pinCode = gameModel.pinCode;
+                          gameModel.resetData();
                           Map<String, dynamic> emptyPlayer = {
                             "username": "",
                             "is_ready": false,
                             "false_answer": "",
                             "selected_answer": ""
                           };
-                          int myIndex = gameModel.playerIndex;
                           var games = FirebaseFirestore.instance
                               .collection('$firestoreMainPath/custom_games');
                           await games
-                              .doc(gameModel.pinCode)
+                              .doc(pinCode)
                               .update({"player$myIndex": emptyPlayer});
-                          gameModel.resetData();
-                          Navigator.of(context).pop(true);
-                          Navigator.of(context).pop(true);
                           Navigator.of(context).pop(true);
                         },
                         child: const Text("YES")),
@@ -405,9 +404,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           WidgetsBinding.instance.addPostFrameCallback(
                             (_) => Navigator.of(context).pop(),
                           );
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => _dialogGameClosed(),
-                          );
+                          if (gameModel.pinCode != 'null') {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => _dialogGameClosed(),
+                            );
+                          }
                         } else {
                           gameModel.update(snapshot.data!);
                           if (game["is_locked"]) {
@@ -420,9 +421,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
-                            WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => _dialogKickedByAdmin(),
-                            );
+                            if (gameModel.pinCode != 'null') {
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _dialogKickedByAdmin(),
+                              );
+                            }
                           }
                           final questions =
                               List<String>.from(game["questions"]);

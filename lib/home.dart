@@ -311,13 +311,17 @@ class _PlayState extends State<Play> {
         // TODO: Support all games!
         final gameModel = Provider.of<GameModel>(context, listen: false);
         final loginModel = Provider.of<LoginModel>(context, listen: false);
-        if (imgPath.contains('create_private')) {
+        if (imgPath.contains('create')) {
           gameModel.resetData();
-          gameModel.isPrivate = true;
+          gameModel.isPrivate = false;
+          if (imgPath.contains('private')) {
+            gameModel.isPrivate = true;
+          }
+          var lobby = LobbyAdmin(isPrivate: gameModel.isPrivate);
           _initializeGame(gameModel, loginModel);
           await Future.delayed(const Duration(milliseconds: 200));
-          Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (context) => const LobbyAdmin()));
+          Navigator.of(context)
+              .push(MaterialPageRoute<void>(builder: (context) => lobby));
         }
         if (imgPath.contains('join_existing')) {
           gameModel.resetData();

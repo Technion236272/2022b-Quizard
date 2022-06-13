@@ -41,10 +41,17 @@ class JoinGameAppBar extends StatelessWidget with PreferredSizeWidget {
   Size get preferredSize => const Size(0, appbarSize);
 }
 
-class JoinGame extends StatelessWidget {
-  JoinGame({Key? key}) : super(key: key);
+class JoinGame extends StatefulWidget {
+  const JoinGame({Key? key}) : super(key: key);
 
+  @override
+  State<JoinGame> createState() => _JoinGameState();
+}
+
+class _JoinGameState extends State<JoinGame> {
   final pinCodeController = TextEditingController();
+
+  bool _pressedJoinGame = false;
 
   Future<void> _initializeGame(
       GameModel gameModel, LoginModel loginModel) async {
@@ -63,50 +70,60 @@ class JoinGame extends StatelessWidget {
     await games.doc(gameModel.pinCode).update(game);
   }
 
-  Future<void> _goToGameLobby(BuildContext context) async {
-    final pinCode = pinCodeController.text.toUpperCase();
-    await FirebaseFirestore.instance
-        .collection('$firestoreMainPath/custom_games')
-        .get()
-        .then((games) async {
-      bool foundGame = false;
-      int indexGame = -1;
-      for (var game in games.docs) {
-        indexGame++;
-        if (game.id == pinCode) {
-          foundGame = true;
-          break;
-        }
-      }
-      FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
-      if (!foundGame) {
-        constSnackBar("Invalid PIN Code", context);
-      } else {
-        var wantedGame = games.docs[indexGame];
-        final gameModel = Provider.of<GameModel>(context, listen: false);
-        gameModel.update(wantedGame);
-        if (wantedGame["is_locked"] == true) {
-          constSnackBar("Game is locked", context);
-        } else {
-          if (gameModel.getNumOfPlayers() == maxPlayers) {
-            constSnackBar("Game is full", context);
-          } else {
-            final loginModel = Provider.of<LoginModel>(context, listen: false);
-            await _initializeGame(gameModel, loginModel);
-            pinCodeController.text = '';
-            Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) => const LobbyPlayer()));
-            // Hide navigation buttons
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                overlays: []);
-          }
-        }
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    Future<void> _goToGameLobby() async {
+      if (pinCodeController.text == '') {
+        return;
+      }
+      setState(() {
+        _pressedJoinGame = true;
+      });
+      final pinCode = pinCodeController.text.toUpperCase();
+      await FirebaseFirestore.instance
+          .collection('$firestoreMainPath/custom_games')
+          .get()
+          .then((games) async {
+        bool foundGame = false;
+        int indexGame = -1;
+        for (var game in games.docs) {
+          indexGame++;
+          if (game.id == pinCode) {
+            foundGame = true;
+            break;
+          }
+        }
+        FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+        if (!foundGame) {
+          constSnackBar("Invalid PIN Code", context);
+        } else {
+          var wantedGame = games.docs[indexGame];
+          final gameModel = Provider.of<GameModel>(context, listen: false);
+          gameModel.update(wantedGame);
+          if (wantedGame["is_locked"] == true) {
+            constSnackBar("Game is locked", context);
+          } else {
+            if (gameModel.getNumOfPlayers() == maxPlayers) {
+              constSnackBar("Game is full", context);
+            } else {
+              final loginModel =
+                  Provider.of<LoginModel>(context, listen: false);
+              await _initializeGame(gameModel, loginModel);
+              pinCodeController.text = '';
+              Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (context) => const LobbyPlayer()));
+              // Hide navigation buttons
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                  overlays: []);
+            }
+          }
+        }
+      });
+      setState(() {
+        _pressedJoinGame = false;
+      });
+    }
+
     return WillPopScope(
       child: Scaffold(
           resizeToAvoidBottomInset: false,
@@ -137,14 +154,12 @@ class JoinGame extends StatelessWidget {
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50)), // max width
-                      child: const Text('Join Game',
-                          style: TextStyle(fontSize: 18)),
-                      onPressed: () {
-                        _goToGameLobby(context);
-                      },
-                    )),
+                        style: ElevatedButton.styleFrom(
+                            minimumSize:
+                                const Size.fromHeight(50)), // max width
+                        child: const Text('Join Game',
+                            style: TextStyle(fontSize: 18)),
+                        onPressed: _pressedJoinGame ? null : _goToGameLobby)),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Row(children: const <Widget>[
