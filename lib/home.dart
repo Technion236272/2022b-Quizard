@@ -294,6 +294,7 @@ class _PlayState extends State<Play> {
       "false_answer": "",
       "selected_answer": "",
       "score": 0,
+      "round_score": 0
     };
     for (int i = 1; i < maxPlayers; i++) {
       game.addAll({"player$i": mapPlayer});
