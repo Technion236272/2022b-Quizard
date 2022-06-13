@@ -62,11 +62,12 @@ class _RootState extends State<Root> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: Theme.of(context).copyWith(
-          colorScheme:
-              Theme.of(context).colorScheme.copyWith(primary: defaultColor),
-          scaffoldBackgroundColor: backgroundColor,
-        ),
+        theme: ThemeData(
+            primaryColor: defaultColor,
+            colorScheme:
+                Theme.of(context).colorScheme.copyWith(primary: defaultColor),
+            backgroundColor: backgroundColor,
+            scaffoldBackgroundColor: backgroundColor),
         home: FirebaseAuth.instance.currentUser != null
             ? const LoadHomePage()
             : const WelcomePage());
@@ -113,8 +114,9 @@ class LoadHomePage extends StatelessWidget {
       });
     }
 
-    return Scaffold(
-        body: FutureBuilder(
+    return Container(
+        color: backgroundColor,
+        child: FutureBuilder(
             future: _prepHomePage(),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
@@ -122,17 +124,7 @@ class LoadHomePage extends StatelessWidget {
                   return const HomePage();
                 }
               }
-              return Center(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                    Text("Loading your \ngreatest challenge...",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 24)),
-                    Padding(padding: EdgeInsets.symmetric(vertical: 20)),
-                    CircularProgressIndicator()
-                  ]));
+              return const Center(child: CircularProgressIndicator());
             }));
   }
 }

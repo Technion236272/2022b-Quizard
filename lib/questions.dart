@@ -78,7 +78,7 @@ class AddQuestionForm extends StatelessWidget {
                     }
                     return null;
                   },
-                  maxLength: 20,
+                  maxLength: 25,
                   minLines: 1,
                   maxLines: 1,
                   decoration: const InputDecoration(
