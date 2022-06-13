@@ -298,37 +298,69 @@ class _WelcomePageState extends State<WelcomePage> {
                                     .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
+                                  List<String> allUsersName = [];
+                                  String source = "";
+
                                   for (var user in users.docs) {
-                                    if (user["email"] ==
-                                        FirebaseAuth
-                                            .instance.currentUser?.email) {
+                                    allUsersName.add(user["username"]);
+                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+                                      source = user["source"].toString();
                                       userExist = true;
                                     }
                                   }
                                   if (!userExist) {
                                     var users = FirebaseFirestore.instance
                                         .collection("$firestoreMainPath/users");
+
+                                    uniqueNameIndex = 0;
                                     final userToAdd = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
                                       "email": value!.email,
                                       "questions": [],
-                                      "username": value.displayName,
+                                      "username": getUniqueUserName(value!.email!.split("@")[0], allUsersName),
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink":
-                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "source" : "google",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
-                                  }
+                                    login(
+                                        "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                            builder: (context) =>
+                                            const HomePage()));
+                                  }else{
 
-                                  login(
-                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                  Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                          builder: (context) =>
+                                    if(source!="google"){
+                                      if(source=="facebook"){
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          customSnackBar(
+                                            content:
+                                            'The account already exists with Facebook credentials. please sign in via Facebook',
+                                          ),
+                                        );
+                                      }else{
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          customSnackBar(
+                                            content:
+                                            'The account already exists try signing in using email and password',
+                                          ),
+                                        );
+                                      }
+
+                                    }else{
+                                      login(
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                              builder: (context) =>
                                               const HomePage()));
+                                    }
+
+                                  }
                                 });
                               });
                             }, //TODO: Continue with Google
@@ -354,10 +386,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                     .collection('$firestoreMainPath/users')
                                     .get()
                                     .then((users) async {
+                                  List<String> allUsersName = [];
+                                  String source = "";
                                   for (var user in users.docs) {
+                                    allUsersName.add(user["username"]);
                                     if (user["email"] ==
                                         FirebaseAuth
                                             .instance.currentUser?.email) {
+                                      source = user["source"].toString();
                                       userExist = true;
                                     }
                                   }
@@ -367,23 +403,52 @@ class _WelcomePageState extends State<WelcomePage> {
                                     final user = <String, dynamic>{
                                       "answers": [],
                                       "categories": [],
-                                      "email": value.user?.email,
+                                      "email": value?.email,
                                       "questions": [],
-                                      "username": value.user?.displayName,
+                                      "username": getUniqueUserName("${value?.email?.split("@")[0]}", allUsersName),
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink":
-                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "source" : "facebook",
                                       "MonthlyWins": 0
                                     };
-                                    users.doc(value.user?.uid).set(user);
-                                  }
-                                  login(
-                                      "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                  Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                          builder: (context) =>
+                                    users.doc(value?.uid).set(user);
+                                    login(
+                                        "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                            builder: (context) =>
+                                            const HomePage()));
+                                  }else{
+
+                                    if(source!="facebook"){
+                                      if(source=="google"){
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          customSnackBar(
+                                            content:
+                                            'The account already exists with Google credentials. please sign in via Google',
+                                          ),
+                                        );
+                                      }else{
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          customSnackBar(
+                                            content:
+                                            'The account already exists try signing in using email and password',
+                                          ),
+                                        );
+                                      }
+
+                                    }else{
+                                      login(
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}");
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                              builder: (context) =>
                                               const HomePage()));
+                                    }
+
+                                  }
+
                                 });
                               });
                             }, //TODO: Continue with Facebook
@@ -459,20 +524,46 @@ class _WelcomePageState extends State<WelcomePage> {
     return user;
   }
 
-  Future<UserCredential> signinWithFacebook() async {
+  Future<User?> signinWithFacebook() async {
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
 
     // Create a credential from the access token
     final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+    FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
 
-    UserCredential userCredential = await FirebaseAuth.instance
-        .signInWithCredential(facebookAuthCredential);
+    User? user;
 
-    return userCredential;
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(facebookAuthCredential);
+
+      user = userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          customSnackBar(
+            content:
+            'The account already exists with a different credential.',
+          ),
+        );
+      } else if (e.code == 'invalid-credential') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          customSnackBar(
+            content: 'Error occurred while accessing credentials. Try again.',
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        customSnackBar(
+          content: 'Error occurred using Facebook Sign-In. Try again.',
+        ),
+      );
+    }
+    return user;
   }
 
   static SnackBar customSnackBar({required String content}) {
@@ -484,4 +575,18 @@ class _WelcomePageState extends State<WelcomePage> {
       ),
     );
   }
+
+  int uniqueNameIndex = 0;
+  String getUniqueUserName(String name, List<String> allUsersNameList) {
+    String uniqueName = name;
+    for(String userName in allUsersNameList){
+      if(userName==name){
+        uniqueNameIndex++;
+        uniqueName = getUniqueUserName("${name}_${uniqueNameIndex}", allUsersNameList);
+      }
+    }
+    print("uniqueName = ${uniqueName}");
+    return uniqueName;
+  }
+
 }

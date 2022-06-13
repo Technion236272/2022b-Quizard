@@ -42,8 +42,7 @@ class AuthModel with ChangeNotifier {
 
   Future<void> setUp(
       String email, String userName, String userId, String photoUrl) async {
-    var users =
-        FirebaseFirestore.instance.collection("$firestoreMainPath/users");
+    var users = FirebaseFirestore.instance.collection("$firestoreMainPath/users");
     final user = <String, dynamic>{
       "answers": [],
       "categories": [],
@@ -53,6 +52,7 @@ class AuthModel with ChangeNotifier {
       "wins": 0,
       "DailyWins": 0,
       "photoLink": photoUrl,
+      "source" : "regular",
       "MonthlyWins": 0
     };
     users.doc(userId).set(user);
