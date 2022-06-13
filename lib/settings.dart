@@ -51,30 +51,6 @@ class ChangePasswordForm extends StatelessWidget {
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
               },
-              controller: _oldPasswordController,
-              minLines: 1,
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              validator: (val) {
-                if (val == '') {
-                  return 'Passwords can\'t be empty';
-                }
-                if (val != loginModel.password) {
-                  return 'Wrong password';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                labelText: 'Current Password',
-              ),
-            ),
-            TextFormField(
-              onTap: () {
-                // Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-              },
               controller: _newPasswordController,
               minLines: 1,
               obscureText: true,
@@ -83,6 +59,9 @@ class ChangePasswordForm extends StatelessWidget {
               validator: (val) {
                 if (val == '') {
                   return 'Password can\'t be empty';
+                }
+                if (val!.length < 6) {
+                  return '6 characters needed';
                 }
                 return null;
               },
