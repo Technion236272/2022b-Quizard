@@ -335,9 +335,13 @@ class _SecondGameScreenState extends State<SecondGameScreen>
       });
     }
 
-    return Scaffold(
-        backgroundColor: backgroundColor,
-        body: SingleChildScrollView(
-            child: Column(children: [_secondScreenBody(), _statusMessage()])));
+    return WillPopScope(
+        child: Scaffold(
+            backgroundColor: backgroundColor,
+            body: SingleChildScrollView(
+                child:
+                    Column(children: [_secondScreenBody(), _statusMessage()]))),
+        // won't let pop
+        onWillPop: () => Future<bool>.value(false));
   }
 }

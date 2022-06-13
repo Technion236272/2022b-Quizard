@@ -126,9 +126,12 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
             _colorButton = orangeColor;
           });
 
+          // smoother on selecting answer
+          await Future.delayed(const Duration(milliseconds: 250));
+
           // score of round == time left
           // score is calculated by admin only after everyone selected answer
-          // round score view only reflects score of correct answer
+          // roundScoreView only reflects score of correct answer
 
           if (widget.isCorrect) {
             gameModel.roundScoreView = _timerView.animation.value; // else 0
