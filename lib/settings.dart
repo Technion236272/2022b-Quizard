@@ -275,22 +275,34 @@ class ChangeUsernameForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
+                    final enteredUsername = _textController.text;
+                    bool foundUser = false;
+
+                    // first check if username exists
                     await FirebaseFirestore.instance
                         .collection('$firestoreMainPath/users')
-                        .doc(loginModel.userId)
-                        .update({
-                      "username": _textController.text,
-                    }).then((_) {
-                      loginModel.setUsername(_textController.text);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(
-                            content: Text('Changed username successfully'),
-                          ))
-                          .closed
-                          .then((value) =>
-                              ScaffoldMessenger.of(context).clearSnackBars());
-                      Navigator.of(context).pop(true);
+                        .get()
+                        .then((users) {
+                      for (var user in users.docs) {
+                        if (user["username"] == enteredUsername) {
+                          foundUser = true;
+                          constSnackBar("Username already exists", context);
+                        }
+                      }
                     });
+                    if (!foundUser) {
+                      // username not exists -> then update
+                      await FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/users')
+                          .doc(loginModel.userId)
+                          .update({
+                        "username": enteredUsername,
+                      }).then((_) {
+                        loginModel.setUsername(enteredUsername);
+                        constSnackBar("Changed username successfully", context);
+                      });
+                    }
+                    Navigator.of(context).pop(true);
                   },
                   child: const Text('Submit'),
                 ),
