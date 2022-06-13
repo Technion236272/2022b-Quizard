@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:quizard/main.dart';
 
 import 'consts.dart';
 import 'providers.dart';
@@ -50,30 +51,6 @@ class ChangePasswordForm extends StatelessWidget {
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
               },
-              controller: _oldPasswordController,
-              minLines: 1,
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              validator: (val) {
-                if (val == '') {
-                  return 'Passwords can\'t be empty';
-                }
-                if (val != loginModel.password) {
-                  return 'Wrong password';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                labelText: 'Current Password',
-              ),
-            ),
-            TextFormField(
-              onTap: () {
-                // Show navigation buttons
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.bottom]);
-              },
               controller: _newPasswordController,
               minLines: 1,
               obscureText: true,
@@ -82,6 +59,9 @@ class ChangePasswordForm extends StatelessWidget {
               validator: (val) {
                 if (val == '') {
                   return 'Password can\'t be empty';
+                }
+                if (val!.length < 6) {
+                  return '6 characters needed';
                 }
                 return null;
               },
@@ -295,22 +275,34 @@ class ChangeUsernameForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
+                    final enteredUsername = _textController.text;
+                    bool foundUser = false;
+
+                    // first check if username exists
                     await FirebaseFirestore.instance
                         .collection('$firestoreMainPath/users')
-                        .doc(loginModel.userId)
-                        .update({
-                      "username": _textController.text,
-                    }).then((_) {
-                      loginModel.setUsername(_textController.text);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(
-                            content: Text('Changed username successfully'),
-                          ))
-                          .closed
-                          .then((value) =>
-                              ScaffoldMessenger.of(context).clearSnackBars());
-                      Navigator.of(context).pop(true);
+                        .get()
+                        .then((users) {
+                      for (var user in users.docs) {
+                        if (user["username"] == enteredUsername) {
+                          foundUser = true;
+                          constSnackBar("Username already exists", context);
+                        }
+                      }
                     });
+                    if (!foundUser) {
+                      // username not exists -> then update
+                      await FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/users')
+                          .doc(loginModel.userId)
+                          .update({
+                        "username": enteredUsername,
+                      }).then((_) {
+                        loginModel.setUsername(enteredUsername);
+                        constSnackBar("Changed username successfully", context);
+                      });
+                    }
+                    Navigator.of(context).pop(true);
                   },
                   child: const Text('Submit'),
                 ),
@@ -440,6 +432,8 @@ class Settings extends StatelessWidget {
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
                 Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
+                    builder: (context) => const WelcomePage()));
               });
             }));
   }

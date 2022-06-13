@@ -363,6 +363,7 @@ class GameModel extends ChangeNotifier {
     return numOfPlayers;
   }
 
+  // searches for empty slot and attaches new username to it
   int addNewPlayer(String username) {
     for (int i = 0; i < maxPlayers; i++) {
       if (_playersMaps[i]["username"] == "") {

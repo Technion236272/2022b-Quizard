@@ -254,8 +254,15 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class Play extends StatelessWidget {
+class Play extends StatefulWidget {
   const Play({Key? key}) : super(key: key);
+
+  @override
+  State<Play> createState() => _PlayState();
+}
+
+class _PlayState extends State<Play> {
+  bool _navigated = false;
 
   Future<void> _initializeGame(
       GameModel gameModel, LoginModel loginModel) async {
@@ -287,6 +294,7 @@ class Play extends StatelessWidget {
       "false_answer": "",
       "selected_answer": "",
       "score": 0,
+      "round_score": 0
     };
     for (int i = 1; i < maxPlayers; i++) {
       game.addAll({"player$i": mapPlayer});
@@ -297,30 +305,42 @@ class Play extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     InkWell _playOptionButton(String imgPath) {
+      void _navigateToGame() async {
+        setState(() {
+          _navigated = true;
+        });
+        // TODO: Support all games!
+        final gameModel = Provider.of<GameModel>(context, listen: false);
+        final loginModel = Provider.of<LoginModel>(context, listen: false);
+        if (imgPath.contains('create')) {
+          gameModel.resetData();
+          gameModel.isPrivate = false;
+          if (imgPath.contains('private')) {
+            gameModel.isPrivate = true;
+          }
+          var lobby = LobbyAdmin(isPrivate: gameModel.isPrivate);
+          _initializeGame(gameModel, loginModel);
+          await Future.delayed(const Duration(milliseconds: 200));
+          Navigator.of(context)
+              .push(MaterialPageRoute<void>(builder: (context) => lobby));
+        }
+        if (imgPath.contains('join_existing')) {
+          gameModel.resetData();
+          await Future.delayed(const Duration(milliseconds: 200));
+          Navigator.of(context)
+              .push(MaterialPageRoute<void>(builder: (context) => JoinGame()));
+          // Show navigation buttons
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+              overlays: [SystemUiOverlay.bottom]);
+        }
+        setState(() {
+          _navigated = false;
+        });
+      }
+
       return InkWell(
         splashColor: defaultColor,
-        onTap: () async {
-          // TODO: Support all games!
-          final gameModel = Provider.of<GameModel>(context, listen: false);
-          final loginModel = Provider.of<LoginModel>(context, listen: false);
-          if (imgPath.contains('create_private')) {
-            gameModel.resetData();
-            gameModel.isPrivate = true;
-            _initializeGame(gameModel, loginModel);
-            await Future.delayed(const Duration(milliseconds: 200));
-            Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) => const LobbyAdmin()));
-          }
-          if (imgPath.contains('join_existing')) {
-            gameModel.resetData();
-            await Future.delayed(const Duration(milliseconds: 200));
-            Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (context) => JoinGame()));
-            // Show navigation buttons
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                overlays: [SystemUiOverlay.bottom]);
-          }
-        },
+        onTap: _navigated ? null : _navigateToGame,
         child: Padding(
             padding: const EdgeInsets.all(7),
             child: Container(

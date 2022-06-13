@@ -311,7 +311,6 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final gameModel = Provider.of<GameModel>(context, listen: false);
     final loginModel = Provider.of<LoginModel>(context, listen: false);
 
     void _dialogGameClosed() {
@@ -361,22 +360,23 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   actions: <Widget>[
                     TextButton(
                         onPressed: () async {
+                          int myIndex = gameModel.playerIndex;
+                          String pinCode = gameModel.pinCode;
+                          gameModel.resetData();
                           Map<String, dynamic> emptyPlayer = {
                             "username": "",
                             "is_ready": false,
                             "false_answer": "",
-                            "selected_answer": ""
+                            "selected_answer": "",
+                            "score": 0,
+                            "round_score": 0
                           };
-                          int myIndex = gameModel.playerIndex;
                           var games = FirebaseFirestore.instance
                               .collection('$firestoreMainPath/custom_games');
                           await games
-                              .doc(gameModel.pinCode)
+                              .doc(pinCode)
                               .update({"player$myIndex": emptyPlayer});
-                          gameModel.resetData();
-                          Navigator.of(context).pop(true);
-                          Navigator.of(context).pop(true);
-                          Navigator.of(context).pop(true);
+                          Navigator.of(context).pop();
                         },
                         child: const Text("YES")),
                     TextButton(
@@ -389,64 +389,71 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           false;
     }
 
-    return WillPopScope(
-        child: Scaffold(
-            appBar: LobbyAppBar(_exitDialog),
-            body: SingleChildScrollView(
-                child: StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('$firestoreMainPath/custom_games')
-                        .doc(gameModel.pinCode)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        var game = snapshot.data!;
-                        if (!game.exists) {
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => Navigator.of(context).pop(),
-                          );
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => _dialogGameClosed(),
-                          );
-                        } else {
-                          gameModel.update(snapshot.data!);
-                          if (game["is_locked"]) {
-                            lockText = 'LOCKED';
-                          } else {
-                            lockText = 'UNLOCKED';
-                          }
-                          if (!gameModel
-                              .doesUsernameExist(loginModel.username)) {
+    return Consumer<GameModel>(builder: (context, gameModel, child) {
+      return WillPopScope(
+          child: Scaffold(
+              appBar: LobbyAppBar(_exitDialog),
+              body: SingleChildScrollView(
+                  child: StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/custom_games')
+                          .doc(gameModel.pinCode)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          var game = snapshot.data!;
+                          if (!game.exists) {
                             WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
-                            WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => _dialogKickedByAdmin(),
-                            );
-                          }
-                          final questions =
-                              List<String>.from(game["questions"]);
-                          if (questions.isNotEmpty) {
-                            int participantIndex = gameModel
-                                .getPlayerIndexByUsername(loginModel.username);
-                            gameModel.playerIndex = participantIndex;
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const FirstGameScreen()));
-                            });
+                            if (gameModel.pinCode != 'null') {
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _dialogGameClosed(),
+                              );
+                            }
+                          } else {
+                            gameModel.update(game);
+                            if (game["is_locked"]) {
+                              lockText = 'LOCKED';
+                            } else {
+                              lockText = 'UNLOCKED';
+                            }
+                            if (!gameModel
+                                .doesUsernameExist(loginModel.username)) {
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => Navigator.of(context).pop(),
+                              );
+                              if (gameModel.pinCode != 'null') {
+                                WidgetsBinding.instance.addPostFrameCallback(
+                                  (_) => _dialogKickedByAdmin(),
+                                );
+                              }
+                            }
+                            final questions =
+                                List<String>.from(game["questions"]);
+                            if (questions.isNotEmpty) {
+                              int participantIndex =
+                                  gameModel.getPlayerIndexByUsername(
+                                      loginModel.username);
+                              gameModel.playerIndex = participantIndex;
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const FirstGameScreen()));
+                              });
+                            }
                           }
                         }
-                      }
-                      return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Column(children: [
-                            _selectedCategories(),
-                            _gameLobby(),
-                          ]));
-                    }))),
-        onWillPop: _exitDialog);
+                        return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Column(children: [
+                              _selectedCategories(),
+                              _gameLobby(),
+                            ]));
+                      }))),
+          onWillPop: _exitDialog);
+    });
   }
 }
