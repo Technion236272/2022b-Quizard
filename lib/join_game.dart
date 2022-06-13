@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
+import 'lobby_admin.dart';
 import 'lobby_player.dart';
 
 class JoinGameAppBar extends StatelessWidget with PreferredSizeWidget {
@@ -50,28 +51,39 @@ class JoinGame extends StatefulWidget {
 
 class _JoinGameState extends State<JoinGame> {
   final pinCodeController = TextEditingController();
-
   bool _pressedJoinGame = false;
-
-  Future<void> _initializeGame(
-      GameModel gameModel, LoginModel loginModel) async {
-    gameModel.pinCode = pinCodeController.text.toUpperCase();
-    int newPlayerIndex = -1;
-    var games = FirebaseFirestore.instance
-        .collection('$firestoreMainPath/custom_games');
-    await games.doc(gameModel.pinCode).get().then((game) {
-      gameModel.update(game);
-      newPlayerIndex = gameModel.addNewPlayer(loginModel.username);
-      gameModel.pinCode = pinCodeController.text.toUpperCase();
-    });
-    final game = <String, dynamic>{
-      "player$newPlayerIndex": gameModel.players[newPlayerIndex],
-    };
-    await games.doc(gameModel.pinCode).update(game);
-  }
 
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+    final gamesRef = FirebaseFirestore.instance
+        .collection('$firestoreMainPath/custom_games');
+
+    Future<int> _initializeGameAndGetPlayerIndex() async {
+      gameModel.pinCode = pinCodeController.text.toUpperCase();
+      int newPlayerIndex = -1;
+      await gamesRef.doc(gameModel.pinCode).get().then((game) async {
+        // check if player already exists
+        for (int i = 0; i < maxPlayers; i++) {
+          if (game["player$i"]["username"] == loginModel.username) {
+            newPlayerIndex = i;
+            gameModel.playerIndex = i;
+          }
+        }
+        gameModel.update(game);
+        print("newPlayerIndex: " + newPlayerIndex.toString());
+        // if player doesn't exist then add player to an empty slot
+        if (newPlayerIndex == -1) {
+          newPlayerIndex = gameModel.addNewPlayer(loginModel.username);
+          await gamesRef.doc(gameModel.pinCode).update(
+              {"player$newPlayerIndex": gameModel.players[newPlayerIndex]});
+        }
+      });
+      pinCodeController.text = '';
+      return newPlayerIndex;
+    }
+
     Future<void> _goToGameLobby() async {
       if (pinCodeController.text == '') {
         return;
@@ -79,16 +91,13 @@ class _JoinGameState extends State<JoinGame> {
       setState(() {
         _pressedJoinGame = true;
       });
-      final pinCode = pinCodeController.text.toUpperCase();
-      await FirebaseFirestore.instance
-          .collection('$firestoreMainPath/custom_games')
-          .get()
-          .then((games) async {
+      final enteredPinCode = pinCodeController.text.toUpperCase();
+      await gamesRef.get().then((games) async {
         bool foundGame = false;
         int indexGame = -1;
         for (var game in games.docs) {
           indexGame++;
-          if (game.id == pinCode) {
+          if (game.id == enteredPinCode) {
             foundGame = true;
             break;
           }
@@ -98,7 +107,6 @@ class _JoinGameState extends State<JoinGame> {
           constSnackBar("Invalid PIN Code", context);
         } else {
           var wantedGame = games.docs[indexGame];
-          final gameModel = Provider.of<GameModel>(context, listen: false);
           gameModel.update(wantedGame);
           if (wantedGame["is_locked"] == true) {
             constSnackBar("Game is locked", context);
@@ -106,12 +114,15 @@ class _JoinGameState extends State<JoinGame> {
             if (gameModel.getNumOfPlayers() == maxPlayers) {
               constSnackBar("Game is full", context);
             } else {
-              final loginModel =
-                  Provider.of<LoginModel>(context, listen: false);
-              await _initializeGame(gameModel, loginModel);
-              pinCodeController.text = '';
-              Navigator.of(context).push(MaterialPageRoute<void>(
-                  builder: (context) => const LobbyPlayer()));
+              int i = await _initializeGameAndGetPlayerIndex();
+              if (i == 0) {
+                Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (context) =>
+                        LobbyAdmin(isPrivate: wantedGame["is_private"])));
+              } else {
+                Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (context) => const LobbyPlayer()));
+              }
               // Hide navigation buttons
               SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                   overlays: []);
@@ -176,7 +187,8 @@ class _JoinGameState extends State<JoinGame> {
                       child: const Text('Find me an open game',
                           style: TextStyle(fontSize: 18)),
                       onPressed: () {
-                        constSnackBar("Coming soon", context);
+                        //TODO: Finish this
+                        //constSnackBar("Coming soon", context);
                       },
                     )),
               ]))),
