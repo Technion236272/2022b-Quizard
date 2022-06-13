@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'game/first_screen.dart';
 import 'lobby_appbar.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -60,7 +61,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           final categories = user["categories"].toSet().toList();
           for (int i = 0; i < categories.length; i++) {
             final filteredListByItem =
-                user["categories"].where((cat) => cat == categories[i]);
+            user["categories"].where((cat) => cat == categories[i]);
             customCategories.add(
                 [categories[i], user["username"], filteredListByItem.length]);
           }
@@ -71,11 +72,11 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
     return ChipsInput(
       initialValue: const [],
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
           filled: true,
           fillColor: secondaryColor,
-          hintText: "Type here...",
-          hintStyle: TextStyle(color: thirdColor)),
+          hintText: translation(context).typeHere,
+          hintStyle: const TextStyle(color: thirdColor)),
       maxChips: 5,
       findSuggestions: (String query) {
         if (query.isNotEmpty) {
@@ -138,10 +139,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                   String optionText;
                   if (option[2] == 1) {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} question";
+                    "${option[0]}, by ${option[1]}, ${option[2]} question";
                   } else {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} questions";
+                    "${option[0]}, by ${option[1]}, ${option[2]} questions";
                   }
                   return GestureDetector(
                     onTap: () {
@@ -223,7 +224,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _categoriesTitle(
-                  'Official Categories', 'Scroll right for more categories'),
+                  translation(context).officialCategory, translation(context).message2),
               _officialCategoriesChips()
             ]));
   }
@@ -262,16 +263,16 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(
-                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
-                    duration: const Duration(days: 365),
-                    action: SnackBarAction(
-                      label: 'Dismiss',
-                      onPressed: () {},
-                    ),
-                  ))
+                content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                duration: const Duration(days: 365),
+                action: SnackBarAction(
+                  label: 'Dismiss',
+                  onPressed: () {},
+                ),
+              ))
                   .closed
                   .then((value) =>
-                      ScaffoldMessenger.of(context).clearSnackBars());
+                  ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -402,7 +403,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             }
           });
           final ref =
-              FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
           final url = await ref.getDownloadURL();
           return NetworkImage(url);
         }
@@ -443,15 +444,15 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                         child: Checkbox(
                             splashRadius: 20,
                             materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                            MaterialTapTargetSize.shrinkWrap,
                             activeColor: greenColor,
                             value: gameModel.players[playerIndex]["is_ready"],
                             onChanged: matchUsernames
                                 ? (value) {
-                                    _toggleIsReady();
-                                  }
+                              _toggleIsReady();
+                            }
                                 : null)),
-                    const Text("Ready")
+                    Text(translation(context).ready)
                   ])
                 ],
               ),
@@ -497,7 +498,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       final allCategories = [];
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
       var users =
-          FirebaseFirestore.instance.collection('$firestoreMainPath/users');
+      FirebaseFirestore.instance.collection('$firestoreMainPath/users');
       var officialQuestions = FirebaseFirestore.instance
           .collection('versions/v1/official_questions');
       for (int i = 0; i < gameModel.selectedCategories.length; i++) {
@@ -585,7 +586,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       gameModel.playerIndex = playerIndex;
       bool retVal = await _buildQuestions();
       if (!retVal) {
-        constSnackBar("Not enough questions to build a game", context);
+        constSnackBar(translation(context).snackBar6, context);
       } else {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
@@ -605,7 +606,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 style: ElevatedButton.styleFrom(
                     primary: defaultColor,
                     minimumSize: const Size.fromHeight(50)), // max width
-                child: const Text('Start Game', style: TextStyle(fontSize: 18)),
+                child: Text(translation(context).startGame, style: const TextStyle(fontSize: 18)),
                 // TODO: Make sure that there are at least 2 players
                 onPressed: gameModel.areAllReady() ? _startGame : null));
       },
@@ -615,33 +616,33 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   Future<bool> _exitDialog() async {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     return (await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text("Close Game"),
-                content: const Text("Are you sure you wish to close "
-                    "this game? All current participants "
-                    "will be kicked automatically"),
-                actions: <Widget>[
-                  TextButton(
-                      onPressed: () async {
-                        await FirebaseFirestore.instance
-                            .collection('$firestoreMainPath/custom_games')
-                            .doc(gameModel.pinCode)
-                            .delete();
-                        Navigator.of(context).pop(true);
-                        Navigator.of(context).pop(true);
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                            overlays: []);
-                      },
-                      child: const Text("YES")),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text("NO"),
-                  ),
-                ],
-              );
-            })) ??
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Close Game"),
+            content: const Text("Are you sure you wish to close "
+                "this game? All current participants "
+                "will be kicked automatically"),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection('$firestoreMainPath/custom_games')
+                        .doc(gameModel.pinCode)
+                        .delete();
+                    Navigator.of(context).pop(true);
+                    Navigator.of(context).pop(true);
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                        overlays: []);
+                  },
+                  child: const Text("YES")),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("NO"),
+              ),
+            ],
+          );
+        })) ??
         false;
   }
 

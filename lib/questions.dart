@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 
 class AddQuestionForm extends StatelessWidget {
@@ -41,8 +42,8 @@ class AddQuestionForm extends StatelessWidget {
                   maxLength: 20,
                   minLines: 1,
                   maxLines: 1,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
+                  decoration: InputDecoration(
+                    labelText: translation(context).category,
                   ),
                 ),
                 TextFormField(
@@ -61,8 +62,8 @@ class AddQuestionForm extends StatelessWidget {
                   maxLength: 50,
                   minLines: 1,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Question',
+                  decoration: InputDecoration(
+                    labelText: translation(context).question,
                   ),
                 ),
                 TextFormField(
@@ -81,8 +82,8 @@ class AddQuestionForm extends StatelessWidget {
                   maxLength: 25,
                   minLines: 1,
                   maxLines: 1,
-                  decoration: const InputDecoration(
-                    labelText: 'Answer',
+                  decoration: InputDecoration(
+                    labelText: translation(context).answer,
                   ),
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -115,16 +116,16 @@ class AddQuestionForm extends StatelessWidget {
                           });
                         }
                       },
-                      child: const Text('Submit'),
+                      child: Text(translation(context).submit),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text(translation(context).cancel2)
                     ),
                   ),
                 ])
@@ -251,9 +252,8 @@ class _QuestionsState extends State<Questions> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Delete Question"),
-            content:
-                const Text("Are you sure you wish to delete this question?"),
+            title: Text(translation(context).deleteQuestion),
+            content: Text(translation(context).confirmDeletion),
             actions: <Widget>[
               TextButton(
                   onPressed: () async {
@@ -287,10 +287,10 @@ class _QuestionsState extends State<Questions> {
                       });
                     });
                   },
-                  child: const Text("DELETE")),
+                  child: Text(translation(context).delete)),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("CANCEL"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(translation(context).cancel)
               ),
             ],
           );
@@ -337,12 +337,12 @@ class _QuestionsState extends State<Questions> {
                 onLongPress: () {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(const SnackBar(
-                        content: Text(
-                            'Swipe left to edit, and swipe right to delete'),
-                      ))
+                    content: Text(
+                        'Swipe left to edit, and swipe right to delete'),
+                  ))
                       .closed
                       .then((value) =>
-                          ScaffoldMessenger.of(context).clearSnackBars());
+                      ScaffoldMessenger.of(context).clearSnackBars());
                 },
                 child: ExpansionTile(
                     childrenPadding: EdgeInsets.zero,
@@ -372,7 +372,7 @@ class _QuestionsState extends State<Questions> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                        title: const Text("Add Question"),
+                        title: Text(translation(context).addYourQuestion),
                         content: AddQuestionForm());
                   },
                 ).then((value) => SystemChrome.setEnabledSystemUIMode(
@@ -392,14 +392,13 @@ class _QuestionsState extends State<Questions> {
                   if (snapshot.data.isNotEmpty) {
                     return ListView(children: loginModel.cachedQuestionsList);
                   } else {
-                    return const Padding(
+                    return Padding(
                         padding: EdgeInsets.all(10),
                         child: Center(
-                            child: Text(
-                          "Add questions here for custom games.",
-                          style: TextStyle(fontSize: 22),
-                          textAlign: TextAlign.center,
-                        )));
+                            child: Text(translation(context).addQuestionsCustom,
+                              style: TextStyle(fontSize: 22),
+                              textAlign: TextAlign.center,
+                            )));
                   }
                 } else {
                   if (loginModel.cachedQuestionsList.isEmpty) {

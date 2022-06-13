@@ -116,16 +116,16 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(
-                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
-                    duration: const Duration(days: 365),
-                    action: SnackBarAction(
-                      label: 'Dismiss',
-                      onPressed: () {},
-                    ),
-                  ))
+                content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                duration: const Duration(days: 365),
+                action: SnackBarAction(
+                  label: 'Dismiss',
+                  onPressed: () {},
+                ),
+              ))
                   .closed
                   .then((value) =>
-                      ScaffoldMessenger.of(context).clearSnackBars());
+                  ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -153,7 +153,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                       borderRadius: BorderRadius.circular(4.0),
                       side: const BorderSide(color: defaultColor))),
               backgroundColor:
-                  MaterialStateProperty.all<Color>(lightBlueColor)),
+              MaterialStateProperty.all<Color>(lightBlueColor)),
           onPressed: null,
           child: Text(lockText))
     ]);
@@ -217,7 +217,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             }
           });
           final ref =
-              FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
           final url = await ref.getDownloadURL();
           return NetworkImage(url);
         }
@@ -257,13 +257,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         child: Checkbox(
                             splashRadius: 20,
                             materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                            MaterialTapTargetSize.shrinkWrap,
                             activeColor: greenColor,
                             value: gameModel.players[playerIndex]["is_ready"],
                             onChanged: matchUsernames
                                 ? (value) {
-                                    _toggleIsReady();
-                                  }
+                              _toggleIsReady();
+                            }
                                 : null)),
                     const Text("Ready")
                   ])
@@ -337,7 +337,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             return AlertDialog(
               title: const Text("Game Closed"),
               content:
-                  const Text("You have been kicked by the admin from the game"),
+              const Text("You have been kicked by the admin from the game"),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -351,41 +351,41 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
     Future<bool> _exitDialog() async {
       final gameModel = Provider.of<GameModel>(context, listen: false);
       return (await showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text("Close Game"),
-                  content: const Text("Are you sure you wish to exit from "
-                      "this game?"),
-                  actions: <Widget>[
-                    TextButton(
-                        onPressed: () async {
-                          int myIndex = gameModel.playerIndex;
-                          String pinCode = gameModel.pinCode;
-                          gameModel.resetData();
-                          Map<String, dynamic> emptyPlayer = {
-                            "username": "",
-                            "is_ready": false,
-                            "false_answer": "",
-                            "selected_answer": "",
-                            "score": 0,
-                            "round_score": 0
-                          };
-                          var games = FirebaseFirestore.instance
-                              .collection('$firestoreMainPath/custom_games');
-                          await games
-                              .doc(pinCode)
-                              .update({"player$myIndex": emptyPlayer});
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("YES")),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text("NO"),
-                    ),
-                  ],
-                );
-              })) ??
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Close Game"),
+              content: const Text("Are you sure you wish to exit from "
+                  "this game?"),
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () async {
+                      int myIndex = gameModel.playerIndex;
+                      String pinCode = gameModel.pinCode;
+                      gameModel.resetData();
+                      Map<String, dynamic> emptyPlayer = {
+                        "username": "",
+                        "is_ready": false,
+                        "false_answer": "",
+                        "selected_answer": "",
+                        "score": 0,
+                        "round_score": 0
+                      };
+                      var games = FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/custom_games');
+                      await games
+                          .doc(pinCode)
+                          .update({"player$myIndex": emptyPlayer});
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("YES")),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("NO"),
+                ),
+              ],
+            );
+          })) ??
           false;
     }
 
@@ -403,12 +403,12 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance.addPostFrameCallback(
-                              (_) => Navigator.of(context).pop(),
+                            WidgetsBinding.instance?.addPostFrameCallback(
+                                  (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => _dialogGameClosed(),
+                              WidgetsBinding.instance?.addPostFrameCallback(
+                                    (_) => _dialogGameClosed(),
                               );
                             }
                           } else {
@@ -420,28 +420,28 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => Navigator.of(context).pop(),
+                              WidgetsBinding.instance?.addPostFrameCallback(
+                                    (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance.addPostFrameCallback(
-                                  (_) => _dialogKickedByAdmin(),
+                                WidgetsBinding.instance?.addPostFrameCallback(
+                                      (_) => _dialogKickedByAdmin(),
                                 );
                               }
                             }
                             final questions =
-                                List<String>.from(game["questions"]);
+                            List<String>.from(game["questions"]);
                             if (questions.isNotEmpty) {
                               int participantIndex =
-                                  gameModel.getPlayerIndexByUsername(
-                                      loginModel.username);
+                              gameModel.getPlayerIndexByUsername(
+                                  loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                              WidgetsBinding.instance?.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            const FirstGameScreen()));
+                                        const FirstGameScreen()));
                               });
                             }
                           }

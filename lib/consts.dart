@@ -33,8 +33,8 @@ const appVersion = "1.0.0"; // For AboutDialog - update if necessary!
 void constSnackBar(String text, BuildContext context) {
   ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(
-        content: Text(text),
-      ))
+    content: Text(text),
+  ))
       .closed
       .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
 }

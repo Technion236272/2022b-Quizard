@@ -9,6 +9,7 @@ import 'package:random_string/random_string.dart';
 
 import 'ModelClasses/leader_board_model.dart';
 import 'lobby_admin.dart';
+import 'localization/classes/language_constants.dart';
 import 'profile.dart';
 import 'consts.dart';
 import 'providers.dart';
@@ -23,138 +24,139 @@ class Rules extends StatelessWidget {
             color: backgroundColor,
             child: Padding(
                 padding: const EdgeInsets.all(appbarPadding),
-                child: Column(children: <Widget>[
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        InkWell(
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: defaultColor,
-                              size: appbarIconSize,
-                            ),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            })
-                      ]),
-                  const Padding(padding: EdgeInsets.all(18)),
-                  const Image(image: AssetImage('images/titles/rules.png')),
-                  const Padding(padding: EdgeInsets.all(15)),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 70,
-                    width: 350,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Players',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.bold)),
-                          Padding(padding: EdgeInsets.all(2)),
-                          Text(
-                            '2-5',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                        ]),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  const Padding(padding: EdgeInsets.all(5)),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 70,
-                    width: 350,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Goal',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.bold)),
-                          Padding(padding: EdgeInsets.all(2)),
-                          Text(
-                            'The player with the highest score wins.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                        ]),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  const Padding(padding: EdgeInsets.all(5)),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 260,
-                    width: 350,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Round Gameplay\n',
-                              style: TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.bold)),
-                          Text(
-                            '-Each player enters a false answer.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                          Padding(padding: EdgeInsets.all(4)),
-                          Text(
-                            '-All the false answers are shown with the right answer to all players.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                          Padding(padding: EdgeInsets.all(4)),
-                          Text(
-                            '-Players are rewarded with points for choosing the right answer.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                          Padding(padding: EdgeInsets.all(4)),
-                          Text(
-                            '-Players are rewarded with points for every player choosing their false answer.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                        ]),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  const Padding(padding: EdgeInsets.all(5)),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: secondaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 150,
-                    width: 350,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Bonuses',
-                              style: TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.bold)),
-                          Padding(padding: EdgeInsets.all(10)),
-                          Text(
-                            '-Players are rewarded for choosing the right answer multiple times in a row.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                          Padding(padding: EdgeInsets.all(4)),
-                          Text(
-                            '-Faster answer means more points.',
-                            style:
-                                TextStyle(color: darkGreyColor, fontSize: 18),
-                          ),
-                        ]),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                ]))));
+                child: Column(mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            InkWell(
+                                child: const Icon(
+                                  Icons.arrow_back,
+                                  color: defaultColor,
+                                  size: appbarIconSize,
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                })
+                          ]),
+                      const Padding(padding: EdgeInsets.all(20)),
+                      const Image(image: AssetImage('images/titles/rules.png')),
+                      const Padding(padding: EdgeInsets.all(10)),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: secondaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10))
+                        ),
+                        width: 350,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(translation(context).players,
+                                  textAlign: TextAlign.left,
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                              const Padding(padding: EdgeInsets.all(2)),
+                              const Text(
+                                '2-5',
+                                style:
+                                TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                            ]),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      const Padding(padding: EdgeInsets.all(5)),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: secondaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10))
+                        ),
+                        width: 350,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(translation(context).goal,
+                                  textAlign: TextAlign.left,
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                              const Padding(padding: EdgeInsets.all(2)),
+                              Text(
+                                translation(context).infoText1,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                            ]),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      const Padding(padding: EdgeInsets.all(5)),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: secondaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10))
+                        ),
+                        width: 350,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(translation(context).roundGameplay,
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                              const Padding(padding: EdgeInsets.all(3)),
+                              Text(translation(context).infoText2,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                              const Padding(padding: EdgeInsets.all(4)),
+                              Text(translation(context).infoText3,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                              const Padding(padding: EdgeInsets.all(4)),
+                              Text(
+                                translation(context).infoText4,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                              const Padding(padding: EdgeInsets.all(4)),
+                              Text(
+                                translation(context).infoText5,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                            ]),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      const Padding(padding: EdgeInsets.all(5)),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: secondaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
+                        height: 150,
+                        width: 350,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(translation(context).bonuses,
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                              const Padding(padding: EdgeInsets.all(3)),
+                              Text(
+                                translation(context).infoText6,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                              const Padding(padding: EdgeInsets.all(4)),
+                              Text(
+                                translation(context).infoText7,
+                                style:
+                                const TextStyle(color: darkGreyColor, fontSize: 16),
+                              ),
+                            ]),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                    ]))));
   }
 }
+
 
 class QuizardAppBar extends StatelessWidget with PreferredSizeWidget {
   QuizardAppBar({Key? key}) : super(key: key);
@@ -229,18 +231,18 @@ class _HomePageState extends State<HomePage> {
           resizeToAvoidBottomInset: false,
           appBar: QuizardAppBar(),
           bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),
-                label: 'Profile',
+                label: translation(context).profile,
               ),
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.gamepad),
-                label: 'Play',
+                label: translation(context).play,
               ),
               BottomNavigationBarItem(
                 icon: Icon(FontAwesomeIcons.crown),
-                label: 'Leaderboard',
+                label: translation(context).leaderboard,
               ),
             ],
             currentIndex: _currentIndex,
@@ -367,7 +369,7 @@ class _PlayState extends State<Play> {
             children: <Widget>[
               const Image(image: AssetImage('images/titles/quizard.png')),
               Text(
-                'Good luck, ${loginModel.username}!',
+                translation(context).goodLuck +' ${loginModel.username}!',
                 style: const TextStyle(fontSize: 18),
               ),
               Column(
@@ -438,71 +440,71 @@ class _LeaderboardState extends State<Leaderboard>
           color: secondaryBackgroundColor,
           height: screenHeight,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-                height: screenHeight * 0.2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      loginModel.username,
-                      style: const TextStyle(fontSize: 24, color: defaultColor),
-                    ),
-                    Expanded(child: Container()),
-                    Container(
-                      height: 1,
-                      width: MediaQuery.of(context).size.width * 0.85,
-                      color: defaultColor.withOpacity(0.1),
-                    ),
-                    Expanded(child: Container()),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "${loginModel.wins}",
-                              style: TextStyle(
-                                  fontSize: 24,
-                                  color: defaultColor.withOpacity(.5)),
-                            ),
-                            const Text(
-                              "Wins",
-                              style:
-                                  TextStyle(fontSize: 18, color: defaultColor),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              myRankAllTimeWins.toString(),
-                              style: TextStyle(
-                                  fontSize: 24,
-                                  color: defaultColor.withOpacity(.5)),
-                            ),
-                            const Text(
-                              "Rank",
-                              style:
-                                  TextStyle(fontSize: 18, color: defaultColor),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    Expanded(child: Container()),
-                  ],
-                ),
-                decoration: const BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(boxRadiusConst)))),
-            Expanded(
-                child: DefaultTabController(
+              Container(
+              height: screenHeight * 0.2,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    loginModel.username,
+                    style: const TextStyle(fontSize: 24, color: defaultColor),
+                  ),
+                  Expanded(child: Container()),
+                  Container(
+                    height: 1,
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    color: defaultColor.withOpacity(0.1),
+                  ),
+                  Expanded(child: Container()),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${loginModel.wins}",
+                            style: TextStyle(
+                                fontSize: 24,
+                                color: defaultColor.withOpacity(.5)),
+                          ),
+                          Text(
+                            translation(context).wins,
+                            style:
+                            const TextStyle(fontSize: 18, color: defaultColor),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            myRankAllTimeWins.toString(),
+                            style: TextStyle(
+                                fontSize: 24,
+                                color: defaultColor.withOpacity(.5)),
+                          ),
+                          Text(
+                            translation(context).rank,
+                            style:
+                            const TextStyle(fontSize: 18, color: defaultColor),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  Expanded(child: Container()),
+                ],
+              ),
+              decoration: const BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(boxRadiusConst)))),
+          Expanded(
+            child: DefaultTabController(
               initialIndex: _lastTab,
               length: 3,
               child: Scaffold(
@@ -517,61 +519,61 @@ class _LeaderboardState extends State<Leaderboard>
                     onTap: _onTapTab,
                     labelColor: defaultColor,
                     indicatorColor: defaultColor,
-                    tabs: const [
-                      Tab(text: "DAILY"),
+                    tabs: [
+                      Tab(text: translation(context).daily),
                       Tab(
-                        text: "MONTHLY",
+                        text: translation(context).monthly,
                       ),
                       Tab(
-                        text: "ALL TIME",
+                        text: translation(context).allTime,
                       ),
                     ],
                   ),
                 ),
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: dailyWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  dailyWinsList[index].name,
-                                  dailyWinsList[index].profileImageLink,
-                                  dailyWinsList[index].wins);
-                            })),
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: monthlyWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  monthlyWinsList[index].name,
-                                  monthlyWinsList[index].profileImageLink,
-                                  monthlyWinsList[index].wins);
-                            })),
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: allTimeWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  allTimeWinsList[index].name,
-                                  allTimeWinsList[index].profileImageLink,
-                                  allTimeWinsList[index].wins);
-                            })),
-                  ],
-                ),
+              body: TabBarView(
+                controller: _tabController,
+                children: [
+                  Container(
+                      color: secondaryBackgroundColor,
+                      child: ListView.builder(
+                          itemCount: dailyWinsList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return leaderBoardListItemWidget(
+                                screenHeight,
+                                index + 1,
+                                dailyWinsList[index].name,
+                                dailyWinsList[index].profileImageLink,
+                                dailyWinsList[index].wins);
+                          })),
+                  Container(
+                      color: secondaryBackgroundColor,
+                      child: ListView.builder(
+                          itemCount: monthlyWinsList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return leaderBoardListItemWidget(
+                                screenHeight,
+                                index + 1,
+                                monthlyWinsList[index].name,
+                                monthlyWinsList[index].profileImageLink,
+                                monthlyWinsList[index].wins);
+                          })),
+                  Container(
+                      color: secondaryBackgroundColor,
+                      child: ListView.builder(
+                          itemCount: allTimeWinsList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return leaderBoardListItemWidget(
+                                screenHeight,
+                                index + 1,
+                                allTimeWinsList[index].name,
+                                allTimeWinsList[index].profileImageLink,
+                                allTimeWinsList[index].wins);
+                          })),
+                ],
               ),
-            )),
-          ]));
+            ),
+          )),
+      ]));
     });
   }
 
@@ -648,7 +650,7 @@ class _LeaderboardState extends State<Leaderboard>
         var url = "";
         try {
           final ref =
-              FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+          FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
           url = await ref.getDownloadURL();
         } catch (e) {
           url = "";

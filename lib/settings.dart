@@ -10,6 +10,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:quizard/main.dart';
 
 import 'consts.dart';
+import 'localization/classes/language.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 
 class ChangePasswordForm extends StatelessWidget {
@@ -27,12 +29,12 @@ class ChangePasswordForm extends StatelessWidget {
     await AuthModel.instance()
         .signIn(email, oldPassword)
         .then((value) async => {
-              await FirebaseAuth.instance.currentUser!
-                  .updatePassword(newPassword)
-                  .then(
-                    (value) => message = true,
-                  )
-            });
+      await FirebaseAuth.instance.currentUser!
+          .updatePassword(newPassword)
+          .then(
+            (value) => message = true,
+      )
+    });
     return message;
   }
 
@@ -103,29 +105,29 @@ class ChangePasswordForm extends StatelessWidget {
                     if (valid != null) {
                       if (valid) {
                         resetPassword(
-                                loginModel.email,
-                                _oldPasswordController.text,
-                                _newPasswordController.text)
+                            loginModel.email,
+                            _oldPasswordController.text,
+                            _newPasswordController.text)
                             .then((value) {
                           if (value == true) {
                             loginModel.setPassword(_newPasswordController.text);
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                                  content:
-                                      Text('Changed password successfully'),
-                                ))
+                                .showSnackBar(SnackBar(
+                              content:
+                              Text(translation(context).passwordChanged),
+                            ))
                                 .closed
                                 .then((value) => ScaffoldMessenger.of(context)
-                                    .clearSnackBars());
+                                .clearSnackBars());
                             Navigator.of(context).pop(true);
                           } else {
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                                  content: Text('Something went wrong'),
-                                ))
+                                .showSnackBar(SnackBar(
+                              content: Text(translation(context).somethingIsWrong),
+                            ))
                                 .closed
                                 .then((value) => ScaffoldMessenger.of(context)
-                                    .clearSnackBars());
+                                .clearSnackBars());
                           }
                         });
                       }
@@ -162,12 +164,12 @@ class ChangeEmailForm extends StatelessWidget {
     await AuthModel.instance()
         .signIn(oldEmail, password)
         .then((value) async => {
-              await FirebaseAuth.instance.currentUser!
-                  .updateEmail(newEmail)
-                  .then(
-                    (value) => message = true,
-                  )
-            });
+      await FirebaseAuth.instance.currentUser!
+          .updateEmail(newEmail)
+          .then(
+            (value) => message = true,
+      )
+    });
     return message;
   }
 
@@ -190,8 +192,8 @@ class ChangeEmailForm extends StatelessWidget {
               },
               controller: _textController,
               minLines: 1,
-              decoration: const InputDecoration(
-                hintText: 'Username',
+              decoration: InputDecoration(
+                  hintText: translation(context).username
               ),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -200,7 +202,7 @@ class ChangeEmailForm extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     resetEmail(loginModel.email, _textController.text,
-                            loginModel.password)
+                        loginModel.password)
                         .then((value) {
                       if (value == true) {
                         FirebaseFirestore.instance
@@ -212,11 +214,11 @@ class ChangeEmailForm extends StatelessWidget {
                           loginModel.setEmail(_textController.text);
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
-                                content: Text('Changed email successfully'),
-                              ))
+                            content: Text('Changed email successfully'),
+                          ))
                               .closed
                               .then((value) => ScaffoldMessenger.of(context)
-                                  .clearSnackBars());
+                              .clearSnackBars());
                           Navigator.of(context).pop(true);
                         });
                       }
@@ -238,6 +240,46 @@ class ChangeEmailForm extends StatelessWidget {
           ],
         ),
       );
+    });
+  }
+}
+
+class ChangeLanguageForm extends StatelessWidget {
+  ChangeLanguageForm({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      return Form(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              DropdownButton<Language>(
+                underline: const SizedBox(),
+                onChanged: (Language? language) async {
+                  if (language != null) {
+                    Locale _locale = await setLocale(language.languageCode);
+                    Localization.setLocale(context, _locale);
+                  }
+                },
+                items: Language.languageList()
+                    .map(
+                      (e) => DropdownMenuItem<Language>(
+                    value: e,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        Text(
+                          e.flag,
+                          style: const TextStyle(fontSize: 30),
+                        ),
+                        Text(e.name)
+                      ],
+                    ),
+                  ),).toList(),
+              ),
+            ],
+          ));
     });
   }
 }
@@ -327,11 +369,31 @@ class ChangeUsernameForm extends StatelessWidget {
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
 
+  static const _changeLanguageText = 'Change Language';
   static const _changeAvatarText = 'Change Avatar';
   static const _changeUsernameText = 'Change Username';
   static const _changeEmailText = 'Change Email';
   static const _changePasswordText = 'Change Password';
   static const _aboutDialogText = 'About';
+
+  String getLocalizedFieldValue(String field, BuildContext context) {
+    switch (field) {
+      case "Change Language":
+        return translation(context).changeLanguage;
+      case "Change Avatar":
+        return translation(context).changeAvatar;
+      case "Change Username":
+        return translation(context).changeUsername;
+      case "Change Password":
+        return translation(context).changePassword;
+      case "Change Email":
+        return translation(context).changeEmail;
+      case "About":
+        return translation(context).about;
+    }
+
+    return "";
+  }
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(
@@ -340,17 +402,29 @@ class Settings extends StatelessWidget {
           style: ElevatedButton.styleFrom(
               primary: thirdColor,
               minimumSize: const Size.fromHeight(50)), // max width
-          child: Text(buttonText, style: const TextStyle(color: defaultColor)),
+          child: Text(getLocalizedFieldValue(buttonText, context), style: const TextStyle(color: defaultColor)),
           onPressed: () async {
             switch (buttonText) {
+              case _changeLanguageText:
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text(translation(context).changeLanguage),
+                          content: ChangeLanguageForm());
+                    })
+                    .then((value) => SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.manual,
+                    overlays: []));
+                break;
               case _changeAvatarText:
                 final loginModel =
-                    Provider.of<LoginModel>(context, listen: false);
+                Provider.of<LoginModel>(context, listen: false);
                 final uid = loginModel.userId;
                 FilePickerResult? result =
-                    await FilePicker.platform.pickFiles(withData: true);
+                await FilePicker.platform.pickFiles(withData: true);
                 final ref =
-                    FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
+                FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
                 if (result != null) {
                   Uint8List? fileBytes = result.files.first.bytes;
                   await ref.putData(fileBytes!);
@@ -359,47 +433,47 @@ class Settings extends StatelessWidget {
                 loginModel.setUserImageUrl(url);
                 ScaffoldMessenger.of(context)
                     .showSnackBar(const SnackBar(
-                      content: Text('Changed avatar successfully'),
-                    ))
+                  content: Text('Changed avatar successfully'),
+                ))
                     .closed
                     .then((value) =>
-                        ScaffoldMessenger.of(context).clearSnackBars());
+                    ScaffoldMessenger.of(context).clearSnackBars());
                 break;
               case _changeUsernameText:
                 showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                              title: const Text(_changeUsernameText),
-                              content: ChangeUsernameForm());
-                        })
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text(translation(context).changeUsername),
+                          content: ChangeUsernameForm());
+                    })
                     .then((value) => SystemChrome.setEnabledSystemUIMode(
-                        SystemUiMode.manual,
-                        overlays: []));
+                    SystemUiMode.manual,
+                    overlays: []));
                 break;
               case _changeEmailText:
                 showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                              title: const Text(_changeEmailText),
-                              content: ChangeEmailForm());
-                        })
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text(translation(context).changeEmail),
+                          content: ChangeEmailForm());
+                    })
                     .then((value) => SystemChrome.setEnabledSystemUIMode(
-                        SystemUiMode.manual,
-                        overlays: []));
+                    SystemUiMode.manual,
+                    overlays: []));
                 break;
               case _changePasswordText:
                 showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                              title: const Text(_changePasswordText),
-                              content: ChangePasswordForm());
-                        })
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text(translation(context).changePassword),
+                          content: ChangePasswordForm());
+                    })
                     .then((value) => SystemChrome.setEnabledSystemUIMode(
-                        SystemUiMode.manual,
-                        overlays: []));
+                    SystemUiMode.manual,
+                    overlays: []));
                 break;
               case _aboutDialogText:
                 showAboutDialog(
@@ -422,10 +496,10 @@ class Settings extends StatelessWidget {
             style: ElevatedButton.styleFrom(
                 primary: redColor,
                 minimumSize: const Size.fromHeight(50)), // max width
-            child: const Text('Log Out', style: TextStyle(color: defaultColor)),
+            child: Text(translation(context).logOut, style: TextStyle(color: defaultColor)),
             onPressed: () {
               final loginModel =
-                  Provider.of<LoginModel>(context, listen: false);
+              Provider.of<LoginModel>(context, listen: false);
               AuthModel.instance().signOut().then((value) {
                 loginModel.logOut();
                 // Hide StatusBar, Show navigation buttons
@@ -450,6 +524,7 @@ class Settings extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(children: [
+                        _settingsButton(_changeLanguageText, context),
                         _settingsButton(_changeAvatarText, context),
                         _settingsButton(_changeUsernameText, context),
                         _settingsButton(_changeEmailText, context),

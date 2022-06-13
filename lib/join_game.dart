@@ -171,7 +171,7 @@ class _JoinGameState extends State<JoinGame> {
                   }
                   transaction.update(game.reference, {
                     "player${gameModel.playerIndex}.username":
-                        loginModel.username
+                    loginModel.username
                   });
                   gameModel.update(gameDoc);
                   gameModel.setDataToPlayer(
@@ -182,13 +182,13 @@ class _JoinGameState extends State<JoinGame> {
                       overlays: []);
                   joinedGame = true;
                 }).then(
-                  (value) async {
+                      (value) async {
                     await gamesRef.doc(gameModel.pinCode).update({
                       "player${gameModel.playerIndex}.username":
-                          loginModel.username
+                      loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
-                    WidgetsBinding.instance.addPostFrameCallback((_) =>
+                    WidgetsBinding.instance?.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },
@@ -240,7 +240,7 @@ class _JoinGameState extends State<JoinGame> {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               minimumSize:
-                                  const Size.fromHeight(50)), // max width
+                              const Size.fromHeight(50)), // max width
                           child: const Text('Join Game',
                               style: TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _goToGameLobby)),
@@ -257,7 +257,7 @@ class _JoinGameState extends State<JoinGame> {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               minimumSize:
-                                  const Size.fromHeight(50)), // max width
+                              const Size.fromHeight(50)), // max width
                           child: const Text('Find me an open game',
                               style: TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _findOpenGame)),

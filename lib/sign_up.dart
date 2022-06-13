@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -46,7 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Future<void> setAvatar() async {
       final userId = loginModel.userId;
       Reference ref =
-          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+      FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
       await ref.putData(loginModel.initAvatarBlock);
     }
 
@@ -91,9 +92,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (user["email"] == emailController.text.trim() ||
               user["username"] == userNameController.text.trim()) {
             ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(
-                  content: Text('Email/Username already exists.'),
-                ))
+                .showSnackBar(SnackBar(
+              content: Text(translation(context).snackBar1),
+            ))
                 .closed
                 .then(
                     (value) => ScaffoldMessenger.of(context).clearSnackBars());
@@ -115,9 +116,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           userNameController.text.trim().isEmpty ||
           secondPasswordController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(
-              content: Text('All fields are required!'),
-            ))
+            .showSnackBar(SnackBar(
+            content: Text(translation(context).snackBar2)
+        ))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -127,9 +128,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]")
           .hasMatch(emailController.text.trim())) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(
-              content: Text('Enter a valid email.'),
-            ))
+            .showSnackBar(SnackBar(
+            content: Text(translation(context).snackBar3)
+        ))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -138,9 +139,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (passwordController.text != secondPasswordController.text) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(
-              content: Text('Passwords do not match!'),
-            ))
+            .showSnackBar(SnackBar(
+            content: Text(translation(context).snackBar4)
+        ))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -148,9 +149,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       if (passwordController.text.trim().length < 6) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(
-              content: Text('Password should contain at least 6 characters.'),
-            ))
+            .showSnackBar(SnackBar(
+            content: Text(translation(context).snackBar5)
+        ))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -182,11 +183,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Image(
                             image:
-                                AssetImage('images/titles/almost_there.png'))),
-                    const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                            AssetImage('images/titles/almost_there.png'))),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Select your avatar by clicking the photo below',
+                          translation(context).selectAvatar,
                         )),
                     Column(children: <Widget>[
                       Padding(
@@ -204,22 +205,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               horizontal: 24, vertical: 8),
                           child: TextFormField(
                               controller: userNameController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
                                 border: OutlineInputBorder(),
-                                hintText: 'Username',
+                                hintText: translation(context).username,
                               ))),
                       Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 8),
                           child: TextFormField(
                               controller: emailController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Email',
+                                border: const OutlineInputBorder(),
+                                hintText: translation(context).email,
                               ))),
                       Padding(
                           padding: const EdgeInsets.symmetric(
@@ -229,11 +230,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               obscureText: true,
                               enableSuggestions: false,
                               autocorrect: false,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Password',
+                                border: const OutlineInputBorder(),
+                                hintText: translation(context).password,
                               ))),
                       Padding(
                           padding: const EdgeInsets.symmetric(
@@ -243,11 +244,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               obscureText: true,
                               enableSuggestions: false,
                               autocorrect: false,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
-                                hintText: 'Repeat password',
+                                border: const OutlineInputBorder(),
+                                hintText: translation(context).repeatPassword,
                               ))),
                     ]),
                     Padding(
@@ -255,7 +256,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               minimumSize: const Size.fromHeight(50)),
-                          child: const Text('Finish signing up'),
+                          child: Text(translation(context).finishSignUp),
                           onPressed: loginModel.isLoggingIn ? null : _trySignUp,
                         )),
                   ]))));
