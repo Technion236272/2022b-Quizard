@@ -9,10 +9,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-
-import 'consts.dart';
+import 'package:quizard/localization/classes/language_constants.dart';
 import 'firebase_options.dart';
 import 'home.dart';
+import 'consts.dart';
+import 'localization/classes/language.dart';
 import 'providers.dart';
 import 'sign_up.dart';
 
@@ -45,12 +46,12 @@ class _RootState extends State<Root> {
 
     _userStateListener =
         FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user == null) {
-        debugPrint('DEBUG: User is signed out');
-      } else {
-        debugPrint('DEBUG: User is signed in');
-      }
-    });
+          if (user == null) {
+            debugPrint('DEBUG: User is signed out');
+          } else {
+            debugPrint('DEBUG: User is signed in');
+          }
+        });
   }
 
   @override
@@ -61,16 +62,7 @@ class _RootState extends State<Root> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        theme: ThemeData(
-            primaryColor: defaultColor,
-            colorScheme:
-                Theme.of(context).colorScheme.copyWith(primary: defaultColor),
-            backgroundColor: backgroundColor,
-            scaffoldBackgroundColor: backgroundColor),
-        home: FirebaseAuth.instance.currentUser != null
-            ? const LoadHomePage()
-            : const WelcomePage());
+    return Localization();
   }
 }
 
@@ -103,7 +95,7 @@ class LoadHomePage extends StatelessWidget {
               loginModel.setUserImageUrl(currentUser.photoURL!);
             }
             final ref =
-                FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+            FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
             final url = await ref.getDownloadURL();
             loginModel.setUserImageUrl(url);
             loginModel.logIn();
@@ -155,8 +147,8 @@ class _WelcomePageState extends State<WelcomePage> {
     void _wrongCerts() {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(
-            content: Text('Wrong certificates'),
-          ))
+        content: Text('Wrong certificates'),
+      ))
           .closed
           .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
       loginModel.toggleLogging(); // Enable log in button back
@@ -277,21 +269,10 @@ class _WelcomePageState extends State<WelcomePage> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const <Widget>[
-                      InkWell(
-                        child: Icon(
-                          Icons.language,
-                          size: 32.0,
-                        ),
-                        onTap: null, // TODO: Go to Change Language screen
-                      )
-                    ],
-                  ),
+                  Padding(
+                      padding: const EdgeInsets.all(30)),
                   const Image(image: AssetImage('images/titles/quizard.png')),
-                  const Text(
-                    'Please login to your account',
+                  Text(translation(context).loginToAccount,
                     style: TextStyle(fontSize: 18),
                   ),
                   Column(children: <Widget>[
@@ -300,11 +281,11 @@ class _WelcomePageState extends State<WelcomePage> {
                             horizontal: 24, vertical: 8),
                         child: TextFormField(
                             controller: loginModel.emailOrUsernameController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               filled: true,
                               fillColor: secondaryColor,
                               border: OutlineInputBorder(),
-                              hintText: 'Username / Email',
+                              hintText: translation(context).usernameOrEmail,
                             ))),
                     Padding(
                         padding: const EdgeInsets.symmetric(
@@ -314,11 +295,11 @@ class _WelcomePageState extends State<WelcomePage> {
                             obscureText: true,
                             enableSuggestions: false,
                             autocorrect: false,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               filled: true,
                               fillColor: secondaryColor,
                               border: OutlineInputBorder(),
-                              hintText: 'Password',
+                              hintText: translation(context).password,
                             ))),
                   ]),
                   Padding(
@@ -326,17 +307,17 @@ class _WelcomePageState extends State<WelcomePage> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             minimumSize:
-                                const Size.fromHeight(50)), // max width
-                        child: const Text('Log in',
+                            const Size.fromHeight(50)), // max width
+                        child: Text(translation(context).login,
                             style: TextStyle(fontSize: 18)),
                         onPressed: loginModel.isLoggingIn ? null : _tryLogin,
                       )),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Row(children: const <Widget>[
+                      child: Row(children: <Widget>[
                         // OR Divider
                         Expanded(child: Divider(color: defaultColor)),
-                        Text("  OR  "),
+                        Text(translation(context).or),
                         Expanded(child: Divider(color: defaultColor)),
                       ])),
                   Column(
@@ -348,7 +329,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             style: ElevatedButton.styleFrom(
                                 primary: secondaryColor,
                                 minimumSize:
-                                    const Size.fromHeight(50)), // max width
+                                const Size.fromHeight(50)), // max width
                             onPressed: () {
                               signInWithGoogle().then((value) {
                                 bool userExist = false;
@@ -376,7 +357,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "categories": [],
                                       "email": value!.email,
                                       "questions": [],
-                                      "username": getUniqueUserName(value!.email!.split("@")[0], allUsersName),
+                                      "username": getUniqueUserName(value.email!.split("@")[0], allUsersName),
                                       "wins": 0,
                                       "DailyWins": 0,
                                       "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
@@ -422,7 +403,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 });
                               });
                             }, //TODO: Continue with Google
-                            label: const Text('Continue with Google',
+                            label: Text(translation(context).continueWithGoogle,
                                 style: TextStyle(color: defaultColor)),
                             icon: Image.asset(
                               'images/google.png',
@@ -436,7 +417,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             style: ElevatedButton.styleFrom(
                                 primary: secondaryColor,
                                 minimumSize:
-                                    const Size.fromHeight(50)), // max width
+                                const Size.fromHeight(50)), // max width
                             onPressed: () async {
                               signinWithFacebook().then((value) {
                                 bool userExist = false;
@@ -510,7 +491,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 });
                               });
                             }, //TODO: Continue with Facebook
-                            label: const Text('Continue with Facebook',
+                            label: Text(translation(context).continueWithFacebook,
                                 style: TextStyle(color: defaultColor)),
                             icon: Image.asset(
                               'images/facebook.png',
@@ -522,9 +503,9 @@ class _WelcomePageState extends State<WelcomePage> {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        const Text("Don't have an account? "),
+                        Text(translation(context).noAccount),
                         InkWell(
-                            child: const Text('Sign Up'),
+                            child: Text(translation(context).signUp),
                             onTap: () => _signUpPrep())
                       ])
                 ]),
@@ -539,11 +520,11 @@ class _WelcomePageState extends State<WelcomePage> {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     final GoogleSignInAccount? googleSignInAccount =
-        await googleSignIn.signIn();
+    await googleSignIn.signIn();
 
     if (googleSignInAccount != null) {
       final GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount.authentication;
+      await googleSignInAccount.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
@@ -552,7 +533,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
       try {
         final UserCredential userCredential =
-            await auth.signInWithCredential(credential);
+        await auth.signInWithCredential(credential);
 
         user = userCredential.user;
       } on FirebaseAuthException catch (e) {
@@ -560,7 +541,7 @@ class _WelcomePageState extends State<WelcomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
               content:
-                  'The account already exists with a different credential.',
+              'The account already exists with a different credential.',
             ),
           );
         } else if (e.code == 'invalid-credential') {

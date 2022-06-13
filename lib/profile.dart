@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'consts.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 import 'questions.dart';
 import 'settings.dart';
@@ -25,7 +26,7 @@ class Profile extends StatelessWidget {
               decoration: const BoxDecoration(
                 color: secondaryColor,
                 borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(boxRadiusConst)),
+                BorderRadius.vertical(top: Radius.circular(boxRadiusConst)),
               ),
               child: Column(children: [
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -67,53 +68,53 @@ class Profile extends StatelessWidget {
                 ]),
                 Expanded(
                     child: DefaultTabController(
-                  initialIndex: _lastTab,
-                  length: 3,
-                  child: Scaffold(
-                    backgroundColor: secondaryColor,
-                    appBar: AppBar(
-                      backgroundColor: thirdColor,
-                      automaticallyImplyLeading: false,
-                      toolbarHeight: 0,
-                      elevation: 0,
-                      bottom: TabBar(
-                        onTap: _onTapTab,
-                        labelColor: defaultColor,
-                        indicatorColor: defaultColor,
-                        tabs: const [
-                          Tab(
-                              icon: Icon(Icons.question_mark),
-                              text: "QUESTIONS"),
-                          Tab(
-                            icon: Icon(Icons.tag_faces),
-                            text: "FRIENDS",
+                      initialIndex: _lastTab,
+                      length: 3,
+                      child: Scaffold(
+                        backgroundColor: secondaryColor,
+                        appBar: AppBar(
+                          backgroundColor: thirdColor,
+                          automaticallyImplyLeading: false,
+                          toolbarHeight: 0,
+                          elevation: 0,
+                          bottom: TabBar(
+                            onTap: _onTapTab,
+                            labelColor: defaultColor,
+                            indicatorColor: defaultColor,
+                            tabs: [
+                              Tab(
+                                  icon: const Icon(Icons.question_mark),
+                                  text: translation(context).questions),
+                              Tab(
+                                icon: const Icon(Icons.tag_faces),
+                                text: translation(context).friends,
+                              ),
+                              Tab(
+                                icon: const Icon(Icons.settings),
+                                text: translation(context).settings,
+                              ),
+                            ],
                           ),
-                          Tab(
-                            icon: Icon(Icons.settings),
-                            text: "SETTINGS",
-                          ),
-                        ],
+                        ),
+                        body: TabBarView(
+                          children: [
+                            Container(
+                                color: secondaryBackgroundColor,
+                                child: const Questions()),
+                            Container(
+                                color: secondaryBackgroundColor,
+                                child: const Center(
+                                    child: Text(
+                                      "Coming soon.",
+                                      style: TextStyle(fontSize: 20),
+                                    ))),
+                            Container(
+                                color: secondaryBackgroundColor,
+                                child: const Settings()),
+                          ],
+                        ),
                       ),
-                    ),
-                    body: TabBarView(
-                      children: [
-                        Container(
-                            color: secondaryBackgroundColor,
-                            child: const Questions()),
-                        Container(
-                            color: secondaryBackgroundColor,
-                            child: const Center(
-                                child: Text(
-                              "Coming soon.",
-                              style: TextStyle(fontSize: 20),
-                            ))),
-                        Container(
-                            color: secondaryBackgroundColor,
-                            child: const Settings()),
-                      ],
-                    ),
-                  ),
-                ))
+                    ))
               ])));
     });
   }

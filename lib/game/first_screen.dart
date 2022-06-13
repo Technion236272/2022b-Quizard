@@ -213,7 +213,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        .addPostFrameCallback((_) => Navigator.pushReplacement(
+                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SecondGameScreen(),
