@@ -189,7 +189,7 @@ class _JoinGameState extends State<JoinGame> {
                           loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
-                    WidgetsBinding.instance?.addPostFrameCallback((_) =>
+                    WidgetsBinding.instance.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },

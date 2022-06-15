@@ -47,7 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Future<void> setAvatar() async {
       final userId = loginModel.userId;
       Reference ref =
-      FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
       await ref.putData(loginModel.initAvatarBlock);
     }
 
@@ -93,8 +93,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               user["username"] == userNameController.text.trim()) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(
-              content: Text(translation(context).snackBar1),
-            ))
+                  content: Text(translation(context).snackBar1),
+                ))
                 .closed
                 .then(
                     (value) => ScaffoldMessenger.of(context).clearSnackBars());
@@ -116,9 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           userNameController.text.trim().isEmpty ||
           secondPasswordController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(
-            content: Text(translation(context).snackBar2)
-        ))
+            .showSnackBar(
+                SnackBar(content: Text(translation(context).snackBar2)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -128,9 +127,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]")
           .hasMatch(emailController.text.trim())) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(
-            content: Text(translation(context).snackBar3)
-        ))
+            .showSnackBar(
+                SnackBar(content: Text(translation(context).snackBar3)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -139,9 +137,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (passwordController.text != secondPasswordController.text) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(
-            content: Text(translation(context).snackBar4)
-        ))
+            .showSnackBar(
+                SnackBar(content: Text(translation(context).snackBar4)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -149,9 +146,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       if (passwordController.text.trim().length < 6) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(
-            content: Text(translation(context).snackBar5)
-        ))
+            .showSnackBar(
+                SnackBar(content: Text(translation(context).snackBar5)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -183,7 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Image(
                             image:
-                            AssetImage('images/titles/almost_there.png'))),
+                                AssetImage('images/titles/almost_there.png'))),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
@@ -208,7 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: secondaryColor,
-                                border: OutlineInputBorder(),
+                                border: const OutlineInputBorder(),
                                 hintText: translation(context).username,
                               ))),
                       Padding(

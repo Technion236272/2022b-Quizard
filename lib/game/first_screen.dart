@@ -182,8 +182,8 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                       style: ElevatedButton.styleFrom(
                           primary: defaultColor,
                           minimumSize: const Size.fromHeight(50)), // max width
-                      child:
-                          Text(translation(context).submit, style: TextStyle(fontSize: 18)),
+                      child: Text(translation(context).submit,
+                          style: const TextStyle(fontSize: 18)),
                       onPressed:
                           _enableSubmitAnswer ? _submitFalseAnswer : null))
             ]));
@@ -214,7 +214,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
+                        .addPostFrameCallback((_) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SecondGameScreen(),
@@ -225,7 +225,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                         child: Column(
                           children: [
                             Text(translation(context).waitForOthers,
-                                style: TextStyle(fontSize: 24)),
+                                style: const TextStyle(fontSize: 24)),
                             Container(height: 25),
                             const CircularProgressIndicator()
                           ],

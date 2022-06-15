@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:quizard/join_game.dart';
 import 'package:random_string/random_string.dart';
 
+import 'join_game.dart';
+import 'quick_play.dart';
 import 'ModelClasses/leader_board_model.dart';
 import 'game/lobby/admin.dart';
 import 'localization/classes/language_constants.dart';
@@ -329,6 +330,15 @@ class _PlayState extends State<Play> {
           await Future.delayed(const Duration(milliseconds: 200));
           Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (context) => const JoinGame()));
+          // Show navigation buttons
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+              overlays: [SystemUiOverlay.bottom]);
+        }
+        if (imgPath.contains('quick_play')) {
+          gameModel.resetData();
+          await Future.delayed(const Duration(milliseconds: 200));
+          Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (context) => const QuickPlay()));
           // Show navigation buttons
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
               overlays: [SystemUiOverlay.bottom]);

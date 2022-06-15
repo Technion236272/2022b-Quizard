@@ -246,7 +246,7 @@ class ChangeEmailForm extends StatelessWidget {
 }
 
 class ChangeLanguageForm extends StatelessWidget {
-  ChangeLanguageForm({Key? key}) : super(key: key);
+  const ChangeLanguageForm({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +257,7 @@ class ChangeLanguageForm extends StatelessWidget {
         children: <Widget>[
           DropdownButton<Language>(
             icon: Text(Localization.getLocale(context),
-                style: TextStyle(height: 2, fontSize: 19)),
+                style: const TextStyle(height: 2, fontSize: 19)),
             underline: const SizedBox(),
             onChanged: (Language? language) async {
               if (language != null) {
@@ -417,7 +417,7 @@ class Settings extends StatelessWidget {
                         builder: (BuildContext context) {
                           return AlertDialog(
                               title: Text(translation(context).changeLanguage),
-                              content: ChangeLanguageForm());
+                              content: const ChangeLanguageForm());
                         })
                     .then((value) => SystemChrome.setEnabledSystemUIMode(
                         SystemUiMode.manual,
@@ -503,7 +503,7 @@ class Settings extends StatelessWidget {
                 primary: redColor,
                 minimumSize: const Size.fromHeight(50)), // max width
             child: Text(translation(context).logOut,
-                style: TextStyle(color: defaultColor)),
+                style: const TextStyle(color: defaultColor)),
             onPressed: () {
               final loginModel =
                   Provider.of<LoginModel>(context, listen: false);

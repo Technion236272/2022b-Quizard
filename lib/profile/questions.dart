@@ -390,11 +390,11 @@ class _QuestionsState extends State<Questions> {
                     return ListView(children: loginModel.cachedQuestionsList);
                   } else {
                     return Padding(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         child: Center(
                             child: Text(
                           translation(context).addQuestionsCustom,
-                          style: TextStyle(fontSize: 22),
+                          style: const TextStyle(fontSize: 22),
                           textAlign: TextAlign.center,
                         )));
                   }
