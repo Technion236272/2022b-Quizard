@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
-import 'lobby_admin.dart';
-import 'lobby_player.dart';
+import 'game/lobby/admin.dart';
+import 'game/lobby/player.dart';
 import 'localization/classes/language_constants.dart';
 
 class JoinGameAppBar extends StatelessWidget with PreferredSizeWidget {
@@ -172,7 +172,7 @@ class _JoinGameState extends State<JoinGame> {
                   }
                   transaction.update(game.reference, {
                     "player${gameModel.playerIndex}.username":
-                    loginModel.username
+                        loginModel.username
                   });
                   gameModel.update(gameDoc);
                   gameModel.setDataToPlayer(
@@ -183,10 +183,10 @@ class _JoinGameState extends State<JoinGame> {
                       overlays: []);
                   joinedGame = true;
                 }).then(
-                      (value) async {
+                  (value) async {
                     await gamesRef.doc(gameModel.pinCode).update({
                       "player${gameModel.playerIndex}.username":
-                      loginModel.username
+                          loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
                     WidgetsBinding.instance?.addPostFrameCallback((_) =>
@@ -219,7 +219,8 @@ class _JoinGameState extends State<JoinGame> {
                   const Image(image: AssetImage('images/titles/quizard.png')),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Text(translation(context).enterPin,
+                    child: Text(
+                      translation(context).enterPin,
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
@@ -240,7 +241,7 @@ class _JoinGameState extends State<JoinGame> {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               minimumSize:
-                              const Size.fromHeight(50)), // max width
+                                  const Size.fromHeight(50)), // max width
                           child: Text(translation(context).joinGame,
                               style: const TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _goToGameLobby)),
@@ -257,7 +258,7 @@ class _JoinGameState extends State<JoinGame> {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               minimumSize:
-                              const Size.fromHeight(50)), // max width
+                                  const Size.fromHeight(50)), // max width
                           child: Text(translation(context).findOpenGame,
                               style: const TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _findOpenGame)),

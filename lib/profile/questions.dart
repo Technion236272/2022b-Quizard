@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'consts.dart';
-import 'localization/classes/language_constants.dart';
-import 'providers.dart';
+import '../consts.dart';
+import '../localization/classes/language_constants.dart';
+import '../providers.dart';
 
 class AddQuestionForm extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -125,8 +125,7 @@ class AddQuestionForm extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).pop(false);
                         },
-                        child: Text(translation(context).cancel2)
-                    ),
+                        child: Text(translation(context).cancel2)),
                   ),
                 ])
               ],
@@ -290,8 +289,7 @@ class _QuestionsState extends State<Questions> {
                   child: Text(translation(context).delete)),
               TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(translation(context).cancel)
-              ),
+                  child: Text(translation(context).cancel)),
             ],
           );
         });
@@ -337,12 +335,11 @@ class _QuestionsState extends State<Questions> {
                 onLongPress: () {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                    content: Text(translation(context).snackBar7
-                        ),
-                  ))
+                        content: Text(translation(context).snackBar7),
+                      ))
                       .closed
                       .then((value) =>
-                      ScaffoldMessenger.of(context).clearSnackBars());
+                          ScaffoldMessenger.of(context).clearSnackBars());
                 },
                 child: ExpansionTile(
                     childrenPadding: EdgeInsets.zero,
@@ -395,10 +392,11 @@ class _QuestionsState extends State<Questions> {
                     return Padding(
                         padding: EdgeInsets.all(10),
                         child: Center(
-                            child: Text(translation(context).addQuestionsCustom,
-                              style: TextStyle(fontSize: 22),
-                              textAlign: TextAlign.center,
-                            )));
+                            child: Text(
+                          translation(context).addQuestionsCustom,
+                          style: TextStyle(fontSize: 22),
+                          textAlign: TextAlign.center,
+                        )));
                   }
                 } else {
                   if (loginModel.cachedQuestionsList.isEmpty) {

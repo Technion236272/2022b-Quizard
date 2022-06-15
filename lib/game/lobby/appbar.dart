@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'consts.dart';
+import '../../consts.dart';
 
 class LobbyAppBar extends StatelessWidget with PreferredSizeWidget {
   final Future<bool> Function() exitDialog;

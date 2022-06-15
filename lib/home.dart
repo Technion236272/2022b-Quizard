@@ -8,9 +8,9 @@ import 'package:quizard/join_game.dart';
 import 'package:random_string/random_string.dart';
 
 import 'ModelClasses/leader_board_model.dart';
-import 'lobby_admin.dart';
+import 'game/lobby/admin.dart';
 import 'localization/classes/language_constants.dart';
-import 'profile.dart';
+import 'profile/profile.dart';
 import 'consts.dart';
 import 'providers.dart';
 

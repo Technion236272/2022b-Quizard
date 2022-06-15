@@ -5,11 +5,11 @@ import 'package:chips_choice_null_safety/chips_choice_null_safety.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
-import 'game/first_screen.dart';
-import 'lobby_appbar.dart';
-import 'localization/classes/language_constants.dart';
-import 'providers.dart';
-import 'consts.dart';
+import '../first_screen.dart';
+import 'appbar.dart';
+import '../../localization/classes/language_constants.dart';
+import '../../providers.dart';
+import '../../consts.dart';
 
 class LobbyPlayer extends StatefulWidget {
   const LobbyPlayer({Key? key}) : super(key: key);
