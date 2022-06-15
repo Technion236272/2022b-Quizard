@@ -122,6 +122,11 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
 
       Future<void> _onSelectingAnswer() async {
         if (gameModel.selectedAnswer.isEmpty) {
+          // avoids spam clicks
+          if (_colorButton == orangeColor) {
+            return;
+          }
+
           setState(() {
             _colorButton = orangeColor;
           });

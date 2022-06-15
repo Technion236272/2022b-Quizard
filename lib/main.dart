@@ -618,7 +618,7 @@ class _WelcomePageState extends State<WelcomePage> {
       if (userName == name) {
         uniqueNameIndex++;
         uniqueName =
-            getUniqueUserName("${name}_${uniqueNameIndex}", allUsersNameList);
+            getUniqueUserName("${name}_$uniqueNameIndex", allUsersNameList);
       }
     }
     debugPrint("uniqueName = $uniqueName");

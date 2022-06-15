@@ -148,7 +148,8 @@ class _JoinGameState extends State<JoinGame> {
             }
             if (!game["is_private"] && !game["is_locked"]) {
               gameModel.update(game);
-              if (gameModel.getNumOfPlayers() < maxPlayers) {
+              if (gameModel.getNumOfPlayers() < maxPlayers &&
+                  gameModel.getNumOfPlayers() > 0) {
                 // atomic read and write with one transaction for join game
                 await FirebaseFirestore.instance
                     .runTransaction((transaction) async {
@@ -189,7 +190,7 @@ class _JoinGameState extends State<JoinGame> {
                           loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
-                    WidgetsBinding.instance?.addPostFrameCallback((_) =>
+                    WidgetsBinding.instance.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },
@@ -214,7 +215,8 @@ class _JoinGameState extends State<JoinGame> {
             resizeToAvoidBottomInset: false,
             appBar: JoinGameAppBar(),
             body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                 child: Column(children: [
                   const Image(image: AssetImage('images/titles/quizard.png')),
                   Padding(

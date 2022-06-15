@@ -323,7 +323,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                         child: Column(
                           children: [
                             Text(translation(context).waitForOthers,
-                                style: TextStyle(fontSize: 24)),
+                                style: const TextStyle(fontSize: 24)),
                             Container(height: 25),
                             const CircularProgressIndicator()
                           ],
