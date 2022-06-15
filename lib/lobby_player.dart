@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'game/first_screen.dart';
 import 'lobby_appbar.dart';
+import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 import 'consts.dart';
 
@@ -50,12 +51,12 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
   Consumer<GameModel> _selectedCategoriesChips() {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       if (gameModel.selectedCategories.isEmpty) {
-        return const Flexible(
+        return Flexible(
             child: Padding(
-                padding: EdgeInsets.all(15),
+                padding: const EdgeInsets.all(15),
                 child: Text(
-                  "No categories selected",
-                  style: TextStyle(fontSize: 18),
+                  translation(context).noCategories,
+                  style: const TextStyle(fontSize: 18),
                 )));
       } else {
         return Flexible(
@@ -265,7 +266,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                               _toggleIsReady();
                             }
                                 : null)),
-                    const Text("Ready")
+                    Text(translation(context).ready)
                   ])
                 ],
               ),
@@ -318,12 +319,12 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("Game Closed"),
-              content: const Text("The admin closed the game"),
+              title: Text(translation(context).gameClosed),
+              content: Text(translation(context).adminClosed),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("CLOSE"),
+                  child: Text(translation(context).close),
                 ),
               ],
             );
@@ -335,13 +336,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("Game Closed"),
+              title: Text(translation(context).gameClosed),
               content:
-              const Text("You have been kicked by the admin from the game"),
+              Text(translation(context).adminKick),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("CLOSE"),
+                  child: Text(translation(context).close),
                 ),
               ],
             );
@@ -354,9 +355,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("Close Game"),
-              content: const Text("Are you sure you wish to exit from "
-                  "this game?"),
+              title: Text(translation(context).closeGame),
+              content: Text(translation(context).wishToClose),
               actions: <Widget>[
                 TextButton(
                     onPressed: () async {
@@ -378,10 +378,10 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           .update({"player$myIndex": emptyPlayer});
                       Navigator.of(context).pop();
                     },
-                    child: const Text("YES")),
+                    child: Text(translation(context).yes)),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("NO"),
+                  child: Text(translation(context).no),
                 ),
               ],
             );

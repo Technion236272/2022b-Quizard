@@ -162,7 +162,7 @@ class _QuestionsState extends State<Questions> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-              title: const Text("Edit Question"),
+              title: Text(translation(context).editQuestion),
               content: Form(
                 key: UniqueKey(),
                 child: Column(
@@ -172,24 +172,24 @@ class _QuestionsState extends State<Questions> {
                     TextFormField(
                       controller: _categoryController,
                       minLines: 1,
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
+                      decoration: InputDecoration(
+                        labelText: translation(context).category,
                       ),
                     ),
                     TextFormField(
                       controller: _questionController,
                       minLines: 1,
                       maxLines: 5,
-                      decoration: const InputDecoration(
-                        labelText: 'Question',
+                      decoration: InputDecoration(
+                        labelText: translation(context).question,
                       ),
                     ),
                     TextFormField(
                       controller: _answerController,
                       minLines: 1,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Answer',
+                      decoration: InputDecoration(
+                        labelText: translation(context).answer,
                       ),
                     ),
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -227,7 +227,7 @@ class _QuestionsState extends State<Questions> {
                                   .notifyAddedQuestion();
                             });
                           },
-                          child: const Text('Submit'),
+                          child: Text(translation(context).submit),
                         ),
                       ),
                       Padding(
@@ -236,7 +236,7 @@ class _QuestionsState extends State<Questions> {
                           onPressed: () {
                             Navigator.of(context).pop(false);
                           },
-                          child: const Text('Cancel'),
+                          child: Text(translation(context).cancel2),
                         ),
                       ),
                     ])
@@ -336,9 +336,9 @@ class _QuestionsState extends State<Questions> {
             child: GestureDetector(
                 onLongPress: () {
                   ScaffoldMessenger.of(context)
-                      .showSnackBar(const SnackBar(
-                    content: Text(
-                        'Swipe left to edit, and swipe right to delete'),
+                      .showSnackBar(SnackBar(
+                    content: Text(translation(context).snackBar7
+                        ),
                   ))
                       .closed
                       .then((value) =>

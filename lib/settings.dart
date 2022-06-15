@@ -133,7 +133,7 @@ class ChangePasswordForm extends StatelessWidget {
                       }
                     }
                   },
-                  child: const Text('Submit'),
+                  child: Text(translation(context).submit),
                 ),
               ),
               Padding(
@@ -142,7 +142,7 @@ class ChangePasswordForm extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  child: const Text('Cancel'),
+                  child: Text(translation(context).cancel2),
                 ),
               ),
             ])
@@ -213,8 +213,8 @@ class ChangeEmailForm extends StatelessWidget {
                         }).then((_) {
                           loginModel.setEmail(_textController.text);
                           ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text('Changed email successfully'),
+                              .showSnackBar(SnackBar(
+                            content: Text(translation(context).changedEmail),
                           ))
                               .closed
                               .then((value) => ScaffoldMessenger.of(context)
@@ -224,7 +224,7 @@ class ChangeEmailForm extends StatelessWidget {
                       }
                     });
                   },
-                  child: const Text('Submit'),
+                  child: Text(translation(context).submit),
                 ),
               ),
               Padding(
@@ -233,7 +233,7 @@ class ChangeEmailForm extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  child: const Text('Cancel'),
+                  child: Text(translation(context).cancel2),
                 ),
               ),
             ])
@@ -255,6 +255,8 @@ class ChangeLanguageForm extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               DropdownButton<Language>(
+                icon: Text(Localization.getLocale(context),
+                    style: TextStyle(height: 2, fontSize: 19)),
                 underline: const SizedBox(),
                 onChanged: (Language? language) async {
                   if (language != null) {
@@ -308,8 +310,8 @@ class ChangeUsernameForm extends StatelessWidget {
               },
               controller: _textController,
               minLines: 1,
-              decoration: const InputDecoration(
-                hintText: 'Username',
+              decoration: InputDecoration(
+                hintText: translation(context).username,
               ),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -346,7 +348,7 @@ class ChangeUsernameForm extends StatelessWidget {
                     }
                     Navigator.of(context).pop(true);
                   },
-                  child: const Text('Submit'),
+                  child: Text(translation(context).submit),
                 ),
               ),
               Padding(
@@ -355,7 +357,7 @@ class ChangeUsernameForm extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  child: const Text('Cancel'),
+                  child: Text(translation(context).cancel2),
                 ),
               ),
             ])
@@ -432,8 +434,8 @@ class Settings extends StatelessWidget {
                 final url = await ref.getDownloadURL();
                 loginModel.setUserImageUrl(url);
                 ScaffoldMessenger.of(context)
-                    .showSnackBar(const SnackBar(
-                  content: Text('Changed avatar successfully'),
+                    .showSnackBar(SnackBar(
+                  content: Text(translation(context).changedAvatar),
                 ))
                     .closed
                     .then((value) =>

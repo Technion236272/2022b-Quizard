@@ -146,8 +146,8 @@ class _WelcomePageState extends State<WelcomePage> {
 
     void _wrongCerts() {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(
-        content: Text('Wrong certificates'),
+          .showSnackBar(SnackBar(
+        content: Text(translation(context).wrongCertificates),
       ))
           .closed
           .then((value) => ScaffoldMessenger.of(context).clearSnackBars());

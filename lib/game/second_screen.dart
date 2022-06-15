@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:quizard/game/scoreboard.dart';
 
 import '../consts.dart';
+import '../localization/classes/language_constants.dart';
 import '../providers.dart';
 import 'auxiliaries.dart';
 import 'first_screen.dart';
@@ -321,7 +322,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                         child: Column(
                           children: [
-                            const Text("Waiting for other players...",
+                            Text(translation(context).waitForOthers,
                                 style: TextStyle(fontSize: 24)),
                             Container(height: 25),
                             const CircularProgressIndicator()
