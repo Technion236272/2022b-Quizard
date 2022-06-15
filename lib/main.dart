@@ -46,12 +46,12 @@ class _RootState extends State<Root> {
 
     _userStateListener =
         FirebaseAuth.instance.authStateChanges().listen((user) {
-          if (user == null) {
-            debugPrint('DEBUG: User is signed out');
-          } else {
-            debugPrint('DEBUG: User is signed in');
-          }
-        });
+      if (user == null) {
+        debugPrint('DEBUG: User is signed out');
+      } else {
+        debugPrint('DEBUG: User is signed in');
+      }
+    });
   }
 
   @override
@@ -62,7 +62,7 @@ class _RootState extends State<Root> {
 
   @override
   Widget build(BuildContext context) {
-    return Localization();
+    return const Localization();
   }
 }
 
@@ -95,7 +95,7 @@ class LoadHomePage extends StatelessWidget {
               loginModel.setUserImageUrl(currentUser.photoURL!);
             }
             final ref =
-            FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+                FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
             final url = await ref.getDownloadURL();
             loginModel.setUserImageUrl(url);
             loginModel.logIn();
@@ -147,8 +147,8 @@ class _WelcomePageState extends State<WelcomePage> {
     void _wrongCerts() {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(
-        content: Text(translation(context).wrongCertificates),
-      ))
+            content: Text(translation(context).wrongCertificates),
+          ))
           .closed
           .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
       loginModel.toggleLogging(); // Enable log in button back
@@ -181,7 +181,7 @@ class _WelcomePageState extends State<WelcomePage> {
               loginModel.setDailyWins(user["DailyWins"]);
               loginModel.setMonthlyWins(user["MonthlyWins"]);
             } catch (e) {
-              print("ERROR = $e");
+              debugPrint("ERROR = $e");
             }
             loginModel.setUserImageUrl(photoLink);
           }
@@ -265,31 +265,29 @@ class _WelcomePageState extends State<WelcomePage> {
       return Scaffold(
           resizeToAvoidBottomInset: false,
           body: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(36),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Padding(
-                      padding: const EdgeInsets.all(30)),
+                  //const Padding(padding: EdgeInsets.all(30)),
                   const Image(image: AssetImage('images/titles/quizard.png')),
-                  Text(translation(context).loginToAccount,
-                    style: TextStyle(fontSize: 18),
+                  Text(
+                    translation(context).loginToAccount,
+                    style: const TextStyle(fontSize: 18),
                   ),
                   Column(children: <Widget>[
                     Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         child: TextFormField(
                             controller: loginModel.emailOrUsernameController,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: secondaryColor,
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               hintText: translation(context).usernameOrEmail,
                             ))),
                     Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         child: TextFormField(
                             controller: loginModel.passwordController,
                             obscureText: true,
@@ -298,38 +296,32 @@ class _WelcomePageState extends State<WelcomePage> {
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: secondaryColor,
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               hintText: translation(context).password,
                             ))),
                   ]),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            minimumSize:
-                            const Size.fromHeight(50)), // max width
-                        child: Text(translation(context).login,
-                            style: TextStyle(fontSize: 18)),
-                        onPressed: loginModel.isLoggingIn ? null : _tryLogin,
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Row(children: <Widget>[
-                        // OR Divider
-                        Expanded(child: Divider(color: defaultColor)),
-                        Text(translation(context).or),
-                        Expanded(child: Divider(color: defaultColor)),
-                      ])),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50)), // max width
+                    child: Text(translation(context).login,
+                        style: const TextStyle(fontSize: 18)),
+                    onPressed: loginModel.isLoggingIn ? null : _tryLogin,
+                  ),
+                  Row(children: <Widget>[
+                    // OR Divider
+                    const Expanded(child: Divider(color: defaultColor)),
+                    Text(translation(context).or),
+                    const Expanded(child: Divider(color: defaultColor)),
+                  ]),
                   Column(
                     children: <Widget>[
                       Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                                 primary: secondaryColor,
                                 minimumSize:
-                                const Size.fromHeight(50)), // max width
+                                    const Size.fromHeight(50)), // max width
                             onPressed: () {
                               signInWithGoogle().then((value) {
                                 bool userExist = false;
@@ -342,7 +334,9 @@ class _WelcomePageState extends State<WelcomePage> {
 
                                   for (var user in users.docs) {
                                     allUsersName.add(user["username"]);
-                                    if (user["email"] == FirebaseAuth.instance.currentUser?.email) {
+                                    if (user["email"] ==
+                                        FirebaseAuth
+                                            .instance.currentUser?.email) {
                                       source = user["source"].toString();
                                       userExist = true;
                                     }
@@ -357,11 +351,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "categories": [],
                                       "email": value!.email,
                                       "questions": [],
-                                      "username": getUniqueUserName(value.email!.split("@")[0], allUsersName),
+                                      "username": getUniqueUserName(
+                                          value.email!.split("@")[0],
+                                          allUsersName),
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
-                                      "source" : "google",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "source": "google",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value.uid).set(userToAdd);
@@ -370,54 +367,52 @@ class _WelcomePageState extends State<WelcomePage> {
                                     Navigator.of(context).push(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
-                                            const HomePage()));
-                                  }else{
-
-                                    if(source!="google"){
-                                      if(source=="facebook"){
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                const HomePage()));
+                                  } else {
+                                    if (source != "google") {
+                                      if (source == "facebook") {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            'The account already exists with Facebook credentials. please sign in via Facebook',
+                                                'The account already exists with Facebook credentials. please sign in via Facebook',
                                           ),
                                         );
-                                      }else{
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            'The account already exists try signing in using email and password',
+                                                'The account already exists try signing in using email and password',
                                           ),
                                         );
                                       }
-
-                                    }else{
+                                    } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
                                       Navigator.of(context).push(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
-                                              const HomePage()));
+                                                  const HomePage()));
                                     }
-
                                   }
                                 });
                               });
-                            }, //TODO: Continue with Google
+                            },
                             label: Text(translation(context).continueWithGoogle,
-                                style: TextStyle(color: defaultColor)),
+                                style: const TextStyle(color: defaultColor)),
                             icon: Image.asset(
                               'images/google.png',
                               height: 24,
                             ),
                           )),
                       Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                                 primary: secondaryColor,
                                 minimumSize:
-                                const Size.fromHeight(50)), // max width
+                                    const Size.fromHeight(50)), // max width
                             onPressed: () async {
                               signinWithFacebook().then((value) {
                                 bool userExist = false;
@@ -444,11 +439,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "categories": [],
                                       "email": value?.email,
                                       "questions": [],
-                                      "username": getUniqueUserName("${value?.email?.split("@")[0]}", allUsersName),
+                                      "username": getUniqueUserName(
+                                          "${value?.email?.split("@")[0]}",
+                                          allUsersName),
                                       "wins": 0,
                                       "DailyWins": 0,
-                                      "photoLink" : "${FirebaseAuth.instance.currentUser?.photoURL}",
-                                      "source" : "facebook",
+                                      "photoLink":
+                                          "${FirebaseAuth.instance.currentUser?.photoURL}",
+                                      "source": "facebook",
                                       "MonthlyWins": 0
                                     };
                                     users.doc(value?.uid).set(user);
@@ -457,42 +455,41 @@ class _WelcomePageState extends State<WelcomePage> {
                                     Navigator.of(context).push(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
-                                            const HomePage()));
-                                  }else{
-
-                                    if(source!="facebook"){
-                                      if(source=="google"){
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                const HomePage()));
+                                  } else {
+                                    if (source != "facebook") {
+                                      if (source == "google") {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            'The account already exists with Google credentials. please sign in via Google',
+                                                'The account already exists with Google credentials. please sign in via Google',
                                           ),
                                         );
-                                      }else{
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            'The account already exists try signing in using email and password',
+                                                'The account already exists try signing in using email and password',
                                           ),
                                         );
                                       }
-
-                                    }else{
+                                    } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
                                       Navigator.of(context).push(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
-                                              const HomePage()));
+                                                  const HomePage()));
                                     }
-
                                   }
-
                                 });
                               });
-                            }, //TODO: Continue with Facebook
-                            label: Text(translation(context).continueWithFacebook,
-                                style: TextStyle(color: defaultColor)),
+                            },
+                            label: Text(
+                                translation(context).continueWithFacebook,
+                                style: const TextStyle(color: defaultColor)),
                             icon: Image.asset(
                               'images/facebook.png',
                               height: 24,
@@ -520,11 +517,11 @@ class _WelcomePageState extends State<WelcomePage> {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     final GoogleSignInAccount? googleSignInAccount =
-    await googleSignIn.signIn();
+        await googleSignIn.signIn();
 
     if (googleSignInAccount != null) {
       final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
+          await googleSignInAccount.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
@@ -533,7 +530,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
       try {
         final UserCredential userCredential =
-        await auth.signInWithCredential(credential);
+            await auth.signInWithCredential(credential);
 
         user = userCredential.user;
       } on FirebaseAuthException catch (e) {
@@ -541,7 +538,7 @@ class _WelcomePageState extends State<WelcomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
               content:
-              'The account already exists with a different credential.',
+                  'The account already exists with a different credential.',
             ),
           );
         } else if (e.code == 'invalid-credential') {
@@ -569,7 +566,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
     // Create a credential from the access token
     final OAuthCredential facebookAuthCredential =
-    FacebookAuthProvider.credential(loginResult.accessToken!.token);
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
 
@@ -584,8 +581,7 @@ class _WelcomePageState extends State<WelcomePage> {
       if (e.code == 'account-exists-with-different-credential') {
         ScaffoldMessenger.of(context).showSnackBar(
           customSnackBar(
-            content:
-            'The account already exists with a different credential.',
+            content: 'The account already exists with a different credential.',
           ),
         );
       } else if (e.code == 'invalid-credential') {
@@ -618,14 +614,14 @@ class _WelcomePageState extends State<WelcomePage> {
   int uniqueNameIndex = 0;
   String getUniqueUserName(String name, List<String> allUsersNameList) {
     String uniqueName = name;
-    for(String userName in allUsersNameList){
-      if(userName==name){
+    for (String userName in allUsersNameList) {
+      if (userName == name) {
         uniqueNameIndex++;
-        uniqueName = getUniqueUserName("${name}_${uniqueNameIndex}", allUsersNameList);
+        uniqueName =
+            getUniqueUserName("${name}_${uniqueNameIndex}", allUsersNameList);
       }
     }
-    print("uniqueName = ${uniqueName}");
+    debugPrint("uniqueName = $uniqueName");
     return uniqueName;
   }
-
 }

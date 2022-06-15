@@ -135,7 +135,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         return Center(
             child: Column(children: [
           const Padding(
-              padding: EdgeInsets.symmetric(vertical: 100),
+              padding: EdgeInsets.symmetric(vertical: 50),
               child: Image(image: AssetImage('images/titles/winner.png'))),
           FutureBuilder(
               future: _getUsersIdsOnce(),
@@ -165,7 +165,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
                           ),
                         )),
                     Padding(
-                      padding: const EdgeInsets.all(100),
+                      padding: const EdgeInsets.all(50),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             primary: defaultColor,
