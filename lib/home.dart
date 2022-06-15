@@ -310,7 +310,6 @@ class _PlayState extends State<Play> {
         setState(() {
           _navigated = true;
         });
-        // TODO: Support all games!
         final gameModel = Provider.of<GameModel>(context, listen: false);
         final loginModel = Provider.of<LoginModel>(context, listen: false);
         if (imgPath.contains('create')) {
@@ -336,13 +335,24 @@ class _PlayState extends State<Play> {
         }
         if (imgPath.contains('quick_play')) {
           gameModel.resetData();
+          final playersRef = FirebaseFirestore.instance
+              .collection("$firestoreMainPath/official_games/"
+                  "waiting_room/players");
+          final myPlayerDocRef = playersRef.doc(loginModel.userId);
+          await FirebaseFirestore.instance.runTransaction((transaction) async {
+            Map<String, dynamic> data = {
+              "username": loginModel.username,
+              "timestamp": DateTime.now(),
+              "wins": loginModel.wins,
+              "pin_code": ""
+            };
+            transaction.set(myPlayerDocRef, data);
+          });
           await Future.delayed(const Duration(milliseconds: 200));
           Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (context) => const QuickPlay()));
-          // Show navigation buttons
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-              overlays: [SystemUiOverlay.bottom]);
         }
+
         setState(() {
           _navigated = false;
         });

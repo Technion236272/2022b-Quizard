@@ -5,12 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
-import 'game/lobby/admin.dart';
-import 'game/lobby/player.dart';
-import 'localization/classes/language_constants.dart';
 
 class QuickPlayAppBar extends StatelessWidget with PreferredSizeWidget {
   QuickPlayAppBar({Key? key}) : super(key: key);
+
+  bool _canPop = true;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +28,25 @@ class QuickPlayAppBar extends StatelessWidget with PreferredSizeWidget {
                         color: defaultColor,
                         size: appbarIconSize,
                       ),
-                      onTap: () {
+                      onTap: () async {
+                        final playersRef = FirebaseFirestore.instance
+                            .collection("$firestoreMainPath/official_games/"
+                                "waiting_room/players");
+                        final loginModel =
+                            Provider.of<LoginModel>(context, listen: false);
+                        final myPlayerDocRef =
+                            playersRef.doc(loginModel.userId);
+                        await FirebaseFirestore.instance
+                            .runTransaction((transaction) async {
+                          final doc = await transaction.get(myPlayerDocRef);
+                          if (doc.exists) {
+                            transaction.delete(myPlayerDocRef);
+                            Navigator.of(context).maybePop(_canPop);
+                            _canPop = false; // avoid spam click
+                          }
+                        });
                         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                             overlays: []);
-                        Navigator.of(context).pop(true);
                       },
                     ),
                   ],
@@ -55,8 +69,9 @@ class _QuickPlayState extends State<QuickPlay> {
   Widget build(BuildContext context) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
-      final gamesRef = FirebaseFirestore.instance
-          .collection('$firestoreMainPath/custom_games');
+      final playersRef = FirebaseFirestore.instance
+          .collection("$firestoreMainPath/official_games/"
+              "waiting_room/players");
 
       SizedBox _waitingScreen() {
         return SizedBox.expand(
@@ -93,11 +108,32 @@ class _QuickPlayState extends State<QuickPlay> {
             ]));
       }
 
+      Stream<bool> _foundGame() async* {
+        final myPlayerRef = playersRef.doc(loginModel.userId);
+        bool _foundGame = false;
+        await myPlayerRef.get().then((player) {
+          if (player.exists && player["pin_code"] != "") {
+            _foundGame = true;
+          }
+        });
+        yield _foundGame;
+      }
+
       return WillPopScope(
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: QuickPlayAppBar(),
-            body: _waitingScreen()),
+            body: StreamBuilder(
+              stream: _foundGame(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  if (snapshot.data == true) {
+                    debugPrint(snapshot.data.toString());
+                  }
+                }
+                return _waitingScreen();
+              },
+            )),
         onWillPop: () async {
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
               overlays: []);
