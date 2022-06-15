@@ -101,7 +101,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   Consumer<GameModel> _settingsButton(String text) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
-      return TextButton(
+      return FittedBox(
+          child: TextButton(
         style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
@@ -117,16 +118,16 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(
-                content: Text('Copied ${gameModel.pinCode} to clipboard'),
-                duration: const Duration(days: 365),
-                action: SnackBarAction(
-                  label: 'Dismiss',
-                  onPressed: () {},
-                ),
-              ))
+                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
+                    duration: const Duration(days: 365),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {},
+                    ),
+                  ))
                   .closed
                   .then((value) =>
-                  ScaffoldMessenger.of(context).clearSnackBars());
+                      ScaffoldMessenger.of(context).clearSnackBars());
               break;
             case 'INVITE':
               constSnackBar('Coming soon', context);
@@ -138,7 +139,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           }
         },
         child: Text(text),
-      );
+      ));
     });
   }
 
@@ -147,16 +148,17 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
       _settingsButton('CHAT'),
       _settingsButton('PIN CODE'),
       _settingsButton('INVITE'),
-      TextButton(
-          style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4.0),
-                      side: const BorderSide(color: defaultColor))),
-              backgroundColor:
-              MaterialStateProperty.all<Color>(lightBlueColor)),
-          onPressed: null,
-          child: Text(lockText))
+      FittedBox(
+          child: TextButton(
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                          side: const BorderSide(color: defaultColor))),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(lightBlueColor)),
+              onPressed: null,
+              child: Text(lockText)))
     ]);
   }
 
@@ -218,7 +220,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             }
           });
           final ref =
-          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+              FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
           final url = await ref.getDownloadURL();
           return NetworkImage(url);
         }
@@ -258,13 +260,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         child: Checkbox(
                             splashRadius: 20,
                             materialTapTargetSize:
-                            MaterialTapTargetSize.shrinkWrap,
+                                MaterialTapTargetSize.shrinkWrap,
                             activeColor: greenColor,
                             value: gameModel.players[playerIndex]["is_ready"],
                             onChanged: matchUsernames
                                 ? (value) {
-                              _toggleIsReady();
-                            }
+                                    _toggleIsReady();
+                                  }
                                 : null)),
                     Text(translation(context).ready)
                   ])
@@ -337,8 +339,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(translation(context).gameClosed),
-              content:
-              Text(translation(context).adminKick),
+              content: Text(translation(context).adminKick),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -352,40 +353,40 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
     Future<bool> _exitDialog() async {
       final gameModel = Provider.of<GameModel>(context, listen: false);
       return (await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(translation(context).closeGame),
-              content: Text(translation(context).wishToClose),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () async {
-                      int myIndex = gameModel.playerIndex;
-                      String pinCode = gameModel.pinCode;
-                      gameModel.resetData();
-                      Map<String, dynamic> emptyPlayer = {
-                        "username": "",
-                        "is_ready": false,
-                        "false_answer": "",
-                        "selected_answer": "",
-                        "score": 0,
-                        "round_score": 0
-                      };
-                      var games = FirebaseFirestore.instance
-                          .collection('$firestoreMainPath/custom_games');
-                      await games
-                          .doc(pinCode)
-                          .update({"player$myIndex": emptyPlayer});
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(translation(context).yes)),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(translation(context).no),
-                ),
-              ],
-            );
-          })) ??
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(translation(context).closeGame),
+                  content: Text(translation(context).wishToClose),
+                  actions: <Widget>[
+                    TextButton(
+                        onPressed: () async {
+                          int myIndex = gameModel.playerIndex;
+                          String pinCode = gameModel.pinCode;
+                          gameModel.resetData();
+                          Map<String, dynamic> emptyPlayer = {
+                            "username": "",
+                            "is_ready": false,
+                            "false_answer": "",
+                            "selected_answer": "",
+                            "score": 0,
+                            "round_score": 0
+                          };
+                          var games = FirebaseFirestore.instance
+                              .collection('$firestoreMainPath/custom_games');
+                          await games
+                              .doc(pinCode)
+                              .update({"player$myIndex": emptyPlayer});
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(translation(context).yes)),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(translation(context).no),
+                    ),
+                  ],
+                );
+              })) ??
           false;
     }
 
@@ -403,12 +404,12 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance?.addPostFrameCallback(
-                                  (_) => Navigator.of(context).pop(),
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance?.addPostFrameCallback(
-                                    (_) => _dialogGameClosed(),
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _dialogGameClosed(),
                               );
                             }
                           } else {
@@ -420,28 +421,28 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance?.addPostFrameCallback(
-                                    (_) => Navigator.of(context).pop(),
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance?.addPostFrameCallback(
-                                      (_) => _dialogKickedByAdmin(),
+                                WidgetsBinding.instance.addPostFrameCallback(
+                                  (_) => _dialogKickedByAdmin(),
                                 );
                               }
                             }
                             final questions =
-                            List<String>.from(game["questions"]);
+                                List<String>.from(game["questions"]);
                             if (questions.isNotEmpty) {
                               int participantIndex =
-                              gameModel.getPlayerIndexByUsername(
-                                  loginModel.username);
+                                  gameModel.getPlayerIndexByUsername(
+                                      loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance?.addPostFrameCallback((_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                        const FirstGameScreen()));
+                                            const FirstGameScreen()));
                               });
                             }
                           }
