@@ -102,6 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             return;
           }
         }
+
         await register();
         await _goToHomePage();
       });
