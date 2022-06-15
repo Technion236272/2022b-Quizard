@@ -84,14 +84,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     Future<void> checkAlreadyRegistered() async {
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('$firestoreMainPath/users')
           .get()
-          .then((users) {
+          .then((users) async {
         for (var user in users.docs) {
           if (user["email"] == emailController.text.trim() ||
               user["username"] == userNameController.text.trim()) {
-            ScaffoldMessenger.of(context)
+                ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(
                   content: Text(translation(context).snackBar1),
                 ))
@@ -102,7 +102,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             return;
           }
         }
-      }).then((value) async {
         await register();
         await _goToHomePage();
       });
