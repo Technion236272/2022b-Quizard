@@ -266,7 +266,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 content: Text('Copied ${gameModel.pinCode} to clipboard'),
                 duration: const Duration(days: 365),
                 action: SnackBarAction(
-                  label: 'Dismiss',
+                  label: translation(context).dismiss,
                   onPressed: () {},
                 ),
               ))
@@ -344,8 +344,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text("Kick Player"),
-                    content: Text("Are you sure you wish to kick $username?"),
+                    title: Text(translation(context).kickPlayer),
+                    content: Text(translation(context).wishToKick + "$username?"),
                     actions: <Widget>[
                       TextButton(
                           onPressed: () async {
@@ -358,10 +358,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                             });
                             Navigator.of(context).pop(true);
                           },
-                          child: const Text("KICK")),
+                          child: Text(translation(context).kick)),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text("CANCEL"),
+                        child: Text(translation(context).cancel),
                       ),
                     ],
                   );
@@ -619,10 +619,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Close Game"),
-            content: const Text("Are you sure you wish to close "
-                "this game? All current participants "
-                "will be kicked automatically"),
+            title: Text(translation(context).closeGame),
+            content: Text(translation(context).closingAlert),
             actions: <Widget>[
               TextButton(
                   onPressed: () async {
@@ -635,10 +633,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                         overlays: []);
                   },
-                  child: const Text("YES")),
+                  child: Text(translation(context).yes)),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("NO"),
+                child: Text(translation(context).no),
               ),
             ],
           );

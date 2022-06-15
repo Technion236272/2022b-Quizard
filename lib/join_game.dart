@@ -7,6 +7,7 @@ import 'package:quizard/providers.dart';
 import 'consts.dart';
 import 'lobby_admin.dart';
 import 'lobby_player.dart';
+import 'localization/classes/language_constants.dart';
 
 class JoinGameAppBar extends StatelessWidget with PreferredSizeWidget {
   JoinGameAppBar({Key? key}) : super(key: key);
@@ -216,11 +217,10 @@ class _JoinGameState extends State<JoinGame> {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(children: [
                   const Image(image: AssetImage('images/titles/quizard.png')),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
-                    child: Text(
-                      'Please enter a PIN Code',
-                      style: TextStyle(fontSize: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(translation(context).enterPin,
+                      style: const TextStyle(fontSize: 18),
                     ),
                   ),
                   Padding(
@@ -229,11 +229,11 @@ class _JoinGameState extends State<JoinGame> {
                           enableSuggestions: false,
                           maxLength: 6,
                           controller: pinCodeController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             filled: true,
                             fillColor: secondaryColor,
-                            border: OutlineInputBorder(),
-                            hintText: 'PIN Code',
+                            border: const OutlineInputBorder(),
+                            hintText: translation(context).pin,
                           ))),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -241,16 +241,16 @@ class _JoinGameState extends State<JoinGame> {
                           style: ElevatedButton.styleFrom(
                               minimumSize:
                               const Size.fromHeight(50)), // max width
-                          child: const Text('Join Game',
-                              style: TextStyle(fontSize: 18)),
+                          child: Text(translation(context).joinGame,
+                              style: const TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _goToGameLobby)),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Row(children: const <Widget>[
+                      child: Row(children: <Widget>[
                         // OR Divider
-                        Expanded(child: Divider(color: defaultColor)),
-                        Text("  OR  "),
-                        Expanded(child: Divider(color: defaultColor)),
+                        const Expanded(child: Divider(color: defaultColor)),
+                        Text(translation(context).or2),
+                        const Expanded(child: Divider(color: defaultColor)),
                       ])),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -258,8 +258,8 @@ class _JoinGameState extends State<JoinGame> {
                           style: ElevatedButton.styleFrom(
                               minimumSize:
                               const Size.fromHeight(50)), // max width
-                          child: const Text('Find me an open game',
-                              style: TextStyle(fontSize: 18)),
+                          child: Text(translation(context).findOpenGame,
+                              style: const TextStyle(fontSize: 18)),
                           onPressed: _pressedButton ? null : _findOpenGame)),
                 ]))),
         onWillPop: () async {

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quizard/game/second_screen.dart';
+import 'package:quizard/localization/classes/language_constants.dart';
 
 import '../consts.dart';
 import '../providers.dart';
@@ -172,7 +173,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                         contentPadding:
                             const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                         border: const OutlineInputBorder(),
-                        hintText: 'Enter a false answer...',
+                        hintText: translation(context).enterFalseAnswer,
                       ))),
               Padding(
                   padding:
@@ -182,7 +183,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                           primary: defaultColor,
                           minimumSize: const Size.fromHeight(50)), // max width
                       child:
-                          const Text('Submit', style: TextStyle(fontSize: 18)),
+                          Text(translation(context).submit, style: TextStyle(fontSize: 18)),
                       onPressed:
                           _enableSubmitAnswer ? _submitFalseAnswer : null))
             ]));
@@ -223,7 +224,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                         child: Column(
                           children: [
-                            const Text("Waiting for other players...",
+                            Text(translation(context).waitForOthers,
                                 style: TextStyle(fontSize: 24)),
                             Container(height: 25),
                             const CircularProgressIndicator()
