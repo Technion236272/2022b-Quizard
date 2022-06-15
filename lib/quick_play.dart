@@ -75,37 +75,39 @@ class _QuickPlayState extends State<QuickPlay> {
 
       SizedBox _waitingScreen() {
         return SizedBox.expand(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-              Image(image: AssetImage('images/titles/quizard.png')),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text(
-                  "Waiting for more players...",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              Icon(
-                Icons.people_alt,
-                color: defaultColor,
-                size: appbarIconSize,
-              ),
-              Text(
-                "1/5",
-                style: TextStyle(fontSize: 24),
-              ),
-              Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32),
-                  child: CircularProgressIndicator()),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text(
-                  "The game will start soon.",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ]));
+            child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: const [
+                      Image(image: AssetImage('images/titles/quizard.png')),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          "Waiting for more players...",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      Icon(
+                        Icons.people_alt,
+                        color: defaultColor,
+                        size: appbarIconSize,
+                      ),
+                      Text(
+                        "1/5",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: CircularProgressIndicator()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          "The game will start soon.",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ])));
       }
 
       Stream<bool> _foundGame() async* {

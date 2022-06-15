@@ -265,53 +265,54 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   bool _navigated = false;
 
-  Future<void> _initializeGame(
-      GameModel gameModel, LoginModel loginModel) async {
-    gameModel.setDataToPlayer("username", loginModel.username, 0);
-    gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
-    var games = FirebaseFirestore.instance
-        .collection('$firestoreMainPath/custom_games');
-    Map<String, dynamic> mapAdmin = {
-      "username": loginModel.username,
-      "is_ready": false,
-      "false_answer": "",
-      "selected_answer": "",
-      "score": 0,
-      "round_score": 0
-    };
-    final game = <String, dynamic>{
-      "player0": mapAdmin, // Admin is always player0
-      "is_private": gameModel.isPrivate,
-      "is_locked": gameModel.isLocked,
-      "official_categories": gameModel.officialCategories,
-      "custom_categories": gameModel.customCategories,
-      "questions": [],
-      "answers": [],
-      "categories": [],
-    };
-    Map<String, dynamic> mapPlayer = {
-      "username": "",
-      "is_ready": false,
-      "false_answer": "",
-      "selected_answer": "",
-      "score": 0,
-      "round_score": 0
-    };
-    for (int i = 1; i < maxPlayers; i++) {
-      game.addAll({"player$i": mapPlayer});
-    }
-    await games.doc(gameModel.pinCode).set(game);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final gameModel = Provider.of<GameModel>(context, listen: false);
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+
+    Future<void> _initializeGame() async {
+      gameModel.setDataToPlayer("username", loginModel.username, 0);
+      gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
+      var games = FirebaseFirestore.instance
+          .collection('$firestoreMainPath/custom_games');
+      Map<String, dynamic> mapAdmin = {
+        "username": loginModel.username,
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
+      };
+      final game = <String, dynamic>{
+        "player0": mapAdmin, // Admin is always player0
+        "is_private": gameModel.isPrivate,
+        "is_locked": gameModel.isLocked,
+        "official_categories": gameModel.officialCategories,
+        "custom_categories": gameModel.customCategories,
+        "questions": [],
+        "answers": [],
+        "categories": [],
+        "timestamp": DateTime.now()
+      };
+      Map<String, dynamic> mapPlayer = {
+        "username": "",
+        "is_ready": false,
+        "false_answer": "",
+        "selected_answer": "",
+        "score": 0,
+        "round_score": 0
+      };
+      for (int i = 1; i < maxPlayers; i++) {
+        game.addAll({"player$i": mapPlayer});
+      }
+      await games.doc(gameModel.pinCode).set(game);
+    }
+
     InkWell _playOptionButton(String imgPath) {
       void _navigateToGame() async {
         setState(() {
           _navigated = true;
         });
-        final gameModel = Provider.of<GameModel>(context, listen: false);
-        final loginModel = Provider.of<LoginModel>(context, listen: false);
         if (imgPath.contains('create')) {
           gameModel.resetData();
           gameModel.isPrivate = false;
@@ -319,7 +320,7 @@ class _PlayState extends State<Play> {
             gameModel.isPrivate = true;
           }
           var lobby = LobbyAdmin(isPrivate: gameModel.isPrivate);
-          _initializeGame(gameModel, loginModel);
+          _initializeGame();
           await Future.delayed(const Duration(milliseconds: 200));
           Navigator.of(context)
               .push(MaterialPageRoute<void>(builder: (context) => lobby));
@@ -327,8 +328,15 @@ class _PlayState extends State<Play> {
         if (imgPath.contains('join_existing')) {
           gameModel.resetData();
           await Future.delayed(const Duration(milliseconds: 200));
-          Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (context) => const JoinGame()));
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) =>
+                  const JoinGame(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
           // Show navigation buttons
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
               overlays: [SystemUiOverlay.bottom]);
@@ -349,8 +357,15 @@ class _PlayState extends State<Play> {
             transaction.set(myPlayerDocRef, data);
           });
           await Future.delayed(const Duration(milliseconds: 200));
-          Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (context) => const QuickPlay()));
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) =>
+                  const QuickPlay(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         }
 
         setState(() {
