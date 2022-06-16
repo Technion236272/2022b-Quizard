@@ -33,10 +33,11 @@ class Localization extends StatefulWidget {
   @override
   State<Localization> createState() => _LocalizationState();
 
-  static void setLocale(BuildContext context, Locale newLocale) {
+  static String setLocale(BuildContext context, Locale newLocale) {
     _LocalizationState? state = context.findAncestorStateOfType<
         _LocalizationState>();
     state?.setLocale(newLocale);
+    return getLocale(context);
   }
 
   static String getLocale(BuildContext context) {

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quizard/main.dart';
 
+
 import '../consts.dart';
+
 import '../localization/classes/language.dart';
 import '../localization/classes/language_constants.dart';
 import '../providers.dart';
@@ -60,15 +61,15 @@ class ChangePasswordForm extends StatelessWidget {
               autocorrect: false,
               validator: (val) {
                 if (val == '') {
-                  return 'Password can\'t be empty';
+                  return translation(context).passNotEmpty;
                 }
                 if (val!.length < 6) {
-                  return '6 characters needed';
+                  return translation(context).sixCharacters;
                 }
                 return null;
               },
-              decoration: const InputDecoration(
-                labelText: 'New Password',
+              decoration: InputDecoration(
+                labelText: translation(context).newPass,
               ),
             ),
             TextFormField(
@@ -84,15 +85,15 @@ class ChangePasswordForm extends StatelessWidget {
               autocorrect: false,
               validator: (val) {
                 if (val == '') {
-                  return 'Password can\'t be empty';
+                  return translation(context).passNotEmpty;
                 }
                 if (val != _newPasswordController.text) {
-                  return 'Password don\'t match';
+                  return translation(context).noMatch;
                 }
                 return null;
               },
-              decoration: const InputDecoration(
-                labelText: 'Repeat New Password',
+              decoration: InputDecoration(
+                labelText: translation(context).repeatNewPass,
               ),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -245,29 +246,27 @@ class ChangeEmailForm extends StatelessWidget {
   }
 }
 
-class ChangeLanguageForm extends StatelessWidget {
+class ChangeLanguageForm extends StatefulWidget {
   const ChangeLanguageForm({Key? key}) : super(key: key);
+  @override
+  State<ChangeLanguageForm> createState() => _ChangeLanguageFormState();
+}
 
+class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
+  Language? value;
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Form(
           child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          DropdownButton<Language>(
-            icon: Text(Localization.getLocale(context),
-                style: const TextStyle(height: 2, fontSize: 19)),
-            underline: const SizedBox(),
-            onChanged: (Language? language) async {
-              if (language != null) {
-                Locale _locale = await setLocale(language.languageCode);
-                Localization.setLocale(context, _locale);
-              }
-            },
-            items: Language.languageList()
-                .map(
-                  (e) => DropdownMenuItem<Language>(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              DropdownButton<Language>(
+                icon: value == null? const Text("English") : Text(value!.name),
+                underline: const SizedBox(),
+                items: Language.languageList()
+                    .map(
+                      (e) => DropdownMenuItem<Language>(
                     value: e,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -279,12 +278,17 @@ class ChangeLanguageForm extends StatelessWidget {
                         Text(e.name)
                       ],
                     ),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ));
+                  ),).toList(),
+              onChanged: (Language? language) => setState(() async {
+                if (language != null) {
+                  value = language;
+                  Locale _locale = await setLocale(language.languageCode);
+                  Localization.setLocale(context, _locale);
+                }
+              }),
+              ),
+            ],
+          ));
     });
   }
 }
@@ -333,7 +337,7 @@ class ChangeUsernameForm extends StatelessWidget {
                       for (var user in users.docs) {
                         if (user["username"] == enteredUsername) {
                           foundUser = true;
-                          constSnackBar("Username already exists", context);
+                          constSnackBar(translation(context).usernameExists, context);
                         }
                       }
                     });
@@ -346,7 +350,7 @@ class ChangeUsernameForm extends StatelessWidget {
                         "username": enteredUsername,
                       }).then((_) {
                         loginModel.setUsername(enteredUsername);
-                        constSnackBar("Changed username successfully", context);
+                        constSnackBar(translation(context).changedUsernameSucc, context);
                       });
                     }
                     Navigator.of(context).pop(true);
@@ -381,24 +385,6 @@ class Settings extends StatelessWidget {
   static const _changePasswordText = 'Change Password';
   static const _aboutDialogText = 'About';
 
-  String getLocalizedFieldValue(String field, BuildContext context) {
-    switch (field) {
-      case "Change Language":
-        return translation(context).changeLanguage;
-      case "Change Avatar":
-        return translation(context).changeAvatar;
-      case "Change Username":
-        return translation(context).changeUsername;
-      case "Change Password":
-        return translation(context).changePassword;
-      case "Change Email":
-        return translation(context).changeEmail;
-      case "About":
-        return translation(context).about;
-    }
-
-    return "";
-  }
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(

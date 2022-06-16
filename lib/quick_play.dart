@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/localization/classes/language_constants.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
@@ -79,31 +80,31 @@ class _QuickPlayState extends State<QuickPlay> {
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: const [
-                      Image(image: AssetImage('images/titles/quizard.png')),
+                    children: [
+                      const Image(image: AssetImage('images/titles/quizard.png')),
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 32),
                         child: Text(
-                          "Waiting for more players...",
+                          translation(context).waitForPlayers,
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.people_alt,
                         color: defaultColor,
                         size: appbarIconSize,
                       ),
-                      Text(
+                      const Text(
                         "1/5",
                         style: TextStyle(fontSize: 24),
                       ),
-                      Padding(
+                      const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: CircularProgressIndicator()),
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 32),
                         child: Text(
-                          "The game will start soon.",
+                          translation(context).gameWillStartSoon,
                           style: TextStyle(fontSize: 18),
                         ),
                       ),

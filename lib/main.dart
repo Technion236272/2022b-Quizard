@@ -375,7 +375,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                                'The account already exists with Facebook credentials. please sign in via Facebook',
+                                                translation(context).snackBar9,
                                           ),
                                         );
                                       } else {
@@ -383,7 +383,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                                'The account already exists try signing in using email and password',
+                                                translation(context).snackBar10,
                                           ),
                                         );
                                       }
@@ -463,7 +463,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                                'The account already exists with Google credentials. please sign in via Google',
+                                            translation(context).snackBar11,
                                           ),
                                         );
                                       } else {
@@ -471,7 +471,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                                'The account already exists try signing in using email and password',
+                                            translation(context).snackBar10,
                                           ),
                                         );
                                       }
@@ -538,20 +538,20 @@ class _WelcomePageState extends State<WelcomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
               content:
-                  'The account already exists with a different credential.',
+              translation(context).snackBar13,
             ),
           );
         } else if (e.code == 'invalid-credential') {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
-              content: 'Error occurred while accessing credentials. Try again.',
+              content: translation(context).snackBar14,
             ),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           customSnackBar(
-            content: 'Error occurred using Google Sign-In. Try again.',
+            content: translation(context).snackBar15,
           ),
         );
       }
@@ -581,20 +581,20 @@ class _WelcomePageState extends State<WelcomePage> {
       if (e.code == 'account-exists-with-different-credential') {
         ScaffoldMessenger.of(context).showSnackBar(
           customSnackBar(
-            content: 'The account already exists with a different credential.',
+            content: translation(context).snackBar16,
           ),
         );
       } else if (e.code == 'invalid-credential') {
         ScaffoldMessenger.of(context).showSnackBar(
           customSnackBar(
-            content: 'Error occurred while accessing credentials. Try again.',
+            content: translation(context).snackBar14,
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         customSnackBar(
-          content: 'Error occurred using Facebook Sign-In. Try again.',
+          content: translation(context).snackBar18,
         ),
       );
     }

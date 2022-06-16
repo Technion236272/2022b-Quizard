@@ -35,7 +35,7 @@ class AddQuestionForm extends StatelessWidget {
                   controller: _categoryController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter any category';
+                      return translation(context).enterAnyCategory;
                     }
                     return null;
                   },
@@ -55,7 +55,7 @@ class AddQuestionForm extends StatelessWidget {
                   controller: _questionController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter any question';
+                      return translation(context).enterAnyQuestion;
                     }
                     return null;
                   },
@@ -75,7 +75,7 @@ class AddQuestionForm extends StatelessWidget {
                   controller: _answerController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter any answer';
+                      return translation(context).enterAnyAnswer;
                     }
                     return null;
                   },

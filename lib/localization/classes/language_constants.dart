@@ -38,3 +38,32 @@ Locale _locale(String languageCode) {
 AppLocalizations translation(BuildContext context) {
   return AppLocalizations.of(context)!;
 }
+
+String getLocalizedFieldValue(String field, BuildContext context) {
+  switch (field) {
+    case "Change Language":
+      return translation(context).changeLanguage;
+    case "Change Avatar":
+      return translation(context).changeAvatar;
+    case "Change Username":
+      return translation(context).changeUsername;
+    case "Change Password":
+      return translation(context).changePassword;
+    case "Change Email":
+      return translation(context).changeEmail;
+    case "About":
+      return translation(context).about;
+    case "CHAT":
+      return translation(context).chat;
+    case "PIN CODE":
+      return translation(context).pinCode;
+    case "INVITE":
+      return translation(context).invite;
+    case "UNLOCKED":
+      return translation(context).unlocked;
+    case "LOCKED":
+      return translation(context).locked;
+  }
+
+  return "";
+}

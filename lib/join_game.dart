@@ -104,15 +104,15 @@ class _JoinGameState extends State<JoinGame> {
           }
           FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
           if (!foundGame) {
-            constSnackBar("Invalid PIN Code", context);
+            constSnackBar(translation(context).invalidPin, context);
           } else {
             var wantedGame = games.docs[indexGame];
             if (wantedGame["is_locked"] == true) {
-              constSnackBar("Game is locked", context);
+              constSnackBar(translation(context).gameIsLocked, context);
             } else {
               gameModel.update(wantedGame);
               if (gameModel.getNumOfPlayers() == maxPlayers) {
-                constSnackBar("Game is full", context);
+                constSnackBar(translation(context).gameIsFull, context);
               } else {
                 int i = await _initializeGameAndGetPlayerIndex();
                 if (i == 0) {
@@ -190,7 +190,7 @@ class _JoinGameState extends State<JoinGame> {
                           loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
-                    WidgetsBinding.instance.addPostFrameCallback((_) =>
+                    WidgetsBinding.instance?.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },
@@ -202,7 +202,7 @@ class _JoinGameState extends State<JoinGame> {
             }
           }
           if (!joinedGame) {
-            constSnackBar("Couldn't find any open public game", context);
+            constSnackBar(translation(context).noPublicGames, context);
           }
           setState(() {
             _pressedButton = false;

@@ -238,7 +238,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _categoriesTitle(
-              'Custom Categories', 'Type and search any categories by users'),
+              translation(context).customCategory, translation(context).message1),
           _selectCategoryInput(),
         ],
       ),
@@ -296,7 +296,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
               break;
           }
         },
-        child: Text(text),
+        child: Text(getLocalizedFieldValue(text,context)),
       ));
     });
   }

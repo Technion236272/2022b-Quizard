@@ -404,28 +404,28 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance.addPostFrameCallback(
+                            WidgetsBinding.instance?.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance.addPostFrameCallback(
+                              WidgetsBinding.instance?.addPostFrameCallback(
                                 (_) => _dialogGameClosed(),
                               );
                             }
                           } else {
                             gameModel.update(game);
                             if (game["is_locked"]) {
-                              lockText = 'LOCKED';
+                              lockText = getLocalizedFieldValue("LOCKED", context);
                             } else {
-                              lockText = 'UNLOCKED';
+                              lockText = getLocalizedFieldValue("UNLOCKED", context);
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance.addPostFrameCallback(
+                              WidgetsBinding.instance?.addPostFrameCallback(
                                 (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance.addPostFrameCallback(
+                                WidgetsBinding.instance?.addPostFrameCallback(
                                   (_) => _dialogKickedByAdmin(),
                                 );
                               }
@@ -437,7 +437,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                                   gameModel.getPlayerIndexByUsername(
                                       loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                              WidgetsBinding.instance?.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

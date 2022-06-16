@@ -68,7 +68,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
       // don't proceed if that's the correct answer
       if (gameModel.falseAnswerController.text.toLowerCase() ==
           gameModel.gameAnswers[gameModel.currentQuestionIndex].toLowerCase()) {
-        constSnackBar("Psst, that's the correct answer", context);
+        constSnackBar(translation(context).snackBar8, context);
         return;
       }
 
@@ -131,7 +131,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                     return snapshot.data!;
                   }
                 }
-                return const Text("Score: ", style: TextStyle(fontSize: 24));
+                return Text(translation(context).score, style: TextStyle(fontSize: 24));
               });
         }
 
@@ -214,7 +214,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        .addPostFrameCallback((_) => Navigator.pushReplacement(
+                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SecondGameScreen(),
