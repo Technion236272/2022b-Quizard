@@ -257,39 +257,54 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      return Form(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              DropdownButton<Language>(
-                icon: value == null? const Text("English") : Text(value!.name),
-                underline: const SizedBox(),
-                items: Language.languageList()
-                    .map(
-                      (e) => DropdownMenuItem<Language>(
-                    value: e,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        Text(
-                          e.flag,
-                          style: const TextStyle(fontSize: 30),
-                        ),
-                        Text(e.name)
-                      ],
-                    ),
-                  ),).toList(),
-              onChanged: (Language? language) => setState(() async {
-                if (language != null) {
-                  value = language;
-                  Locale _locale = await setLocale(language.languageCode);
-                  Localization.setLocale(context, _locale);
+     return Form(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+      DecoratedBox(
+      decoration: BoxDecoration(
+          color: Colors.white,
+         borderRadius: BorderRadius.circular(5),
+         boxShadow: const <BoxShadow>[
+           BoxShadow(
+               color: darkGreyColor,
+               blurRadius: 1)
+         ]),
+      child: Padding(
+        padding: EdgeInsets.only(left:30, right:30),
+          child:Container(
+            child: Row(
+             children: [
+               value == null? Text(Localization.getLocale(context)) : Text(value!.name),
+               DropdownButton<Language>(
+                icon: Icon(Icons.arrow_drop_down),
+                underline: Container(),
+                style: TextStyle(fontSize: 18, color: Colors.black),
+                items: Language.languageList().map(
+                (e) => DropdownMenuItem<Language>(
+                value: e,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                  Text(
+                    e.flag,
+                    style: const TextStyle(fontSize: 30),
+                  ),
+                  Text(e.name)
+                  ],)
+                ),).toList(),
+                onChanged: (Language? language) async { setState(() {
+                    value = language!;
+                  });
+                  if (language != null) {
+                    Locale _locale = await setLocale(language.languageCode);
+                    Localization.setLocale(context, _locale);
+                  }
                 }
-              }),
-              ),
-            ],
-          ));
-    });
+                )]),
+      )))],
+      ));
+  });
   }
 }
 
