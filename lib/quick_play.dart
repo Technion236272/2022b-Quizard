@@ -81,12 +81,13 @@ class _QuickPlayState extends State<QuickPlay> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Image(image: AssetImage('images/titles/quizard.png')),
+                      const Image(
+                          image: AssetImage('images/titles/quizard.png')),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+                        padding: const EdgeInsets.symmetric(vertical: 32),
                         child: Text(
                           translation(context).waitForPlayers,
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
                       const Icon(
@@ -102,10 +103,10 @@ class _QuickPlayState extends State<QuickPlay> {
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: CircularProgressIndicator()),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+                        padding: const EdgeInsets.symmetric(vertical: 32),
                         child: Text(
                           translation(context).gameWillStartSoon,
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
                     ])));

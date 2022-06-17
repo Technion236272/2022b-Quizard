@@ -350,8 +350,6 @@ class _PlayState extends State<Play> {
           await FirebaseFirestore.instance.runTransaction((transaction) async {
             Map<String, dynamic> data = {
               "username": loginModel.username,
-              "timestamp": DateTime.now(),
-              "wins": loginModel.wins,
               "pin_code": ""
             };
             transaction.set(myPlayerDocRef, data);

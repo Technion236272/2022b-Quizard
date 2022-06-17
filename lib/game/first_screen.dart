@@ -131,7 +131,8 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                     return snapshot.data!;
                   }
                 }
-                return Text(translation(context).score, style: TextStyle(fontSize: 24));
+                return Text(translation(context).score,
+                    style: const TextStyle(fontSize: 24));
               });
         }
 
@@ -214,7 +215,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
+                        .addPostFrameCallback((_) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SecondGameScreen(),
