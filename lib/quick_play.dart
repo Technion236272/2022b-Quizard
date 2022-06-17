@@ -73,8 +73,10 @@ class _QuickPlayState extends State<QuickPlay> {
       final playersRef = FirebaseFirestore.instance
           .collection("$firestoreMainPath/official_games/"
               "waiting_room/players");
+      final gamesRef = FirebaseFirestore.instance
+          .collection("$firestoreMainPath/official_games/");
 
-      SizedBox _waitingScreen() {
+      SizedBox _waitingScreen(int _numberOfPlayers) {
         return SizedBox.expand(
             child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
@@ -95,9 +97,9 @@ class _QuickPlayState extends State<QuickPlay> {
                         color: defaultColor,
                         size: appbarIconSize,
                       ),
-                      const Text(
-                        "1/5",
-                        style: TextStyle(fontSize: 24),
+                      Text(
+                        "$_numberOfPlayers/5",
+                        style: const TextStyle(fontSize: 24),
                       ),
                       const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
@@ -112,15 +114,14 @@ class _QuickPlayState extends State<QuickPlay> {
                     ])));
       }
 
-      Stream<bool> _foundGame() async* {
-        final myPlayerRef = playersRef.doc(loginModel.userId);
-        bool _foundGame = false;
-        await myPlayerRef.get().then((player) {
-          if (player.exists && player["pin_code"] != "") {
-            _foundGame = true;
+      int _getNumOfPlayers(DocumentSnapshot game) {
+        int numOfPlayers = 0;
+        for (int i = 0; i < maxPlayers; i++) {
+          if (game["player$i.username"] != "") {
+            numOfPlayers++;
           }
-        });
-        yield _foundGame;
+        }
+        return numOfPlayers;
       }
 
       return WillPopScope(
@@ -128,14 +129,29 @@ class _QuickPlayState extends State<QuickPlay> {
             resizeToAvoidBottomInset: false,
             appBar: QuickPlayAppBar(),
             body: StreamBuilder(
-              stream: _foundGame(),
+              stream: playersRef.doc(loginModel.userId).snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  if (snapshot.data == true) {
-                    debugPrint(snapshot.data.toString());
+                if (snapshot.hasData &&
+                    snapshot.connectionState != ConnectionState.waiting) {
+                  var player = snapshot.data as DocumentSnapshot;
+                  if (player.exists && player["pin_code"] != "") {
+                    return StreamBuilder(
+                        stream: gamesRef.doc(player["pin_code"]).snapshots(),
+                        builder: (context, snapshot2) {
+                          if (snapshot2.hasData &&
+                              snapshot2.data != null &&
+                              snapshot2.connectionState !=
+                                  ConnectionState.waiting) {
+                            var game = snapshot2.data! as DocumentSnapshot;
+                            if (game.exists) {
+                              return _waitingScreen(_getNumOfPlayers(game));
+                            }
+                          }
+                          return _waitingScreen(1);
+                        });
                   }
                 }
-                return _waitingScreen();
+                return _waitingScreen(1);
               },
             )),
         onWillPop: () async {

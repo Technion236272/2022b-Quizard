@@ -18,27 +18,27 @@ export const findQuickGameForNewPlayer = functions.firestore
       let foundGame = false;
 
       // first check if already joined
-      await gamesRef.get().then((games) => {
-        games.forEach(async (game) => {
+      await gamesRef.get().then(async (games) => {
+        for (let i = 0; i < games.size; i++) {
+          const game = games.docs[i];
           // get index of duplicate username if exists
-          let alreadyExistIndex = -1;
           for (let j = 0; j < maxPlayers; j++) {
-            if (!foundGame && alreadyExistIndex == -1 &&
-              await game.get(`player${j}.username`) == playerUsername) {
-              alreadyExistIndex = j;
-            }
-            if (alreadyExistIndex != -1 &&
-              await game.get("is_locked") == false) {
-              // if found me in unlocked game then join
+            if (await game.get(`player${j}.username`) == playerUsername &&
+            await game.get("is_locked") == false) {
               await playerRef.update({"pin_code": game.id});
+              console.log("found myself in open game");
               foundGame = true;
+              break;
             }
           }
-        });
+          if (foundGame) {
+            break;
+          }
+        }
       });
 
       if (foundGame) {
-        console.log("found myself in open game");
+        console.log("exiting function");
         return;
       }
 
