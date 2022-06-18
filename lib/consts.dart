@@ -22,7 +22,7 @@ const appbarPadding = 12.0;
 const appbarSize = 2 * appbarPadding + appbarIconSize;
 const roundsPerGame = 5;
 const maxPlayers = 5; // DO NOT CHANGE
-const timePerScreen = 20; // in seconds
+const timePerScreen = 30; // in seconds
 const delayScoreResult = 3; // in seconds
 
 // Strings
@@ -33,8 +33,8 @@ const appVersion = "1.0.0"; // For AboutDialog - update if necessary!
 void constSnackBar(String text, BuildContext context) {
   ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(
-    content: Text(text),
-  ))
+        content: Text(text),
+      ))
       .closed
       .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
 }

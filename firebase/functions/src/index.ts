@@ -3,7 +3,7 @@ import * as functions from "firebase-functions";
 
 admin.initializeApp();
 const db = admin.firestore();
-const maxPlayers = 2; // TODO: Change to 5
+const maxPlayers = 5;
 
 export const findQuickGameForNewPlayer = functions.firestore
     .document("versions/{v2}/official_games/{waiting_room}/players/{playerId}")
