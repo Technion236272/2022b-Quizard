@@ -6,6 +6,7 @@ import 'package:quizard/localization/classes/language_constants.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
+import 'game/first_screen.dart';
 
 class QuickPlayAppBar extends StatelessWidget with PreferredSizeWidget {
   QuickPlayAppBar({Key? key}) : super(key: key);
@@ -70,6 +71,7 @@ class _QuickPlayState extends State<QuickPlay> {
   Widget build(BuildContext context) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final gameModel = Provider.of<GameModel>(context, listen: false);
       final playersRef = FirebaseFirestore.instance
           .collection("$firestoreMainPath/official_games/"
               "waiting_room/players");
@@ -144,6 +146,18 @@ class _QuickPlayState extends State<QuickPlay> {
                                   ConnectionState.waiting) {
                             var game = snapshot2.data! as DocumentSnapshot;
                             if (game.exists) {
+                              if (game["is_locked"]) {
+                                gameModel.updateOfficial(
+                                    game, loginModel.username);
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const FirstGameScreen()));
+                                });
+                              }
                               return _waitingScreen(_getNumOfPlayers(game));
                             }
                           }

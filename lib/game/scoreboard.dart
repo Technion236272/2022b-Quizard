@@ -23,7 +23,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$firestoreMainPath/custom_games")
+        .collection("$firestoreMainPath/${gameModel.gamePath}")
         .doc(gameModel.pinCode);
 
     Future<bool> _getUsersIdsOnce() async {
@@ -31,7 +31,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         return false;
       }
       await FirebaseFirestore.instance
-          .collection("$firestoreMainPath/custom_games")
+          .collection("$firestoreMainPath/${gameModel.gamePath}")
           .doc(gameModel.pinCode)
           .get()
           .then((game) {

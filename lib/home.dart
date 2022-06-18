@@ -274,7 +274,7 @@ class _PlayState extends State<Play> {
       gameModel.setDataToPlayer("username", loginModel.username, 0);
       gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
       var games = FirebaseFirestore.instance
-          .collection('$firestoreMainPath/custom_games');
+          .collection('$firestoreMainPath/${gameModel.gamePath}');
       Map<String, dynamic> mapAdmin = {
         "username": loginModel.username,
         "is_ready": false,
@@ -346,14 +346,12 @@ class _PlayState extends State<Play> {
           final playersRef = FirebaseFirestore.instance
               .collection("$firestoreMainPath/official_games/"
                   "waiting_room/players");
+          Map<String, dynamic> data = {
+            "username": loginModel.username,
+            "pin_code": ""
+          };
           final myPlayerDocRef = playersRef.doc(loginModel.userId);
-          await FirebaseFirestore.instance.runTransaction((transaction) async {
-            Map<String, dynamic> data = {
-              "username": loginModel.username,
-              "pin_code": ""
-            };
-            transaction.set(myPlayerDocRef, data);
-          });
+          await myPlayerDocRef.set(data);
           await Future.delayed(const Duration(milliseconds: 200));
           Navigator.push(
             context,

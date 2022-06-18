@@ -125,6 +125,7 @@ export const findQuickGameForNewPlayer = functions.firestore
           "player3": mapPlayer,
           "player4": mapPlayer,
           "is_locked": false,
+          "is_official": true,
           "questions": [],
           "answers": [],
           "categories": [],
@@ -159,6 +160,12 @@ export const initiateGameForFullParty = functions.firestore
       if (!changedGame.after.exists) {
         // Ignore delete operations
         console.log("ignoring delete operation");
+        return;
+      }
+
+      if (changedGame.after.id == "waiting_room") {
+        // Ignore waiting room
+        console.log("ignoring waiting room");
         return;
       }
 
