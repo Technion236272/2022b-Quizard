@@ -6,6 +6,7 @@ import 'package:quizard/localization/classes/language_constants.dart';
 import 'package:quizard/providers.dart';
 
 import 'consts.dart';
+import 'game/first_screen.dart';
 
 class QuickPlayAppBar extends StatelessWidget with PreferredSizeWidget {
   QuickPlayAppBar({Key? key}) : super(key: key);
@@ -70,23 +71,27 @@ class _QuickPlayState extends State<QuickPlay> {
   Widget build(BuildContext context) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
+      final gameModel = Provider.of<GameModel>(context, listen: false);
       final playersRef = FirebaseFirestore.instance
           .collection("$firestoreMainPath/official_games/"
               "waiting_room/players");
+      final gamesRef = FirebaseFirestore.instance
+          .collection("$firestoreMainPath/official_games/");
 
-      SizedBox _waitingScreen() {
+      SizedBox _waitingScreen(int _numberOfPlayers) {
         return SizedBox.expand(
             child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Image(image: AssetImage('images/titles/quizard.png')),
+                      const Image(
+                          image: AssetImage('images/titles/quizard.png')),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+                        padding: const EdgeInsets.symmetric(vertical: 32),
                         child: Text(
                           translation(context).waitForPlayers,
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
                       const Icon(
@@ -94,32 +99,31 @@ class _QuickPlayState extends State<QuickPlay> {
                         color: defaultColor,
                         size: appbarIconSize,
                       ),
-                      const Text(
-                        "1/5",
-                        style: TextStyle(fontSize: 24),
+                      Text(
+                        "$_numberOfPlayers/5",
+                        style: const TextStyle(fontSize: 24),
                       ),
                       const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: CircularProgressIndicator()),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+                        padding: const EdgeInsets.symmetric(vertical: 32),
                         child: Text(
                           translation(context).gameWillStartSoon,
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
                     ])));
       }
 
-      Stream<bool> _foundGame() async* {
-        final myPlayerRef = playersRef.doc(loginModel.userId);
-        bool _foundGame = false;
-        await myPlayerRef.get().then((player) {
-          if (player.exists && player["pin_code"] != "") {
-            _foundGame = true;
+      int _getNumOfPlayers(DocumentSnapshot game) {
+        int numOfPlayers = 0;
+        for (int i = 0; i < maxPlayers; i++) {
+          if (game["player$i.username"] != "") {
+            numOfPlayers++;
           }
-        });
-        yield _foundGame;
+        }
+        return numOfPlayers;
       }
 
       return WillPopScope(
@@ -127,14 +131,41 @@ class _QuickPlayState extends State<QuickPlay> {
             resizeToAvoidBottomInset: false,
             appBar: QuickPlayAppBar(),
             body: StreamBuilder(
-              stream: _foundGame(),
+              stream: playersRef.doc(loginModel.userId).snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  if (snapshot.data == true) {
-                    debugPrint(snapshot.data.toString());
+                if (snapshot.hasData &&
+                    snapshot.connectionState != ConnectionState.waiting) {
+                  var player = snapshot.data as DocumentSnapshot;
+                  if (player.exists && player["pin_code"] != "") {
+                    return StreamBuilder(
+                        stream: gamesRef.doc(player["pin_code"]).snapshots(),
+                        builder: (context, snapshot2) {
+                          if (snapshot2.hasData &&
+                              snapshot2.data != null &&
+                              snapshot2.connectionState !=
+                                  ConnectionState.waiting) {
+                            var game = snapshot2.data! as DocumentSnapshot;
+                            if (game.exists) {
+                              if (game["is_locked"]) {
+                                gameModel.updateOfficial(
+                                    game, loginModel.username);
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const FirstGameScreen()));
+                                });
+                              }
+                              return _waitingScreen(_getNumOfPlayers(game));
+                            }
+                          }
+                          return _waitingScreen(1);
+                        });
                   }
                 }
-                return _waitingScreen();
+                return _waitingScreen(1);
               },
             )),
         onWillPop: () async {

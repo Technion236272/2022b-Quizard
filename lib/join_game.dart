@@ -59,7 +59,7 @@ class _JoinGameState extends State<JoinGame> {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
       final gamesRef = FirebaseFirestore.instance
-          .collection('$firestoreMainPath/custom_games');
+          .collection('$firestoreMainPath/${gameModel.gamePath}');
 
       Future<int> _initializeGameAndGetPlayerIndex() async {
         gameModel.pinCode = pinCodeController.text.toUpperCase();
@@ -190,7 +190,7 @@ class _JoinGameState extends State<JoinGame> {
                           loginModel.username
                     });
                     debugPrint("DEBUG: gameDoc successfully updated");
-                    WidgetsBinding.instance?.addPostFrameCallback((_) =>
+                    WidgetsBinding.instance.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },

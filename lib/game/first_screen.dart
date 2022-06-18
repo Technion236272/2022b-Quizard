@@ -33,7 +33,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
 
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$firestoreMainPath/custom_games")
+        .collection("$firestoreMainPath/${gameModel.gamePath}")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
     gameRef.update({
@@ -58,7 +58,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   Widget build(BuildContext context) {
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$firestoreMainPath/custom_games")
+        .collection("$firestoreMainPath/${gameModel.gamePath}")
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 
@@ -131,7 +131,8 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                     return snapshot.data!;
                   }
                 }
-                return Text(translation(context).score, style: TextStyle(fontSize: 24));
+                return Text(translation(context).score,
+                    style: const TextStyle(fontSize: 24));
               });
         }
 
@@ -214,7 +215,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
+                        .addPostFrameCallback((_) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const SecondGameScreen(),

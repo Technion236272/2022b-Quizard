@@ -21,9 +21,10 @@ class _ScoreBoardState extends State<ScoreBoard> {
 
   @override
   Widget build(BuildContext context) {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
-        .collection("$firestoreMainPath/custom_games")
+        .collection("$firestoreMainPath/${gameModel.gamePath}")
         .doc(gameModel.pinCode);
 
     Future<bool> _getUsersIdsOnce() async {
@@ -31,7 +32,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         return false;
       }
       await FirebaseFirestore.instance
-          .collection("$firestoreMainPath/custom_games")
+          .collection("$firestoreMainPath/${gameModel.gamePath}")
           .doc(gameModel.pinCode)
           .get()
           .then((game) {
@@ -44,11 +45,32 @@ class _ScoreBoardState extends State<ScoreBoard> {
           .get()
           .then((users) async {
         List players = gameModel.getPlayersSortedByScore(false);
+        int topScore = 0;
+        if (gameModel.isOfficial) {
+          for (int k = 0; k < maxPlayers; k++) {
+            if (gameModel.players[k]["username"] != "" &&
+                topScore < gameModel.players[k]["score"]) {
+              topScore = gameModel.players[k]["score"];
+            }
+          }
+        }
         for (int k = 0; k < players.length; k++) {
           for (var user in users.docs) {
             if (user["username"] == players[k] &&
                 !_playersIds.contains(user.id)) {
               _playersIds.add(user.id);
+              if (topScore > 0 &&
+                  players[k] == loginModel.username &&
+                  topScore == gameModel.getScoreByUsername(players[k])) {
+                int totalWins = user["wins"];
+                int monthlyWins = user["MonthlyWins"];
+                int dailyWins = user["DailyWins"];
+                user.reference.update({
+                  "wins": totalWins + 1,
+                  "MonthlyWins": monthlyWins + 1,
+                  "DailyWins": dailyWins + 1
+                });
+              }
               break;
             }
           }

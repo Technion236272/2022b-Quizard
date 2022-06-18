@@ -42,7 +42,8 @@ class AuthModel with ChangeNotifier {
 
   Future<void> setUp(
       String email, String userName, String userId, String photoUrl) async {
-    var users = FirebaseFirestore.instance.collection("$firestoreMainPath/users");
+    var users =
+        FirebaseFirestore.instance.collection("$firestoreMainPath/users");
     final user = <String, dynamic>{
       "answers": [],
       "categories": [],
@@ -52,7 +53,7 @@ class AuthModel with ChangeNotifier {
       "wins": 0,
       "DailyWins": 0,
       "photoLink": photoUrl,
-      "source" : "regular",
+      "source": "regular",
       "MonthlyWins": 0
     };
     users.doc(userId).set(user);
@@ -255,10 +256,12 @@ class GameModel extends ChangeNotifier {
   int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
   bool _isPrivate = true;
   bool _isLocked = false;
+  bool _isOfficial = false;
   bool _selectedCorrectAnswer = false;
   String _selectedAnswer = "";
   bool _timeOut = false;
   String _pinCode = 'null';
+  String _gamePath = "custom_games";
   int playerIndex = 0; // Starts from 0 for admin
   List<String> _officialCategories = [];
   List<String> _customCategories = [];
@@ -272,10 +275,12 @@ class GameModel extends ChangeNotifier {
   List<Map<String, dynamic>> get players => _playersMaps;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
+  bool get isOfficial => _isOfficial;
   bool get selectedCorrectAnswer => _selectedCorrectAnswer;
   String get selectedAnswer => _selectedAnswer;
   bool get timeOut => _timeOut;
   String get pinCode => _pinCode;
+  String get gamePath => _gamePath;
   List<String> get officialCategories => _officialCategories; // For admin
   List<String> get customCategories => _customCategories; // For admin
   List<String> get selectedCategories => _selectedCategories; // For participant
@@ -439,6 +444,11 @@ class GameModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  set isOfficial(bool value) {
+    _isOfficial = value;
+    notifyListeners();
+  }
+
   set pinCode(String value) {
     _pinCode = value;
     notifyListeners();
@@ -552,6 +562,22 @@ class GameModel extends ChangeNotifier {
     }
   }
 
+  void updateOfficial(DocumentSnapshot game, String username) {
+    if (game.exists) {
+      for (int i = 0; i < maxPlayers; i++) {
+        _playersMaps[i] = game["player$i"];
+      }
+      _isLocked = game["is_locked"];
+      _isOfficial = true;
+      _gameQuestions = List<String>.from(game["questions"]);
+      _gameAnswers = List<String>.from(game["answers"]);
+      _gameCategories = List<String>.from(game["categories"]);
+      _pinCode = game.id;
+      playerIndex = getPlayerIndexByUsername(username);
+      _gamePath = "official_games";
+    }
+  }
+
   List<String> getFalseAnswers() {
     List<String> falseAnswers = [];
     for (int i = 0; i < maxPlayers; i++) {
@@ -588,5 +614,14 @@ class GameModel extends ChangeNotifier {
     int i = playerIndex;
     players[i]["score"] += score;
     notifyListeners();
+  }
+
+  int getScoreByUsername(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] == username) {
+        return players[i]["score"];
+      }
+    }
+    return 0;
   }
 }

@@ -202,7 +202,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('$firestoreMainPath/custom_games')
+              .collection('$firestoreMainPath/${gameModel.gamePath}')
               .doc(gameModel.pinCode)
               .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
@@ -372,8 +372,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             "score": 0,
                             "round_score": 0
                           };
-                          var games = FirebaseFirestore.instance
-                              .collection('$firestoreMainPath/custom_games');
+                          var games = FirebaseFirestore.instance.collection(
+                              '$firestoreMainPath/${gameModel.gamePath}');
                           await games
                               .doc(pinCode)
                               .update({"player$myIndex": emptyPlayer});
@@ -397,35 +397,38 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               body: SingleChildScrollView(
                   child: StreamBuilder<DocumentSnapshot>(
                       stream: FirebaseFirestore.instance
-                          .collection('$firestoreMainPath/custom_games')
+                          .collection(
+                              '$firestoreMainPath/${gameModel.gamePath}')
                           .doc(gameModel.pinCode)
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance?.addPostFrameCallback(
+                            WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => _dialogGameClosed(),
                               );
                             }
                           } else {
                             gameModel.update(game);
                             if (game["is_locked"]) {
-                              lockText = getLocalizedFieldValue("LOCKED", context);
+                              lockText =
+                                  getLocalizedFieldValue("LOCKED", context);
                             } else {
-                              lockText = getLocalizedFieldValue("UNLOCKED", context);
+                              lockText =
+                                  getLocalizedFieldValue("UNLOCKED", context);
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance?.addPostFrameCallback(
+                                WidgetsBinding.instance.addPostFrameCallback(
                                   (_) => _dialogKickedByAdmin(),
                                 );
                               }
@@ -437,7 +440,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                                   gameModel.getPlayerIndexByUsername(
                                       loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance?.addPostFrameCallback((_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

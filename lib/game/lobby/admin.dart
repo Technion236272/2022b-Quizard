@@ -107,7 +107,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         final gameModel = Provider.of<GameModel>(context, listen: false);
         gameModel.customCategories = selectedCustomCategories;
         FirebaseFirestore.instance
-            .collection('$firestoreMainPath/custom_games')
+            .collection('$firestoreMainPath/${gameModel.gamePath}')
             .doc(gameModel.pinCode)
             .update({"custom_categories": selectedCustomCategories});
       },
@@ -191,7 +191,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             onChanged: (val) {
               gameModel.officialCategories = val;
               FirebaseFirestore.instance
-                  .collection('$firestoreMainPath/custom_games')
+                  .collection('$firestoreMainPath/${gameModel.gamePath}')
                   .doc(gameModel.pinCode)
                   .update({"official_categories": val});
             },
@@ -237,8 +237,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _categoriesTitle(
-              translation(context).customCategory, translation(context).message1),
+          _categoriesTitle(translation(context).customCategory,
+              translation(context).message1),
           _selectCategoryInput(),
         ],
       ),
@@ -281,7 +281,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'UNLOCKED':
               lockText = 'LOCKED';
               FirebaseFirestore.instance
-                  .collection('$firestoreMainPath/custom_games')
+                  .collection('$firestoreMainPath/${gameModel.gamePath}')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": true});
               gameModel.isLocked = true;
@@ -289,14 +289,14 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             case 'LOCKED':
               lockText = 'UNLOCKED';
               FirebaseFirestore.instance
-                  .collection('$firestoreMainPath/custom_games')
+                  .collection('$firestoreMainPath/${gameModel.gamePath}')
                   .doc(gameModel.pinCode)
                   .update({"is_locked": false});
               gameModel.isLocked = false;
               break;
           }
         },
-        child: Text(getLocalizedFieldValue(text,context)),
+        child: Text(getLocalizedFieldValue(text, context)),
       ));
     });
   }
@@ -353,7 +353,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                           onPressed: () async {
                             int i = gameModel.removeByUsername(username);
                             var game = FirebaseFirestore.instance
-                                .collection('$firestoreMainPath/custom_games')
+                                .collection(
+                                    '$firestoreMainPath/${gameModel.gamePath}')
                                 .doc(gameModel.pinCode);
                             await game.update({
                               "player$i": gameModel.players[i],
@@ -387,7 +388,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           currentReady = !currentReady;
           gameModel.setDataToPlayer("is_ready", currentReady, playerIndex);
           FirebaseFirestore.instance
-              .collection('$firestoreMainPath/custom_games')
+              .collection('$firestoreMainPath/${gameModel.gamePath}')
               .doc(gameModel.pinCode)
               .update({"player$playerIndex": gameModel.players[playerIndex]});
         }
@@ -566,7 +567,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       }
 
       await FirebaseFirestore.instance
-          .collection('$firestoreMainPath/custom_games')
+          .collection('$firestoreMainPath/${gameModel.gamePath}')
           .doc(gameModel.pinCode)
           .update({
         "questions": selectedQuestions,
@@ -592,7 +593,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       } else {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
-            .collection('$firestoreMainPath/custom_games')
+            .collection('$firestoreMainPath/${gameModel.gamePath}')
             .doc(gameModel.pinCode)
             .update({"is_locked": true});
         Navigator.of(context).push(MaterialPageRoute<void>(
@@ -628,7 +629,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                   TextButton(
                       onPressed: () async {
                         await FirebaseFirestore.instance
-                            .collection('$firestoreMainPath/custom_games')
+                            .collection(
+                                '$firestoreMainPath/${gameModel.gamePath}')
                             .doc(gameModel.pinCode)
                             .delete();
                         Navigator.of(context).pop(true);
@@ -656,7 +658,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
             body: SingleChildScrollView(
                 child: StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('$firestoreMainPath/custom_games')
+                        .collection('$firestoreMainPath/${gameModel.gamePath}')
                         .doc(gameModel.pinCode)
                         .snapshots(),
                     builder: (context, snapshot) {
