@@ -615,4 +615,13 @@ class GameModel extends ChangeNotifier {
     players[i]["score"] += score;
     notifyListeners();
   }
+
+  int getScoreByUsername(String username) {
+    for (int i = 0; i < maxPlayers; i++) {
+      if (players[i]["username"] == username) {
+        return players[i]["score"];
+      }
+    }
+    return 0;
+  }
 }
