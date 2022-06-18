@@ -532,6 +532,7 @@ class GameModel extends ChangeNotifier {
     roundScoreView = 0;
     _isPrivate = true;
     _isLocked = false;
+    _isOfficial = false;
     _pinCode = 'null';
     _officialCategories = [];
     _customCategories = [];
