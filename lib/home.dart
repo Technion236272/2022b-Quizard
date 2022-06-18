@@ -287,12 +287,12 @@ class _PlayState extends State<Play> {
         "player0": mapAdmin, // Admin is always player0
         "is_private": gameModel.isPrivate,
         "is_locked": gameModel.isLocked,
+        "is_official": false,
         "official_categories": gameModel.officialCategories,
         "custom_categories": gameModel.customCategories,
         "questions": [],
         "answers": [],
-        "categories": [],
-        "timestamp": DateTime.now()
+        "categories": []
       };
       Map<String, dynamic> mapPlayer = {
         "username": "",

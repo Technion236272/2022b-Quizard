@@ -7,8 +7,15 @@ const maxPlayers = 2; // TODO: Change to 5
 
 export const findQuickGameForNewPlayer = functions.firestore
     .document("versions/{v2}/official_games/{waiting_room}/players/{playerId}")
-    .onCreate(async (player, context) => {
-      const playerUsername = await player.get("username");
+    .onWrite(async (player, context) => {
+      if (!player.after.exists) {
+        // Ignore delete operations
+        console.log("ignoring delete operation");
+        return;
+      }
+
+      const playerUsername = await player.after.get("username");
+      const playerPinCode = await player.after.get("pin_code");
       const playerId = context.params.playerId;
       const gamesRef = db.collection("versions/v2/official_games");
       const playerRef = db
@@ -17,7 +24,13 @@ export const findQuickGameForNewPlayer = functions.firestore
 
       let foundGame = false;
 
-      // first check if already joined
+      if (playerPinCode != "") {
+        // Ignore players that already found game
+        console.log("player already found game. goodbye.");
+        return;
+      }
+
+      // first check if already appears in unlocked game
       await gamesRef.get().then(async (games) => {
         for (let i = 0; i < games.size; i++) {
           const game = games.docs[i];
@@ -26,7 +39,6 @@ export const findQuickGameForNewPlayer = functions.firestore
             if (await game.get(`player${j}.username`) == playerUsername &&
             await game.get("is_locked") == false) {
               await playerRef.update({"pin_code": game.id});
-              console.log("found myself in open game");
               foundGame = true;
               break;
             }
@@ -38,7 +50,7 @@ export const findQuickGameForNewPlayer = functions.firestore
       });
 
       if (foundGame) {
-        console.log("exiting function");
+        console.log("found player in unlocked game. goodbye.");
         return;
       }
 
