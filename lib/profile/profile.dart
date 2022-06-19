@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../consts.dart';
 import '../localization/classes/language_constants.dart';
 import '../providers.dart';
+import 'friends.dart';
 import 'questions.dart';
 import 'settings.dart';
 
@@ -103,11 +104,7 @@ class Profile extends StatelessWidget {
                             child: const Questions()),
                         Container(
                             color: secondaryBackgroundColor,
-                            child: const Center(
-                                child: Text(
-                              "Coming soon.",
-                              style: TextStyle(fontSize: 20),
-                            ))),
+                            child: const Friends()),
                         Container(
                             color: secondaryBackgroundColor,
                             child: const Settings()),
