@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -160,29 +159,30 @@ class ChangeEmailForm extends StatelessWidget {
   ChangeEmailForm({Key? key}) : super(key: key);
 
   final _textController = TextEditingController();
-
-  Future<bool> resetEmail(
-      String oldEmail, String newEmail, String password) async {
-    var message = false;
-    await AuthModel.instance()
-        .signIn(oldEmail, password)
-        .then((value) async => {
-              await FirebaseAuth.instance.currentUser!
-                  .updateEmail(newEmail)
-                  .then(
-                    (value) => message = true,
-                  )
-            });
-    return message;
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    Future<bool> resetEmail(
+        String oldEmail, String newEmail, String password) async {
+      var message = false;
+      await AuthModel.instance()
+          .signIn(oldEmail, password)
+          .then((value) async => {
+                await FirebaseAuth.instance.currentUser!
+                    .updateEmail(newEmail)
+                    .then(
+                      (value) => message = true,
+                    )
+              });
+      return message;
+    }
+
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       _textController.text = loginModel.email;
 
       return Form(
-        key: UniqueKey(),
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,16 +193,51 @@ class ChangeEmailForm extends StatelessWidget {
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
               },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Email can't be empty";
+                }
+                if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]")
+                    .hasMatch(value)) {
+                  return "Email must be valid";
+                }
+                return null;
+              },
               controller: _textController,
               minLines: 1,
-              decoration:
-                  InputDecoration(hintText: translation(context).username),
+              maxLines: 1,
+              decoration: InputDecoration(hintText: translation(context).email),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // stop if validator failed
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    // first check if email exists
+                    final enteredEmail = _textController.text;
+                    bool foundUser = false;
+                    await FirebaseFirestore.instance
+                        .collection('$firestoreMainPath/users')
+                        .get()
+                        .then((users) {
+                      for (var user in users.docs) {
+                        if (user["email"] == enteredEmail) {
+                          foundUser = true;
+                          Navigator.of(context).pop(true);
+                          constSnackBar("Email already exists", context);
+                        }
+                      }
+                    });
+                    if (foundUser) {
+                      return;
+                    }
+
+                    // then change email
                     resetEmail(loginModel.email, _textController.text,
                             loginModel.password)
                         .then((value) {
@@ -324,9 +359,10 @@ class ChangeUsernameForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       _textController.text = loginModel.username;
+      final _formKey = GlobalKey<FormState>();
 
       return Form(
-        key: UniqueKey(),
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,7 +374,19 @@ class ChangeUsernameForm extends StatelessWidget {
                     overlays: [SystemUiOverlay.bottom]);
               },
               controller: _textController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Username can't be empty";
+                }
+                bool? hasShtrudel = value.contains("@");
+                if (hasShtrudel) {
+                  return "Username can't have '@' in it";
+                }
+                return null;
+              },
               minLines: 1,
+              maxLines: 1,
+              maxLength: 12,
               decoration: InputDecoration(
                 hintText: translation(context).username,
               ),
@@ -348,6 +396,10 @@ class ChangeUsernameForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
+                    // stop if validator failed
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
                     final enteredUsername = _textController.text;
                     bool foundUser = false;
 

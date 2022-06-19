@@ -75,12 +75,25 @@ class LoadHomePage extends StatelessWidget {
     Future<bool> _prepHomePage() async {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
       final currentUser = AuthModel.instance().user!;
+      final gamesRef = FirebaseFirestore.instance
+          .collection("$firestoreMainPath/official_games");
       return await FirebaseFirestore.instance
           .collection("$firestoreMainPath/users")
           .get()
           .then((users) async {
         for (var user in users.docs) {
           if (currentUser.uid == user.id) {
+            await gamesRef.get().then((games) {
+              for (var game in games.docs) {
+                if (!game["is_locked"]) {
+                  for (int i = 0; i < maxPlayers; i++) {
+                    if (game["player$i"]["username"] == user["username"]) {
+                      game.reference.update({"player$i.username": ""});
+                    }
+                  }
+                }
+              }
+            });
             loginModel.setUserId(user.id);
             loginModel.setEmail(user["email"]);
             loginModel.setUsername(user["username"]);

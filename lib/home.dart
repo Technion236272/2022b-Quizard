@@ -397,10 +397,11 @@ class _PlayState extends State<Play> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 const Image(image: AssetImage('images/titles/quizard.png')),
-                Text(
-                  translation(context).goodLuck + ' ${loginModel.username}!',
-                  style: const TextStyle(fontSize: 18),
-                ),
+                Text(translation(context).goodLuck + ' ${loginModel.username}!',
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
