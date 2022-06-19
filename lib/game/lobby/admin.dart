@@ -24,6 +24,7 @@ class LobbyAdmin extends StatefulWidget {
 class _LobbyAdminState extends State<LobbyAdmin> {
   bool finishedBuildAllCustomCategories = false;
   String lockText = 'UNLOCKED';
+  bool clickedStartGame = false;
 
   List<String> officialCategories = [
     'Animal',
@@ -583,6 +584,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
     }
 
     Future<void> _startGame() async {
+      setState(() {
+        clickedStartGame = true;
+      });
       GameModel gameModel = Provider.of<GameModel>(context, listen: false);
       LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
       int playerIndex = gameModel.getPlayerIndexByUsername(loginModel.username);
@@ -590,6 +594,8 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       bool retVal = await _buildQuestions();
       if (!retVal) {
         constSnackBar(translation(context).snackBar6, context);
+      } else if (gameModel.getNumOfPlayers() < 2) {
+        constSnackBar("There should be at least 2 players", context);
       } else {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
@@ -599,6 +605,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (context) => const FirstGameScreen()));
       }
+      setState(() {
+        clickedStartGame = false;
+      });
     }
 
     return Consumer<GameModel>(
@@ -611,8 +620,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     minimumSize: const Size.fromHeight(50)), // max width
                 child: Text(translation(context).startGame,
                     style: const TextStyle(fontSize: 18)),
-                // TODO: Make sure that there are at least 2 players
-                onPressed: gameModel.areAllReady() ? _startGame : null));
+                onPressed: (gameModel.areAllReady() && !clickedStartGame)
+                    ? _startGame
+                    : null));
       },
     );
   }

@@ -186,8 +186,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     Consumer<GameModel> _concludeMatchWidget(
         List<Map<String, dynamic>> players) {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
-        if (!_calculatedFinalScores && i == 0) {
-          // only admin calculates final scores for everyone
+        if (!_calculatedFinalScores) {
+          // everyone calculates final scores for everyone
           List<int> listOfScoresPerSlot = [];
           for (int l = 0; l < maxPlayers; l++) {
             listOfScoresPerSlot.add(players[l]["score"]);
@@ -225,13 +225,9 @@ class _SecondGameScreenState extends State<SecondGameScreen>
             listOfScoresPerSlot[j] += jReward;
           }
 
-          // update final scores - ASSUMING 5 PLAYERS MAX - CHANGE IT IF NOT!
+          // each player updates only his own score
           gameRef.update({
-            "player0.score": listOfScoresPerSlot[0],
-            "player1.score": listOfScoresPerSlot[1],
-            "player2.score": listOfScoresPerSlot[2],
-            "player3.score": listOfScoresPerSlot[3],
-            "player4.score": listOfScoresPerSlot[4],
+            "player$i.score": listOfScoresPerSlot[i],
           });
 
           _calculatedFinalScores = true;
