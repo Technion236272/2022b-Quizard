@@ -214,7 +214,10 @@ class _ScoreBoardState extends State<ScoreBoard> {
     }
 
     return WillPopScope(
-        child: Scaffold(backgroundColor: backgroundColor, body: _bodyBuild()),
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: backgroundColor,
+            body: SingleChildScrollView(child: _bodyBuild())),
         // won't let pop
         onWillPop: () => Future<bool>.value(false)); //MaterialApp
   }

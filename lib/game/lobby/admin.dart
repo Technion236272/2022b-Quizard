@@ -591,11 +591,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       LoginModel loginModel = Provider.of<LoginModel>(context, listen: false);
       int playerIndex = gameModel.getPlayerIndexByUsername(loginModel.username);
       gameModel.playerIndex = playerIndex;
-      bool retVal = await _buildQuestions();
-      if (!retVal) {
-        constSnackBar(translation(context).snackBar6, context);
-      } else if (gameModel.getNumOfPlayers() < 2) {
+      if (gameModel.getNumOfPlayers() < 2) {
         constSnackBar("There should be at least 2 players", context);
+      } else if (!(await _buildQuestions())) {
+        constSnackBar(translation(context).snackBar6, context);
       } else {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
         await FirebaseFirestore.instance
