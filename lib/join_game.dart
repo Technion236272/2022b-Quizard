@@ -142,7 +142,12 @@ class _JoinGameState extends State<JoinGame> {
 
         await gamesRef.get().then((games) async {
           bool joinedGame = false;
+          final shuffledGames = [];
           for (var game in games.docs) {
+            shuffledGames.add(game);
+          }
+          shuffledGames.shuffle();
+          for (var game in shuffledGames) {
             if (joinedGame) {
               break;
             }

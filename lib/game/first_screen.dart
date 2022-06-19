@@ -35,12 +35,13 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     final gameRef = FirebaseFirestore.instance
         .collection("$firestoreMainPath/${gameModel.gamePath}")
         .doc(gameModel.pinCode);
-    int i = gameModel.playerIndex;
-    gameRef.update({
-      "player$i.round_score": 0,
-      "player$i.selected_answer": "",
-      "player$i.false_answer": ""
-    });
+    for (int i = 0; i < maxPlayers; i++) {
+      gameRef.update({
+        "player$i.round_score": 0,
+        "player$i.selected_answer": "",
+        "player$i.false_answer": ""
+      });
+    }
     gameModel.roundScoreView = 0;
     gameModel.resetFalseAnswers();
     gameModel.resetSelectedAnswers();
