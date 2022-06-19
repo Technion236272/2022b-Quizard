@@ -25,9 +25,48 @@ class _FindFriendPageState extends State<FindFriendPage> {
   FutureBuilder<NetworkImage?>? friendImage;
   bool foundFriend = false;
 
-  void addFriend() {
+  Future<void> addFriend() async {
+    final loginModel = Provider.of<LoginModel>(context, listen: false);
+    await FirebaseFirestore.instance
+        .collection('$firestoreMainPath/users')
+        .doc(loginModel.userId)
+        .get()
+        .then((value) {
+      List friends = value["friends"];
+      friends.add(friendName);
+      FirebaseFirestore.instance
+          .collection('$firestoreMainPath/users')
+          .doc(loginModel.userId)
+          .update({
+        "friends": friends,
+      });
+      Provider.of<LoginModel>(context, listen: false)
+          .notifyAddedQuestion();
+    });
+
+    await FirebaseFirestore.instance
+        .collection('$firestoreMainPath/users')
+        .doc(friendId)
+        .get()
+        .then((value) {
+      List friends = value["friends"];
+      friends.add(loginModel.username);
+      FirebaseFirestore.instance
+          .collection('$firestoreMainPath/users')
+          .doc(friendId)
+          .update({
+        "friends": friends,
+      });
+      Provider.of<LoginModel>(context, listen: false)
+          .notifyAddedFriend();
+      setState(() {
+        foundFriend = false;
+      });
+    });
+
 
   }
+
 
   void showNotFoundDialog() {
     showDialog(
@@ -35,6 +74,18 @@ class _FindFriendPageState extends State<FindFriendPage> {
       builder: (context) {
         return AlertDialog(
           content: const Text('Not Found'),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
+        );
+      },
+    );
+  }
+
+  void alreadyFriendDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: const Text('Already A Friend'),
           actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
         );
       },
@@ -69,22 +120,25 @@ class _FindFriendPageState extends State<FindFriendPage> {
 
     friendName = username;
     friendImage = _getAvatarImage();
+    friendId = userId;
   }
 
   Future<void> findUser() async {
     setState(() {
       foundFriend = false;
+      isSearching = true;
     });
     final loginModel = Provider.of<LoginModel>(context, listen: false);
-    setState(() => isSearching = true);
-    QuerySnapshot<Map<String, dynamic>> result =
+    QuerySnapshot<Map<String, dynamic>> resultForEmail =
     await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('email', isEqualTo: email).get();
-    if (result.docs.isEmpty) {
+    QuerySnapshot<Map<String, dynamic>> resultForName =
+    await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: email).get();
+    if (resultForEmail.docs.isEmpty && resultForName.docs.isEmpty) {
       showNotFoundDialog();
       setState(() => isSearching = false);
       return;
     } else {
-      if (email == loginModel.email) {
+      if (email == loginModel.email || email == loginModel.username) {
         showNotFoundDialog();
         setState(() => isSearching = false);
         return;
@@ -96,17 +150,38 @@ class _FindFriendPageState extends State<FindFriendPage> {
         .get()
         .then((users) async {
       for (var user in users.docs) {
-        if (user['email'] == email) {
+        if (user['email'] == email || user['username'] == email) {
           username = user['username'];
           break;
         }
       }
     });
-    setState(() {
-      foundFriend = true;
-      isSearching = false;
+    await FirebaseFirestore.instance
+        .collection('$firestoreMainPath/users')
+        .doc(loginModel.userId)
+        .get()
+        .then((value) {
+      List friends = value["friends"];
+      print(friends);
+      for(var name in friends)
+        {
+          if (username == name) {
+            alreadyFriendDialog();
+            setState(() => isSearching = false);
+            return;
+          }
+        }
+      setState(() {
+        foundFriend = true;
+        isSearching = false;
+      });
+      if(resultForEmail.docs.isEmpty) {
+        _friend(username, resultForName.docs.first.id, 10);
+      }
+      else {
+        _friend(username, resultForEmail.docs.first.id, 10);
+      }
     });
-    _friend(username, result.docs.first.id, 10);
   }
 
 
@@ -124,7 +199,7 @@ class _FindFriendPageState extends State<FindFriendPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0, top: 16.0),
               child: TextField(
-                decoration: const InputDecoration(border: OutlineInputBorder(), labelText: "Friend's email"),
+                decoration: const InputDecoration(border: OutlineInputBorder(), labelText: "Friend's email or username"),
                 onChanged: (val) => setState(() => email = val),
               ),
             ),
