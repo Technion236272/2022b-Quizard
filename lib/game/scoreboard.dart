@@ -197,6 +197,8 @@ class _ScoreBoardState extends State<ScoreBoard> {
                             style: TextStyle(fontSize: 18)),
                         onPressed: () {
                           gameModel.resetData();
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute<void>(
                                   builder: (context) => const HomePage()));
@@ -211,7 +213,9 @@ class _ScoreBoardState extends State<ScoreBoard> {
       });
     }
 
-    return Scaffold(
-        backgroundColor: backgroundColor, body: _bodyBuild()); //MaterialApp
+    return WillPopScope(
+        child: Scaffold(backgroundColor: backgroundColor, body: _bodyBuild()),
+        // won't let pop
+        onWillPop: () => Future<bool>.value(false)); //MaterialApp
   }
 }

@@ -161,7 +161,7 @@ class _WelcomePageState extends State<WelcomePage> {
       final url = await ref.getDownloadURL();
       loginModel.setUserImageUrl(url);
       loginModel.logIn();
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (context) => const HomePage()));
       loginModel.toggleLogging();
     }
@@ -364,7 +364,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     users.doc(value.uid).set(userToAdd);
                                     login(
                                         "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                    Navigator.of(context).push(
+                                    Navigator.of(context).pushReplacement(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
                                                 const HomePage()));
@@ -390,7 +390,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                      Navigator.of(context).push(
+                                      Navigator.of(context).pushReplacement(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
                                                   const HomePage()));
@@ -452,7 +452,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     users.doc(value?.uid).set(user);
                                     login(
                                         "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                    Navigator.of(context).push(
+                                    Navigator.of(context).pushReplacement(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
                                                 const HomePage()));
@@ -463,7 +463,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            translation(context).snackBar11,
+                                                translation(context).snackBar11,
                                           ),
                                         );
                                       } else {
@@ -471,14 +471,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            translation(context).snackBar10,
+                                                translation(context).snackBar10,
                                           ),
                                         );
                                       }
                                     } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                      Navigator.of(context).push(
+                                      Navigator.of(context).pushReplacement(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
                                                   const HomePage()));
@@ -537,8 +537,7 @@ class _WelcomePageState extends State<WelcomePage> {
         if (e.code == 'account-exists-with-different-credential') {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
-              content:
-              translation(context).snackBar13,
+              content: translation(context).snackBar13,
             ),
           );
         } else if (e.code == 'invalid-credential') {
