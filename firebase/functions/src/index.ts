@@ -260,15 +260,15 @@ export const deadOfficialGameBomber = functions.firestore
         return;
       }
 
-      if (changedGame.before.get("is_locked") == false &&
-      changedGame.after.get("is_locked") == true) {
+      if (changedGame.before.get("questions").length == 0 &&
+      changedGame.after.get("questions").length != 0) {
         // game started and only one function executes this
         console.log("sleep for 1h");
         await new Promise((resolve) => setTimeout(resolve, 3600000));
 
         if ((await changedGame.after.ref.get()).exists) {
           console.log("deleting game");
-          changedGame.after.ref.delete();
+          await changedGame.after.ref.delete();
         }
       }
 
@@ -276,6 +276,36 @@ export const deadOfficialGameBomber = functions.firestore
     });
 
 export const deadCustomGameBomber = functions.firestore
+    .document("versions/{v2}/custom_games/{changedGameId}")
+    .onWrite(async (changedGame) => {
+      if (!changedGame.after.exists) {
+        // Ignore delete operations
+        console.log("ignoring delete operation");
+        return;
+      }
+
+      if (!changedGame.before.exists) {
+        // Ignore create operations
+        console.log("ignoring create operation");
+        return;
+      }
+
+      if (changedGame.before.get("questions").length == 0 &&
+      changedGame.after.get("questions").length != 0) {
+        // game started and only one function executes this
+        console.log("sleep for 1h");
+        await new Promise((resolve) => setTimeout(resolve, 3600000));
+
+        if ((await changedGame.after.ref.get()).exists) {
+          console.log("deleting game");
+          await changedGame.after.ref.delete();
+        }
+      }
+
+      return;
+    });
+
+export const createdCustomGameBomber = functions.firestore
     .document("versions/{v2}/custom_games/{createdGameId}")
     .onCreate(async (createdGame) => {
       console.log("sleep for 24h");
@@ -283,7 +313,7 @@ export const deadCustomGameBomber = functions.firestore
 
       if ((await createdGame.ref.get()).exists) {
         console.log("deleting game");
-        createdGame.ref.delete();
+        await createdGame.ref.delete();
       }
 
       return;
