@@ -34,10 +34,25 @@ class QuickPlayAppBar extends StatelessWidget with PreferredSizeWidget {
                         final playersRef = FirebaseFirestore.instance
                             .collection("$firestoreMainPath/official_games/"
                                 "waiting_room/players");
+                        final gamesRef = FirebaseFirestore.instance
+                            .collection("$firestoreMainPath/official_games");
                         final loginModel =
                             Provider.of<LoginModel>(context, listen: false);
                         final myPlayerDocRef =
                             playersRef.doc(loginModel.userId);
+                        await gamesRef.get().then((games) {
+                          for (var game in games.docs) {
+                            if (!game["is_locked"]) {
+                              for (int i = 0; i < maxPlayers; i++) {
+                                if (game["player$i"]["username"] ==
+                                    loginModel.username) {
+                                  game.reference
+                                      .update({"player$i.username": ""});
+                                }
+                              }
+                            }
+                          }
+                        });
                         await FirebaseFirestore.instance
                             .runTransaction((transaction) async {
                           final doc = await transaction.get(myPlayerDocRef);

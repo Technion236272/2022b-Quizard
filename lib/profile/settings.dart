@@ -1,3 +1,4 @@
+import 'package:yaml/yaml.dart';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quizard/main.dart';
-
 
 import '../consts.dart';
 
@@ -159,29 +159,30 @@ class ChangeEmailForm extends StatelessWidget {
   ChangeEmailForm({Key? key}) : super(key: key);
 
   final _textController = TextEditingController();
-
-  Future<bool> resetEmail(
-      String oldEmail, String newEmail, String password) async {
-    var message = false;
-    await AuthModel.instance()
-        .signIn(oldEmail, password)
-        .then((value) async => {
-              await FirebaseAuth.instance.currentUser!
-                  .updateEmail(newEmail)
-                  .then(
-                    (value) => message = true,
-                  )
-            });
-    return message;
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    Future<bool> resetEmail(
+        String oldEmail, String newEmail, String password) async {
+      var message = false;
+      await AuthModel.instance()
+          .signIn(oldEmail, password)
+          .then((value) async => {
+                await FirebaseAuth.instance.currentUser!
+                    .updateEmail(newEmail)
+                    .then(
+                      (value) => message = true,
+                    )
+              });
+      return message;
+    }
+
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       _textController.text = loginModel.email;
 
       return Form(
-        key: UniqueKey(),
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,16 +193,51 @@ class ChangeEmailForm extends StatelessWidget {
                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                     overlays: [SystemUiOverlay.bottom]);
               },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Email can't be empty";
+                }
+                if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]")
+                    .hasMatch(value)) {
+                  return "Email must be valid";
+                }
+                return null;
+              },
               controller: _textController,
               minLines: 1,
-              decoration:
-                  InputDecoration(hintText: translation(context).username),
+              maxLines: 1,
+              decoration: InputDecoration(hintText: translation(context).email),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // stop if validator failed
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    // first check if email exists
+                    final enteredEmail = _textController.text;
+                    bool foundUser = false;
+                    await FirebaseFirestore.instance
+                        .collection('$firestoreMainPath/users')
+                        .get()
+                        .then((users) {
+                      for (var user in users.docs) {
+                        if (user["email"] == enteredEmail) {
+                          foundUser = true;
+                          Navigator.of(context).pop(true);
+                          constSnackBar("Email already exists", context);
+                        }
+                      }
+                    });
+                    if (foundUser) {
+                      return;
+                    }
+
+                    // then change email
                     resetEmail(loginModel.email, _textController.text,
                             loginModel.password)
                         .then((value) {
@@ -257,54 +293,60 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-     return Form(
-      child: Row(
+      return Form(
+          child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-      DecoratedBox(
-      decoration: BoxDecoration(
-          color: Colors.white,
-         borderRadius: BorderRadius.circular(5),
-         boxShadow: const <BoxShadow>[
-           BoxShadow(
-               color: darkGreyColor,
-               blurRadius: 1)
-         ]),
-      child: Padding(
-        padding: EdgeInsets.only(left:30, right:30),
-          child:Container(
-            child: Row(
-             children: [
-               value == null? Text(Localization.getLocale(context)) : Text(value!.name),
-               DropdownButton<Language>(
-                icon: Icon(Icons.arrow_drop_down),
-                underline: Container(),
-                style: TextStyle(fontSize: 18, color: Colors.black),
-                items: Language.languageList().map(
-                (e) => DropdownMenuItem<Language>(
-                value: e,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                  Text(
-                    e.flag,
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                  Text(e.name)
-                  ],)
-                ),).toList(),
-                onChanged: (Language? language) async { setState(() {
-                    value = language!;
-                  });
-                  if (language != null) {
-                    Locale _locale = await setLocale(language.languageCode);
-                    Localization.setLocale(context, _locale);
-                  }
-                }
-                )]),
-      )))],
+          DecoratedBox(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(5),
+                  boxShadow: const <BoxShadow>[
+                    BoxShadow(color: darkGreyColor, blurRadius: 1)
+                  ]),
+              child: Padding(
+                  padding: EdgeInsets.only(left: 30, right: 30),
+                  child: Container(
+                    child: Row(children: [
+                      value == null
+                          ? Text(Localization.getLocale(context))
+                          : Text(value!.name),
+                      DropdownButton<Language>(
+                          icon: Icon(Icons.arrow_drop_down),
+                          underline: Container(),
+                          style: TextStyle(fontSize: 18, color: Colors.black),
+                          items: Language.languageList()
+                              .map(
+                                (e) => DropdownMenuItem<Language>(
+                                    value: e,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: <Widget>[
+                                        Text(
+                                          e.flag,
+                                          style: const TextStyle(fontSize: 30),
+                                        ),
+                                        Text(e.name)
+                                      ],
+                                    )),
+                              )
+                              .toList(),
+                          onChanged: (Language? language) async {
+                            setState(() {
+                              value = language!;
+                            });
+                            if (language != null) {
+                              Locale _locale =
+                                  await setLocale(language.languageCode);
+                              Localization.setLocale(context, _locale);
+                            }
+                          })
+                    ]),
+                  )))
+        ],
       ));
-  });
+    });
   }
 }
 
@@ -317,9 +359,10 @@ class ChangeUsernameForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       _textController.text = loginModel.username;
+      final _formKey = GlobalKey<FormState>();
 
       return Form(
-        key: UniqueKey(),
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,7 +374,19 @@ class ChangeUsernameForm extends StatelessWidget {
                     overlays: [SystemUiOverlay.bottom]);
               },
               controller: _textController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Username can't be empty";
+                }
+                bool? hasShtrudel = value.contains("@");
+                if (hasShtrudel) {
+                  return "Username can't have '@' in it";
+                }
+                return null;
+              },
               minLines: 1,
+              maxLines: 1,
+              maxLength: 12,
               decoration: InputDecoration(
                 hintText: translation(context).username,
               ),
@@ -341,6 +396,10 @@ class ChangeUsernameForm extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 16, 8, 0),
                 child: ElevatedButton(
                   onPressed: () async {
+                    // stop if validator failed
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
                     final enteredUsername = _textController.text;
                     bool foundUser = false;
 
@@ -352,7 +411,8 @@ class ChangeUsernameForm extends StatelessWidget {
                       for (var user in users.docs) {
                         if (user["username"] == enteredUsername) {
                           foundUser = true;
-                          constSnackBar(translation(context).usernameExists, context);
+                          constSnackBar(
+                              translation(context).usernameExists, context);
                         }
                       }
                     });
@@ -365,7 +425,8 @@ class ChangeUsernameForm extends StatelessWidget {
                         "username": enteredUsername,
                       }).then((_) {
                         loginModel.setUsername(enteredUsername);
-                        constSnackBar(translation(context).changedUsernameSucc, context);
+                        constSnackBar(
+                            translation(context).changedUsernameSucc, context);
                       });
                     }
                     Navigator.of(context).pop(true);
@@ -399,7 +460,6 @@ class Settings extends StatelessWidget {
   static const _changeEmailText = 'Change Email';
   static const _changePasswordText = 'Change Password';
   static const _aboutDialogText = 'About';
-
 
   Padding _settingsButton(String buttonText, BuildContext context) {
     return Padding(
@@ -483,13 +543,18 @@ class Settings extends StatelessWidget {
                         overlays: []));
                 break;
               case _aboutDialogText:
+                final pubspecData = await rootBundle.loadString('pubspec.yaml');
+                final pubspecMap = loadYaml(pubspecData);
+                String version = pubspecMap["version"];
                 showAboutDialog(
-                  context: context,
-                  applicationIcon: const FlutterLogo(), //TODO: Add our icon
-                  applicationName: 'Quizard',
-                  applicationVersion: appVersion,
-                  applicationLegalese: '© 2022 Quizard',
-                );
+                    context: context,
+                    applicationIcon: const FlutterLogo(), //TODO: Add our icon
+                    applicationName: 'Quizard',
+                    applicationVersion: version.split('+')[0],
+                    applicationLegalese:
+                        'Created by Raz Ashkenazi, Maysam Haj Yahia, '
+                        'and Ramzi Rwashdeh\n\n'
+                        '© 2022 Quizard');
                 break;
             }
           },

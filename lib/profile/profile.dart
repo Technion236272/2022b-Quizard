@@ -36,7 +36,8 @@ class Profile extends StatelessWidget {
                           backgroundImage: loginModel.getUserImage(),
                           backgroundColor: thirdColor,
                           radius: 35)),
-                  Column(
+                  Flexible(
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
@@ -64,7 +65,7 @@ class Profile extends StatelessWidget {
                         ),
                       )
                     ],
-                  )
+                  ))
                 ]),
                 Expanded(
                     child: DefaultTabController(

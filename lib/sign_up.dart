@@ -78,7 +78,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       loginModel.setUserImageUrl(url);
       loginModel.logIn();
       Navigator.of(context).pop();
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (context) => const HomePage()));
       loginModel.toggleLogging();
     }
@@ -91,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         for (var user in users.docs) {
           if (user["email"] == emailController.text.trim() ||
               user["username"] == userNameController.text.trim()) {
-                ScaffoldMessenger.of(context)
+            ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(
                   content: Text(translation(context).snackBar1),
                 ))
