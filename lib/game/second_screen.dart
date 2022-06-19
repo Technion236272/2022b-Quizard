@@ -49,6 +49,21 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 
+    // someone-is-exited handler
+    Future.delayed(Duration(seconds: timePerScreen + 4 + gameModel.playerIndex),
+        () {
+      if (mounted) {
+        gameRef.get().then((game) {
+          for (int i = 0; i < maxPlayers; i++) {
+            if (game["player$i.selected_answer"] == "" &&
+                game["player$i.username"] != "") {
+              gameRef.update({"player$i.selected_answer": " "});
+            }
+          }
+        });
+      }
+    });
+
     Stream<List<Map<String, dynamic>>> _streamPlayers() async* {
       final game = gameRef.snapshots();
       await for (final snapshot in game) {

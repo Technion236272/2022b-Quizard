@@ -62,6 +62,21 @@ class _FirstGameScreenState extends State<FirstGameScreen>
         .doc(gameModel.pinCode);
     int i = gameModel.playerIndex;
 
+    // someone-is-exited handler
+    Future.delayed(Duration(seconds: timePerScreen + 4 + gameModel.playerIndex),
+        () {
+      if (mounted) {
+        gameRef.get().then((game) {
+          for (int i = 0; i < maxPlayers; i++) {
+            if (game["player$i.false_answer"] == "" &&
+                game["player$i.username"] != "") {
+              gameRef.update({"player$i.false_answer": " "});
+            }
+          }
+        });
+      }
+    });
+
     Future<void> _submitFalseAnswer() async {
       FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
 
