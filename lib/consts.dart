@@ -13,6 +13,7 @@ const blueColor = Colors.blue;
 const orangeColor = Colors.orange;
 const lightBlueColor = Color(0xFFECEFF1);
 const darkGreyColor = Colors.black54;
+const bonusColor = Color(0xFFEA80FC);
 
 // Numbers
 const grabbingHeightConst = 200.0;
@@ -24,6 +25,7 @@ const roundsPerGame = 5;
 const maxPlayers = 5; // DO NOT CHANGE
 const timePerScreen = 30; // in seconds
 const delayScoreResult = 3; // in seconds
+const bonusRewards = 10;
 
 // Strings
 const firestoreMainPath = "versions/v2";
