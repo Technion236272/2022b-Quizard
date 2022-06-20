@@ -26,7 +26,7 @@ class Rules extends StatelessWidget {
             child: Padding(
                 padding: const EdgeInsets.all(appbarPadding),
                 child:
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -59,7 +59,7 @@ class Rules extends StatelessWidget {
                           const Text(
                             '2-5',
                             style:
-                                TextStyle(color: darkGreyColor, fontSize: 16),
+                            TextStyle(color: darkGreyColor, fontSize: 16),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -332,7 +332,7 @@ class _PlayState extends State<Play> {
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation1, animation2) =>
-                  const JoinGame(),
+              const JoinGame(),
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
             ),
@@ -345,7 +345,7 @@ class _PlayState extends State<Play> {
           gameModel.resetData();
           final playersRef = FirebaseFirestore.instance
               .collection("$firestoreMainPath/official_games/"
-                  "waiting_room/players");
+              "waiting_room/players");
           Map<String, dynamic> data = {
             "username": loginModel.username,
             "pin_code": ""
@@ -357,7 +357,7 @@ class _PlayState extends State<Play> {
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation1, animation2) =>
-                  const QuickPlay(),
+              const QuickPlay(),
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
             ),
@@ -449,16 +449,25 @@ class _LeaderboardState extends State<Leaderboard>
   List<LeaderBoardModel> dailyWinsList = [];
   List<LeaderBoardModel> monthlyWinsList = [];
   List<LeaderBoardModel> allTimeWinsList = [];
-  int _lastTab = 0;
+  bool isDataLoading = false;
+  int _lastTab = 2;
   int myRankDailyWins = 0;
   int myRankMonthlyWins = 0;
   int myRankAllTimeWins = 0;
 
+  int myDailyWins = 0;
+  int myMonthlyWins = 0;
+  int myAllTimeWins = 0;
+
   late TabController _tabController;
+  String userId = "null";
 
   void _onTapTab(int index) {
     setState(() {
       _lastTab = index;
+      if (userId != "null" && !isDataLoading) {
+        getWinsData(userId);
+      }
     });
   }
 
@@ -466,6 +475,7 @@ class _LeaderboardState extends State<Leaderboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.index = _lastTab;
   }
 
   @override
@@ -473,8 +483,9 @@ class _LeaderboardState extends State<Leaderboard>
     final screenHeight = MediaQuery.of(context).size.height - 114;
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      if (allTimeWinsList.isEmpty) {
-        getWinsData(loginModel.userId);
+      if (userId=="null") {
+        userId = loginModel.userId;
+        getWinsData(userId);
       }
       return Container(
           color: secondaryBackgroundColor,
@@ -486,8 +497,11 @@ class _LeaderboardState extends State<Leaderboard>
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+
                     Text(
                       loginModel.username,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 24, color: defaultColor),
                     ),
                     Expanded(child: Container()),
@@ -505,7 +519,7 @@ class _LeaderboardState extends State<Leaderboard>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              "${loginModel.wins}",
+                              getWins(_lastTab),
                               style: TextStyle(
                                   fontSize: 24,
                                   color: defaultColor.withOpacity(.5)),
@@ -522,7 +536,7 @@ class _LeaderboardState extends State<Leaderboard>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              myRankAllTimeWins.toString(),
+                              getRank(_lastTab),
                               style: TextStyle(
                                   fontSize: 24,
                                   color: defaultColor.withOpacity(.5)),
@@ -545,74 +559,107 @@ class _LeaderboardState extends State<Leaderboard>
                         bottom: Radius.circular(boxRadiusConst)))),
             Expanded(
                 child: DefaultTabController(
-              initialIndex: _lastTab,
-              length: 3,
-              child: Scaffold(
-                backgroundColor: secondaryColor,
-                appBar: AppBar(
-                  backgroundColor: secondaryBackgroundColor,
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 0,
-                  elevation: 2,
-                  bottom: TabBar(
-                    controller: _tabController,
-                    onTap: _onTapTab,
-                    labelColor: defaultColor,
-                    indicatorColor: defaultColor,
-                    tabs: [
-                      Tab(text: translation(context).daily),
-                      Tab(
-                        text: translation(context).monthly,
+                  initialIndex: _lastTab,
+                  length: 3,
+                  child: Scaffold(
+                    backgroundColor: secondaryColor,
+                    appBar: AppBar(
+                      backgroundColor: secondaryBackgroundColor,
+                      automaticallyImplyLeading: false,
+                      toolbarHeight: 0,
+                      elevation: 2,
+                      bottom: TabBar(
+                        controller: _tabController,
+                        onTap: _onTapTab,
+                        labelColor: defaultColor,
+                        indicatorColor: defaultColor,
+                        tabs: [
+                          Tab(text: translation(context).daily),
+                          Tab(
+                            text: translation(context).monthly,
+                          ),
+                          Tab(
+                            text: translation(context).allTime,
+                          ),
+                        ],
                       ),
-                      Tab(
-                        text: translation(context).allTime,
-                      ),
-                    ],
+                    ),
+                    body: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        isDataLoading
+                            ? const Center(
+                          child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircularProgressIndicator(
+                              value: null,
+                              strokeWidth: 7.0,
+                            ),
+                          ),
+                        )
+                            : Container(
+                            color: secondaryBackgroundColor,
+                            child: ListView.builder(
+                                itemCount: dailyWinsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return leaderBoardListItemWidget(
+                                      screenHeight,
+                                      index + 1,
+                                      dailyWinsList[index].name,
+                                      dailyWinsList[index].profileImageLink,
+                                      dailyWinsList[index].wins);
+                                })),
+                        isDataLoading
+                            ? const Center(
+                          child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircularProgressIndicator(
+                              value: null,
+                              strokeWidth: 7.0,
+                            ),
+                          ),
+                        )
+                            : Container(
+                            color: secondaryBackgroundColor,
+                            child: ListView.builder(
+                                itemCount: monthlyWinsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return leaderBoardListItemWidget(
+                                      screenHeight,
+                                      index + 1,
+                                      monthlyWinsList[index].name,
+                                      monthlyWinsList[index].profileImageLink,
+                                      monthlyWinsList[index].wins);
+                                })),
+                        isDataLoading
+                            ? const Center(
+                          child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircularProgressIndicator(
+                              value: null,
+                              strokeWidth: 7.0,
+                            ),
+                          ),
+                        )
+                            : Container(
+                            color: secondaryBackgroundColor,
+                            child: ListView.builder(
+                                itemCount: allTimeWinsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return leaderBoardListItemWidget(
+                                      screenHeight,
+                                      index + 1,
+                                      allTimeWinsList[index].name,
+                                      allTimeWinsList[index].profileImageLink,
+                                      allTimeWinsList[index].wins);
+                                })),
+                      ],
+                    ),
                   ),
-                ),
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: dailyWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  dailyWinsList[index].name,
-                                  dailyWinsList[index].profileImageLink,
-                                  dailyWinsList[index].wins);
-                            })),
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: monthlyWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  monthlyWinsList[index].name,
-                                  monthlyWinsList[index].profileImageLink,
-                                  monthlyWinsList[index].wins);
-                            })),
-                    Container(
-                        color: secondaryBackgroundColor,
-                        child: ListView.builder(
-                            itemCount: allTimeWinsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return leaderBoardListItemWidget(
-                                  screenHeight,
-                                  index + 1,
-                                  allTimeWinsList[index].name,
-                                  allTimeWinsList[index].profileImageLink,
-                                  allTimeWinsList[index].wins);
-                            })),
-                  ],
-                ),
-              ),
-            )),
+                )),
           ]));
     });
   }
@@ -629,26 +676,58 @@ class _LeaderboardState extends State<Leaderboard>
             children: [
               Expanded(
                 flex: 2,
-                child: Text(
+                child: index>3?Text(
                   "#$index",
                   style: const TextStyle(fontSize: 18, color: defaultColor),
-                ),
+                ):getRankImage(index),
               ),
               Expanded(
                 flex: 9,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(profileImageLink),
-                    ),
+                    Image.network(profileImageLink,
+                        fit: BoxFit.cover, loadingBuilder:
+                            (BuildContext context, Widget child,
+                            loadingProgress) {
+                          if (loadingProgress == null) {
+                            return CircleAvatar(
+                                backgroundImage: NetworkImage(profileImageLink));
+                          }
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                child: const Icon(
+                                  Icons.account_circle,
+                                  size: 40,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const CircularProgressIndicator(
+                                valueColor:
+                                AlwaysStoppedAnimation<Color>(
+                                    Colors.black45),
+                              ),
+                            ],
+                          );
+                        }),            // CircleAvatar(
+                    //   backgroundImage: NetworkImage(profileImageLink),
+                    // ),
                     const SizedBox(
                       width: 16,
                     ),
-                    Text(
-                      name,
-                      style: TextStyle(
-                          fontSize: 18, color: defaultColor.withOpacity(0.5)),
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.only(right: 13.0),
+                        child: Text(
+                          name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 18, color: defaultColor.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
                     )
                   ],
                 ),
@@ -674,14 +753,45 @@ class _LeaderboardState extends State<Leaderboard>
     );
   }
 
+  Widget getRankImage(index){
+    if(index==1){
+      return Row(
+          children: [
+            Image.asset("images/gold_medal.png", width: 30,),
+          ]
+      );
+    }else if(index == 2){
+      return Row(
+          children: [
+            Image.asset("images/silver_medal.png", width: 30,)
+          ]
+      );
+
+    }else{
+      return Row(
+          children: [
+            Image.asset("images/bronze_medal.png", width: 30,)
+          ]
+      );
+    }
+  }
+
   void getWinsData(userId) {
+    print("getWInsDAtaCalled");
+    // try{
+    //
+    // }catch(e){
+    //   print("Error in setState = $e");
+    // }
+
     FirebaseFirestore.instance
         .collection('versions/v2/users')
         .get()
         .then((users) async {
-      dailyWinsList.clear();
-      monthlyWinsList.clear();
-      allTimeWinsList.clear();
+
+      setState(() {
+        isDataLoading = true;
+      });
       List<LeaderBoardModel> tempDailyWinsList = [];
       List<LeaderBoardModel> tempMonthlyWinsList = [];
       List<LeaderBoardModel> tempAllTimeWinsList = [];
@@ -690,7 +800,7 @@ class _LeaderboardState extends State<Leaderboard>
         var url = "";
         try {
           final ref =
-              FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+          FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
           url = await ref.getDownloadURL();
         } catch (e) {
           url = "";
@@ -730,32 +840,64 @@ class _LeaderboardState extends State<Leaderboard>
         tempDailyWinsList.sort((a, b) => a.wins.compareTo(b.wins));
         tempMonthlyWinsList.sort((a, b) => a.wins.compareTo(b.wins));
 
+        dailyWinsList.clear();
+        monthlyWinsList.clear();
+        allTimeWinsList.clear();
         allTimeWinsList.addAll(tempAllTimeWinsList.reversed.toList());
         dailyWinsList.addAll(tempDailyWinsList.reversed.toList());
         monthlyWinsList.addAll(tempMonthlyWinsList.reversed.toList());
 
         getMyRanks(userId);
-        debugPrint("All Data Added");
+        getMyWins(userId);
+        isDataLoading = false;
+      });
+    }).onError((error, stackTrace) {
+      setState(() {
+        isDataLoading = false;
       });
     });
   }
 
   void getMyRanks(myUserId) {
+    myRankDailyWins = 0;
     for (LeaderBoardModel leaderBoardModel in dailyWinsList) {
       if (leaderBoardModel.userId == myUserId) {
         myRankDailyWins = dailyWinsList.indexOf(leaderBoardModel) + 1;
       }
     }
 
+    myRankMonthlyWins = 0;
     for (LeaderBoardModel leaderBoardModel in monthlyWinsList) {
       if (leaderBoardModel.userId == myUserId) {
         myRankMonthlyWins = monthlyWinsList.indexOf(leaderBoardModel) + 1;
       }
     }
-
+    myRankAllTimeWins = 0;
     for (LeaderBoardModel leaderBoardModel in allTimeWinsList) {
       if (leaderBoardModel.userId == myUserId) {
         myRankAllTimeWins = allTimeWinsList.indexOf(leaderBoardModel) + 1;
+      }
+    }
+  }
+
+  void getMyWins(myUserId) {
+    myDailyWins = 0;
+    for (LeaderBoardModel leaderBoardModel in dailyWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myDailyWins = leaderBoardModel.wins;
+      }
+    }
+
+    myMonthlyWins = 0;
+    for (LeaderBoardModel leaderBoardModel in monthlyWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myMonthlyWins = leaderBoardModel.wins;
+      }
+    }
+    myAllTimeWins = 0;
+    for (LeaderBoardModel leaderBoardModel in allTimeWinsList) {
+      if (leaderBoardModel.userId == myUserId) {
+        myAllTimeWins = leaderBoardModel.wins;
       }
     }
   }
@@ -767,6 +909,16 @@ class _LeaderboardState extends State<Leaderboard>
       return myRankMonthlyWins.toString();
     } else {
       return myRankAllTimeWins.toString();
+    }
+  }
+
+  String getWins(tabIndex) {
+    if (tabIndex == 0) {
+      return myDailyWins.toString();
+    } else if (tabIndex == 1) {
+      return myMonthlyWins.toString();
+    } else {
+      return myAllTimeWins.toString();
     }
   }
 }
