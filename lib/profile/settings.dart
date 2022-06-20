@@ -548,7 +548,7 @@ class Settings extends StatelessWidget {
                 String version = pubspecMap["version"];
                 showAboutDialog(
                     context: context,
-                    applicationIcon: const FlutterLogo(), //TODO: Add our icon
+                    applicationIcon: Image.asset("images/AboutDialogIcon.png", width: 50,),
                     applicationName: 'Quizard',
                     applicationVersion: version.split('+')[0],
                     applicationLegalese:
