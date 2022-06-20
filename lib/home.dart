@@ -274,7 +274,7 @@ class _PlayState extends State<Play> {
       gameModel.setDataToPlayer("username", loginModel.username, 0);
       gameModel.pinCode = randomAlphaNumeric(6).toUpperCase();
       var games = FirebaseFirestore.instance
-          .collection('$firestoreMainPath/${gameModel.gamePath}');
+          .collection('$firestoreMainPath/custom_games');
       Map<String, dynamic> mapAdmin = {
         "username": loginModel.username,
         "is_ready": false,

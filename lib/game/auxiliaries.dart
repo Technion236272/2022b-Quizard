@@ -107,6 +107,7 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
           if (gameModel.selectedAnswer.isEmpty &&
               gameModel.players[i]["selected_answer"].isEmpty) {
             gameModel.selectedAnswer = " ";
+            gameModel.correctAnswersInRow = 0;
             gameModel.setDataToPlayer("selected_answer", " ", i);
             await gameRef.update({"player$i": gameModel.players[i]});
           }
@@ -137,10 +138,19 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
           // score of round == time left
           // score is calculated by admin only after everyone selected answer
           // roundScoreView only reflects score of correct answer
+          // bonus rewarded if correct on time - else reset correct in row
 
           if (widget.isCorrect) {
             gameModel.roundScoreView = _timerView.animation.value; // else 0
+            if (_timerView.animation.value > 0) {
+              gameModel.correctAnswersInRow++;
+            } else {
+              gameModel.correctAnswersInRow = 0;
+            }
+          } else {
+            gameModel.correctAnswersInRow = 0;
           }
+
           int timeLeft = _timerView.animation.value;
           gameModel.selectedCorrectAnswer = widget.isCorrect;
           gameModel.selectedAnswer = widget.answerText;

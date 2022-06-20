@@ -271,10 +271,15 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                     // if all submitted
                     WidgetsBinding.instance
                         .addPostFrameCallback((_) => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SecondGameScreen(),
-                            )));
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation1, animation2) =>
+                                        const SecondGameScreen(),
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            ));
                   } else if (!_enableSubmitAnswer) {
                     return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),

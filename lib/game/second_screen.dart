@@ -26,6 +26,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   final List<Widget> _quizBodyWidgets = [];
   Timer? _delayNavigator;
   bool _calculatedFinalScores = false;
+  int _bonus = 0;
 
   @override
   void initState() {
@@ -264,6 +265,15 @@ class _SecondGameScreenState extends State<SecondGameScreen>
             listOfScoresPerSlot[j] += jReward;
           }
 
+          // each player calculates his own bonus
+          if (gameModel.selectedCorrectAnswer &&
+              gameModel.roundScoreView > 0 &&
+              gameModel.correctAnswersInRow > 1) {
+            int c = gameModel.correctAnswersInRow;
+            _bonus = (c - 1) * bonusRewards;
+            listOfScoresPerSlot[i] += _bonus;
+          }
+
           // each player updates only his own score
           gameRef.update({
             "player$i.score": listOfScoresPerSlot[i],
@@ -273,23 +283,42 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         }
 
         if (gameModel.roundScoreView > 0) {
+          Text bonusText = const Text("");
+          if (_bonus > 0) {
+            bonusText = Text("+$_bonus Bonus!",
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: bonusColor,
+                  fontWeight: FontWeight.bold,
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(2.0, 2.0),
+                      blurRadius: 8.0,
+                      color: secondaryColor,
+                    ),
+                  ],
+                ));
+          }
           return Padding(
               padding: const EdgeInsets.only(top: 30),
               child: ShowUp(
                   delay: 100,
-                  child: Text("+${gameModel.roundScoreView}",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: greenColor,
-                        fontWeight: FontWeight.bold,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(2.0, 2.0),
-                            blurRadius: 8.0,
-                            color: defaultColor,
-                          ),
-                        ],
-                      ))));
+                  child: Column(children: [
+                    Text("+${gameModel.roundScoreView}",
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: greenColor,
+                          fontWeight: FontWeight.bold,
+                          shadows: <Shadow>[
+                            Shadow(
+                              offset: Offset(2.0, 2.0),
+                              blurRadius: 8.0,
+                              color: defaultColor,
+                            ),
+                          ],
+                        )),
+                    bonusText
+                  ])));
         } else {
           // else show in red color
           return const Padding(
@@ -354,11 +383,15 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                       } else {
                         _delayNavigator = Timer(
                             const Duration(seconds: delayScoreResult), () {
-                          Navigator.pushReplacement<void, void>(
-                              context,
-                              MaterialPageRoute<void>(
-                                  builder: (BuildContext context) =>
-                                      const FirstGameScreen()));
+                          Navigator.pushReplacement(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2) =>
+                                  const FirstGameScreen(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          );
                         });
                       }
 
