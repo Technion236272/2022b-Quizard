@@ -41,7 +41,7 @@ class _FindFriendPageState extends State<FindFriendPage> {
         "friends": friends,
       });
       Provider.of<LoginModel>(context, listen: false)
-          .notifyAddedQuestion();
+          .notifyAddedFriend();
     });
 
     await FirebaseFirestore.instance
@@ -162,7 +162,6 @@ class _FindFriendPageState extends State<FindFriendPage> {
         .get()
         .then((value) {
       List friends = value["friends"];
-      print(friends);
       for(var name in friends)
         {
           if (username == name) {
@@ -246,29 +245,252 @@ class Friends extends StatefulWidget {
 
 
 class _FriendsState extends State<Friends> {
+  List friendsAvatars = [];
+  List friendsWins = [];
+
+  Future<NetworkImage?> _getImage(String id) async {
+    final ref =
+    FirebaseStorage.instance.ref('images/profiles/$id.jpg');
+    final url = await ref.getDownloadURL();
+    return NetworkImage(url);
+  }
+  Future<int> getWins(String id) async {
+    int wins = 3;
+    return wins;
+  }
+
+  FutureBuilder<NetworkImage?> _getAvatar(String id) {
+    return FutureBuilder<NetworkImage?>(
+        future: _getImage(id),
+        builder: (context, snapshot) {
+          if (snapshot.hasData &&
+              snapshot.connectionState != ConnectionState.waiting) {
+            return CircleAvatar(
+                backgroundImage: snapshot.data,
+                backgroundColor: thirdColor,
+                radius: 25);
+          }
+          return const CircleAvatar(
+              backgroundImage: AssetImage('images/avatar.png'),
+              backgroundColor: thirdColor,
+              radius: 25);
+        });
+  }
+
+  Future<void> getFriendsAvatars(List friends) async {
+    for(int i=0; i<friends.length; i++) {
+      String currentFriendName = friends[i];
+      QuerySnapshot<Map<String, dynamic>> result =
+          await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: currentFriendName).get();
+      friendsAvatars.add(_getAvatar(result.docs.first.id));
+    }
+  }
+  Future<void> getFriendsWins(List friends) async {
+    for(int i=0; i<friends.length; i++) {
+      String currentFriendName = friends[i];
+      QuerySnapshot<Map<String, dynamic>> result =
+      await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: currentFriendName).get();
+      friendsWins.add(getWins(result.docs.first.id));
+    }
+  }
+
+  Future<bool?> _removeFriendDialog(
+      String userId, String username, String friend) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(translation(context).deleteQuestion),
+            content: Text(translation(context).confirmDeletion),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection('$firestoreMainPath/users')
+                        .doc(userId)
+                        .get()
+                        .then((value) {
+                      List friends = value["friends"];
+                      for (int i = 0; i < friends.length; i++) {
+                        if (friends[i] == friend) {
+                          friends.removeAt(i);
+                          break;
+                        }
+                      }
+                      FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/users')
+                          .doc(userId)
+                          .update({
+                        "friends": friends,
+                      }).then((_) {
+                        Navigator.of(context).pop(true);
+                      });
+                    });
+
+                    QuerySnapshot<Map<String, dynamic>> result =
+                    await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: friend).get();
+
+                    await FirebaseFirestore.instance
+                        .collection('$firestoreMainPath/users')
+                        .doc(result.docs.first.id)
+                        .get()
+                        .then((value) {
+                      List friends = value["friends"];
+                      friends.remove(username);
+                      FirebaseFirestore.instance
+                          .collection('$firestoreMainPath/users')
+                          .doc(result.docs.first.id)
+                          .update({
+                        "friends": friends,
+                      }).then((_) {
+                        Navigator.of(context).pop(true);
+                      });
+                    });
+                  },
+                  child: Text(translation(context).delete)),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(translation(context).cancel)),
+            ],
+          );
+        });
+  }
+
+  Future<List<Dismissible>> _friendsListWidget(
+      BuildContext context, String userId, String username) async {
+    List<Dismissible> trivia = <Dismissible>[];
+    await FirebaseFirestore.instance
+        .collection('$firestoreMainPath/users')
+        .doc(userId)
+        .get()
+        .then((value) async {
+      List friends = value["friends"];
+      await getFriendsAvatars(friends);
+      await getFriendsWins(friends);
+      for (int i = 0; i < friends.length; i++) {
+        trivia.add(Dismissible(
+            key: UniqueKey(),
+            confirmDismiss: (DismissDirection direction) {
+                return _removeFriendDialog(
+                    userId, username, friends[i]);
+            },
+            background: Container(
+              padding: const EdgeInsets.all(20),
+              color: redColor,
+              child: const Icon(Icons.delete),
+              alignment: AlignmentDirectional.centerStart,
+            ),
+            //direction: DismissDirection.startToEnd,
+            child: GestureDetector(
+                onLongPress: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(
+                    content: Text(translation(context).snackBar7),
+                  ))
+                      .closed
+                      .then((value) =>
+                      ScaffoldMessenger.of(context).clearSnackBars());
+                },
+                child: Column(
+            children: [
+            Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: MediaQuery.of(context).size.width * 0.1),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 9,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                       friendsAvatars[i],
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Text(
+                      friends[i],
+                      style: TextStyle(
+                          fontSize: 18, color: defaultColor.withOpacity(0.5)),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                  flex: 1,
+                  child: Text(
+                    "3",
+                    style: TextStyle(fontSize: 18, color: defaultColor),
+                  )),
+            ],
+          ),
+        ),
+          Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.05),
+              child: Container(
+                height: 1,
+                color: Colors.grey.withOpacity(0.5),
+                width: MediaQuery.of(context).size.width,
+              ))
+          ],
+        ))));
+      }
+    });
+    return trivia;
+  }
 
 
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
-        resizeToAvoidBottomInset: false,
-        floatingActionButton: FloatingActionButton(
-            backgroundColor: blueColor,
-            child: const Icon(Icons.add),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const FindFriendPage();
+          resizeToAvoidBottomInset: false,
+          floatingActionButton: FloatingActionButton(
+              backgroundColor: blueColor,
+              child: const Icon(Icons.person_add_alt_1_rounded),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const FindFriendPage();
+                    }
+                ).then((value) =>
+                    SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual,
+                        overlays: []));
+              }),
+          backgroundColor: secondaryBackgroundColor,
+          body: FutureBuilder(
+              future: _friendsListWidget(
+                  context,
+                  loginModel.userId.isEmpty
+                      ? "${FirebaseAuth.instance.currentUser?.uid}"
+                      : loginModel.userId, loginModel.username),
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                if (snapshot.hasData) {
+                  loginModel.cachedFriendsList = snapshot.data;
+
+                  if (snapshot.data.isNotEmpty) {
+                    return ListView(children: loginModel.cachedFriendsList);
+                  } else {
+                    return Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Center(
+                            child: Text(
+                              translation(context).addQuestionsCustom,
+                              style: const TextStyle(fontSize: 22),
+                              textAlign: TextAlign.center,
+                            )));
                   }
-              ).then((value) =>
-                  SystemChrome.setEnabledSystemUIMode(
-                      SystemUiMode.manual,
-                      overlays: []));
-            }),
-        backgroundColor: secondaryBackgroundColor,
-      );
+                } else {
+                  if (loginModel.cachedFriendsList.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return ListView(children: loginModel.cachedFriendsList);
+                  }
+                }
+              }));
     });
   }
 }
