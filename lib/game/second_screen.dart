@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:quizard/game/scoreboard.dart';
 
 import '../consts.dart';
+import '../home.dart';
 import '../localization/classes/language_constants.dart';
 import '../providers.dart';
 import 'auxiliaries.dart';
@@ -20,7 +21,7 @@ class SecondGameScreen extends StatefulWidget {
 }
 
 class _SecondGameScreenState extends State<SecondGameScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   final List<Widget> _quizBodyWidgets = [];
   Timer? _delayNavigator;
@@ -29,6 +30,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
@@ -38,7 +40,44 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   void dispose() {
     _controller.dispose();
     _delayNavigator?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // went to Background
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(builder: (context) => const HomePage()));
+      showDialog(
+        context: context,
+        barrierDismissible: false, // user must tap button
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Game Exited'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: const [
+                  Text('You were kicked from the game because'
+                      ' your app has been paused.'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
