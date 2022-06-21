@@ -26,4 +26,18 @@ Edge-case: if any player crashes the app during waiting in the lobby, when the p
 
 ## Quick Play
 
+A game mode without lobby. We refer it as an official game that counts toward the leaderboard by wins. The game demands 5 players (max players) in the party slots and there are always 5 random questions from the official categories only (which are stored in Firebase by arrays). Because there is no admin here, we use two cloud functions on Firebase for that:
+
+- findQuickGameForNewPlayer: This function triggered when a player creates a document by starting Quick Play (contains his username and empty pin code field). The documents sits in a collection called "waiting room" with all the other players, waiting to start the game. The function first checks if the player already joined to a party which didn't start the game (set to unlocked by boolean field) and if he did then the function updates the pin code's player with that party's pin code. Else, the function tries to find an already open game with empty slot to put the player in. If there is no empty slot, the game creates a new game document as unlocked game, with a pin code that is the document's id auto generated when created.
+- initiateGameForFullParty: This function triggered when a game has a full party in it. Then 5 questions will be built randomly from the current database and each player will indicate that the game is ready with StreamBuilder when the game will be locked.
+
 ## Gameplay
+
+There is a timer for each player in his own app that runs for 30 seconds for each screen. There are two main StreamBuilders for each game screen:
+
+- First Screen: Everyone enters a false answer. If all the players entered a false answer before the time runs out (indicated with a streamer) then everyone navigating to the second screen. Else, the time runs out and then all the players are forced to navigate to the next screen without waiting anymore for false answers by entering an empty false answer (this string: " "), and then all the streamers will be triggered.
+- Second Screen: Everyone are trying to select the correct answer. among all the options available. When everyone selected an answer before the time runs out (indicated with a streamer) then the results are shown simultaniously for all the players and after 3 seconds (by a Timer) all the players will be navigated to the first screen. Else, the time runs out and then all the players will be forced to navigate to the first screen by selecting an empty selected answer (this string: " "), and then all the streamers will be triggered. Each player holds the number of rounds per game, and accordingly will navigate to the final scoreboard instead for the first screen if needed.
+
+Edge-case1: if a player pauses the game by moving the app to the backgournd this might delay his timer, and thus the game will indicate that with didChangeAppLifecycleState function that triggered if the state change to paused, and immediately will kick the player from the game by local logic (no a cloud function needed for that).
+
+Edge-case2: if a player's app got crashed then the game will refer to him as a player that didn't enter any input. Because the game must go forward from screen to screen with inputs of all players (even empty inputs as mentioned above) then there is a "timer-exit-handler" which was implemented for this very specific case. This timer waits a little more than the game should exist and by any case will navigate to the next required screen. The exited player won't be able to come back as all games are getting locked at the beginning of the game to keep the integrity of the game.
