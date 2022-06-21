@@ -175,10 +175,9 @@ class _ScoreBoardState extends State<ScoreBoard> {
                       shouldLoop: false,
                     ),
                     Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 50),
                         child: Container(
                           child: _players(),
-                          width: 300,
                           decoration: BoxDecoration(
                             color: secondaryColor,
                             border: Border.all(),
@@ -193,7 +192,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
                             primary: defaultColor,
                             minimumSize:
                                 const Size.fromHeight(50)), // max width
-                        child: const Text('End Game',
+                        child: const Text('End Game', // TODO: Translate
                             style: TextStyle(fontSize: 18)),
                         onPressed: () {
                           gameModel.resetData();

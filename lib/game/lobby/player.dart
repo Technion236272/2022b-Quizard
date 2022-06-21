@@ -426,10 +426,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (game["rounds"] == 7) {
                               numOfRounds = "7 ROUNDS";
+                              gameModel.roundsPerGame = 7;
                             } else if (game["rounds"] == 3) {
                               numOfRounds = "3 ROUNDS";
+                              gameModel.roundsPerGame = 3;
                             } else {
                               numOfRounds = "5 ROUNDS";
+                              gameModel.roundsPerGame = 5;
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {

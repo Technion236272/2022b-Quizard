@@ -188,7 +188,6 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                         elevation: 2,
                         child: Container(
                             padding: const EdgeInsets.all(10),
-                            width: 400,
                             decoration:
                                 const BoxDecoration(color: playOptionColor),
                             child: Row(
@@ -282,7 +281,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           _calculatedFinalScores = true;
         }
 
-        if (gameModel.roundScoreView > 0) {
+        if (gameModel.roundScoreView >= 0) {
           Text bonusText = const Text("");
           if (_bonus > 0) {
             bonusText = Text("+$_bonus Bonus!",
@@ -292,8 +291,43 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                   fontWeight: FontWeight.bold,
                   shadows: <Shadow>[
                     Shadow(
+                      offset: Offset(2.0, -2.0),
+                      blurRadius: 3.0,
+                      color: secondaryColor,
+                    ),
+                    Shadow(
+                      offset: Offset(-2.0, 2.0),
+                      blurRadius: 3.0,
+                      color: secondaryColor,
+                    ),
+                    Shadow(
+                      offset: Offset(-2.0, -2.0),
+                      blurRadius: 3.0,
+                      color: secondaryColor,
+                    ),
+                    Shadow(
                       offset: Offset(2.0, 2.0),
+                      blurRadius: 3.0,
+                      color: secondaryColor,
+                    ),
+                    Shadow(
+                      offset: Offset(-2.0, 2.0),
                       blurRadius: 8.0,
+                      color: lightBlueColor,
+                    ),
+                    Shadow(
+                      offset: Offset(2.0, -2.0),
+                      blurRadius: 8.0,
+                      color: lightBlueColor,
+                    ),
+                    Shadow(
+                      offset: Offset(-2.0, -2.0),
+                      blurRadius: 3.0,
+                      color: secondaryColor,
+                    ),
+                    Shadow(
+                      offset: Offset(2.0, 2.0),
+                      blurRadius: 3.0,
                       color: secondaryColor,
                     ),
                   ],
@@ -304,14 +338,29 @@ class _SecondGameScreenState extends State<SecondGameScreen>
               child: ShowUp(
                   delay: 100,
                   child: Column(children: [
-                    Text("+${gameModel.roundScoreView}",
+                    Text("+${gameModel.roundScoreView} Correct!",
                         style: const TextStyle(
                           fontSize: 24,
                           color: greenColor,
                           fontWeight: FontWeight.bold,
                           shadows: <Shadow>[
                             Shadow(
-                              offset: Offset(2.0, 2.0),
+                              offset: Offset(-1.0, 1.0),
+                              blurRadius: 8.0,
+                              color: defaultColor,
+                            ),
+                            Shadow(
+                              offset: Offset(1.0, -1.0),
+                              blurRadius: 8.0,
+                              color: defaultColor,
+                            ),
+                            Shadow(
+                              offset: Offset(-1.0, -1.0),
+                              blurRadius: 8.0,
+                              color: defaultColor,
+                            ),
+                            Shadow(
+                              offset: Offset(1.0, 1.0),
                               blurRadius: 8.0,
                               color: defaultColor,
                             ),

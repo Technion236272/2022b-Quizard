@@ -403,8 +403,7 @@ class _PlayState extends State<Play> {
                     overflow: TextOverflow.fade,
                     maxLines: 1,
                     softWrap: false),
-                SingleChildScrollView(
-                    child: Column(
+                Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
@@ -432,7 +431,7 @@ class _PlayState extends State<Play> {
                       ],
                     ),
                   ],
-                )),
+                ),
                 Container()
               ]));
     });
