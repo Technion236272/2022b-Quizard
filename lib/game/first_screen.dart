@@ -200,7 +200,6 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                       elevation: 2,
                       child: Container(
                           padding: const EdgeInsets.all(10),
-                          width: 400,
                           decoration:
                               const BoxDecoration(color: playOptionColor),
                           child: Row(
@@ -232,8 +231,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                         hintText: translation(context).enterFalseAnswer,
                       ))),
               Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 35, horizontal: 80),
+                  padding: const EdgeInsets.symmetric(vertical: 35),
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: defaultColor,

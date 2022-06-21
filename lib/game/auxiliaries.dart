@@ -24,7 +24,6 @@ class Question extends StatelessWidget {
           elevation: 2,
           child: Container(
             padding: const EdgeInsets.all(20),
-            width: 400,
             decoration: const BoxDecoration(
                 color: secondaryColor,
                 borderRadius: BorderRadius.all(Radius.circular(10))),
@@ -166,7 +165,8 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
 
       ElevatedButton _answerButton(Color buttonColor) {
         return ElevatedButton(
-          style: ElevatedButton.styleFrom(primary: buttonColor),
+          style: ElevatedButton.styleFrom(
+              primary: buttonColor, minimumSize: const Size.fromHeight(60)),
           child: Text(
             widget.answerText,
             style: const TextStyle(color: defaultColor),
@@ -195,7 +195,6 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
 
       return Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          width: 400,
           height: 60,
           child: StreamBuilder<bool>(
               stream: _streamAreAllSelectedAnswer(),

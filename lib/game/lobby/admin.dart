@@ -24,6 +24,7 @@ class LobbyAdmin extends StatefulWidget {
 class _LobbyAdminState extends State<LobbyAdmin> {
   bool finishedBuildAllCustomCategories = false;
   String lockText = 'UNLOCKED';
+  String numOfRounds = '5 ROUNDS';
   bool clickedStartGame = false;
 
   List<String> officialCategories = [
@@ -248,65 +249,74 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
   Consumer<GameModel> _settingsButton(String text) {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
+      final gameRef = FirebaseFirestore.instance
+          .collection('$firestoreMainPath/${gameModel.gamePath}')
+          .doc(gameModel.pinCode);
       return FittedBox(
           child: TextButton(
-        style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4.0),
-                    side: const BorderSide(color: defaultColor))),
-            backgroundColor: MaterialStateProperty.all<Color>(lightBlueColor)),
-        onPressed: () {
-          switch (text) {
-            case 'CHAT':
-              constSnackBar('Coming soon', context);
-              break;
-            case 'PIN CODE':
-              Clipboard.setData(ClipboardData(text: gameModel.pinCode));
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(
-                    content: Text('Copied ${gameModel.pinCode} to clipboard'),
-                    duration: const Duration(days: 365),
-                    action: SnackBarAction(
-                      label: translation(context).dismiss,
-                      onPressed: () {},
-                    ),
-                  ))
-                  .closed
-                  .then((value) =>
-                      ScaffoldMessenger.of(context).clearSnackBars());
-              break;
-            case 'INVITE':
-              constSnackBar('Coming soon', context);
-              break;
-            case 'UNLOCKED':
-              lockText = 'LOCKED';
-              FirebaseFirestore.instance
-                  .collection('$firestoreMainPath/${gameModel.gamePath}')
-                  .doc(gameModel.pinCode)
-                  .update({"is_locked": true});
-              gameModel.isLocked = true;
-              break;
-            case 'LOCKED':
-              lockText = 'UNLOCKED';
-              FirebaseFirestore.instance
-                  .collection('$firestoreMainPath/${gameModel.gamePath}')
-                  .doc(gameModel.pinCode)
-                  .update({"is_locked": false});
-              gameModel.isLocked = false;
-              break;
-          }
-        },
-        child: Text(getLocalizedFieldValue(text, context)),
-      ));
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                          side: const BorderSide(color: defaultColor))),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(lightBlueColor)),
+              onPressed: () {
+                switch (text) {
+                  case 'PIN CODE':
+                    Clipboard.setData(ClipboardData(text: gameModel.pinCode));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(
+                          content:
+                              Text('Copied ${gameModel.pinCode} to clipboard'),
+                          duration: const Duration(days: 365),
+                          action: SnackBarAction(
+                            label: translation(context).dismiss,
+                            onPressed: () {},
+                          ),
+                        ))
+                        .closed
+                        .then((value) =>
+                            ScaffoldMessenger.of(context).clearSnackBars());
+                    break;
+                  case '3 ROUNDS':
+                    numOfRounds = '5 ROUNDS';
+                    gameRef.update({"rounds": 5});
+                    gameModel.roundsPerGame = 5;
+                    break;
+                  case '5 ROUNDS':
+                    numOfRounds = '7 ROUNDS';
+                    gameRef.update({"rounds": 7});
+                    gameModel.roundsPerGame = 7;
+                    break;
+                  case '7 ROUNDS':
+                    numOfRounds = '3 ROUNDS';
+                    gameRef.update({"rounds": 3});
+                    gameModel.roundsPerGame = 3;
+                    break;
+                  case 'UNLOCKED':
+                    lockText = 'LOCKED';
+                    gameRef.update({"is_locked": true});
+                    gameModel.isLocked = true;
+                    break;
+                  case 'LOCKED':
+                    lockText = 'UNLOCKED';
+                    gameRef.update({"is_locked": false});
+                    gameModel.isLocked = false;
+                    break;
+                }
+              },
+              child: Text(text)
+              // TODO: Fix translation
+              //child: Text(getLocalizedFieldValue(text, context)),
+              ));
     });
   }
 
   Row _gameSettings() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      _settingsButton('CHAT'),
       _settingsButton('PIN CODE'),
-      _settingsButton('INVITE'),
+      _settingsButton(numOfRounds),
       _settingsButton(lockText)
     ]);
   }
@@ -545,7 +555,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
         }
       }
 
-      if (allQuestions.length < roundsPerGame) {
+      if (allQuestions.length < gameModel.roundsPerGame) {
         return false;
       }
 
@@ -554,7 +564,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       final selectedCategories = [];
       List shuffledIndexes = List.generate(allQuestions.length, (i) => i);
       shuffledIndexes.shuffle();
-      for (int i = 0; i < roundsPerGame; i++) {
+      for (int i = 0; i < gameModel.roundsPerGame; i++) {
         selectedQuestions.add(allQuestions[shuffledIndexes[i]]);
         selectedAnswers.add(allAnswers[shuffledIndexes[i]]);
         selectedCategories.add(allCategories[shuffledIndexes[i]]);

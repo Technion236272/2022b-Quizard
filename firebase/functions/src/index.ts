@@ -1,3 +1,5 @@
+/* eslint linebreak-style: ["error", "windows"] */
+
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
@@ -9,7 +11,7 @@ export const findQuickGameForNewPlayer = functions.firestore
     .document("versions/{v2}/official_games/{waiting_room}/players/{playerId}")
     .onWrite(async (player, context) => {
       if (!player.after.exists) {
-        // Ignore delete operations
+      // Ignore delete operations
         console.log("ignoring delete operation");
         return;
       }
@@ -25,7 +27,7 @@ export const findQuickGameForNewPlayer = functions.firestore
       let foundGame = false;
 
       if (playerPinCode != "") {
-        // Ignore players that already found game
+      // Ignore players that already found game
         console.log("player already found game. goodbye.");
         return;
       }
@@ -61,7 +63,7 @@ export const findQuickGameForNewPlayer = functions.firestore
           for (let i = 0; i < maxPlayers; i++) {
             if (await game.get(`player${i}.username`) == "" &&
             await game.get("is_locked") == false) {
-              // and then catch the open slot with transaction
+            // and then catch the open slot with transaction
               try {
                 foundGame = await db.runTransaction(async (transaction) => {
                   const doc = await transaction.get(game.ref);
@@ -158,20 +160,20 @@ export const initiateGameForFullParty = functions.firestore
     .document("versions/{v2}/official_games/{changedGameId}")
     .onWrite(async (changedGame) => {
       if (!changedGame.after.exists) {
-        // Ignore delete operations
+      // Ignore delete operations
         console.log("ignoring delete operation");
         return;
       }
 
       if (changedGame.after.id == "waiting_room") {
-        // Ignore waiting room
+      // Ignore waiting room
         console.log("ignoring waiting room");
         return;
       }
 
       const isLocked = await changedGame.after.get("is_locked");
       if (isLocked) {
-        // Ignore built games
+      // Ignore built games
         console.log("ignoring built game");
         return;
       }
@@ -214,7 +216,7 @@ export const initiateGameForFullParty = functions.firestore
       // generate unique random indexes
       const randomIndexes: number[] = [];
       while (randomIndexes.length < roundsPerGame) {
-        const random = getRandomBetween(0, allQuestions.length-1);
+        const random = getRandomBetween(0, allQuestions.length - 1);
         if (!randomIndexes.includes(random)) {
           randomIndexes.push(random);
         }
@@ -226,7 +228,7 @@ export const initiateGameForFullParty = functions.firestore
       const builtQuestions = [];
       const builtAnswers = [];
       const builtCategories = [];
-      for (let i =0; i < roundsPerGame; i++) {
+      for (let i = 0; i < roundsPerGame; i++) {
         builtQuestions.push(allQuestions[randomIndexes[i]]);
         builtAnswers.push(allAnswers[randomIndexes[i]]);
         builtCategories.push(allCategories[randomIndexes[i]]);
@@ -235,12 +237,36 @@ export const initiateGameForFullParty = functions.firestore
       console.log("new game is ready. updating firestore...");
 
       await changedGame.after.ref.update(
-          {"questions": builtQuestions,
+          {
+            "questions": builtQuestions,
             "answers": builtAnswers,
             "categories": builtCategories,
             "is_locked": true,
-            "is_official": true});
+            "is_official": true,
+          });
 
       console.log("done.");
       return;
+    });
+
+exports.resetDailyWinsForUsers = functions.pubsub
+    .schedule("0 0 * * *")
+    .onRun(async () => {
+      const users = db.collection("versions/v2/users");
+      const user = await users.get();
+      user.forEach((snapshot) => {
+        snapshot.ref.update({DailyWins: 0});
+      });
+      return null;
+    });
+
+exports.resetMonthlyWinsForUsers = functions.pubsub
+    .schedule("0 0 1 * *")
+    .onRun(async () => {
+      const users = db.collection("versions/v2/users");
+      const user = await users.get();
+      user.forEach((snapshot) => {
+        snapshot.ref.update({MonthlyWins: 0});
+      });
+      return null;
     });

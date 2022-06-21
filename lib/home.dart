@@ -26,7 +26,7 @@ class Rules extends StatelessWidget {
             child: Padding(
                 padding: const EdgeInsets.all(appbarPadding),
                 child:
-                Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -59,7 +59,7 @@ class Rules extends StatelessWidget {
                           const Text(
                             '2-5',
                             style:
-                            TextStyle(color: darkGreyColor, fontSize: 16),
+                                TextStyle(color: darkGreyColor, fontSize: 16),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -290,6 +290,7 @@ class _PlayState extends State<Play> {
         "is_official": false,
         "official_categories": gameModel.officialCategories,
         "custom_categories": gameModel.customCategories,
+        "rounds": 5,
         "questions": [],
         "answers": [],
         "categories": []
@@ -332,7 +333,7 @@ class _PlayState extends State<Play> {
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation1, animation2) =>
-              const JoinGame(),
+                  const JoinGame(),
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
             ),
@@ -345,7 +346,7 @@ class _PlayState extends State<Play> {
           gameModel.resetData();
           final playersRef = FirebaseFirestore.instance
               .collection("$firestoreMainPath/official_games/"
-              "waiting_room/players");
+                  "waiting_room/players");
           Map<String, dynamic> data = {
             "username": loginModel.username,
             "pin_code": ""
@@ -357,7 +358,7 @@ class _PlayState extends State<Play> {
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation1, animation2) =>
-              const QuickPlay(),
+                  const QuickPlay(),
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
             ),
@@ -483,7 +484,7 @@ class _LeaderboardState extends State<Leaderboard>
     final screenHeight = MediaQuery.of(context).size.height - 114;
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
-      if (userId=="null") {
+      if (userId == "null") {
         userId = loginModel.userId;
         getWinsData(userId);
       }
@@ -497,7 +498,6 @@ class _LeaderboardState extends State<Leaderboard>
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-
                     Text(
                       loginModel.username,
                       textAlign: TextAlign.center,
@@ -559,46 +559,46 @@ class _LeaderboardState extends State<Leaderboard>
                         bottom: Radius.circular(boxRadiusConst)))),
             Expanded(
                 child: DefaultTabController(
-                  initialIndex: _lastTab,
-                  length: 3,
-                  child: Scaffold(
-                    backgroundColor: secondaryColor,
-                    appBar: AppBar(
-                      backgroundColor: secondaryBackgroundColor,
-                      automaticallyImplyLeading: false,
-                      toolbarHeight: 0,
-                      elevation: 2,
-                      bottom: TabBar(
-                        controller: _tabController,
-                        onTap: _onTapTab,
-                        labelColor: defaultColor,
-                        indicatorColor: defaultColor,
-                        tabs: [
-                          Tab(text: translation(context).daily),
-                          Tab(
-                            text: translation(context).monthly,
-                          ),
-                          Tab(
-                            text: translation(context).allTime,
-                          ),
-                        ],
+              initialIndex: _lastTab,
+              length: 3,
+              child: Scaffold(
+                backgroundColor: secondaryColor,
+                appBar: AppBar(
+                  backgroundColor: secondaryBackgroundColor,
+                  automaticallyImplyLeading: false,
+                  toolbarHeight: 0,
+                  elevation: 2,
+                  bottom: TabBar(
+                    controller: _tabController,
+                    onTap: _onTapTab,
+                    labelColor: defaultColor,
+                    indicatorColor: defaultColor,
+                    tabs: [
+                      Tab(text: translation(context).daily),
+                      Tab(
+                        text: translation(context).monthly,
                       ),
-                    ),
-                    body: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        isDataLoading
-                            ? const Center(
-                          child: SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: CircularProgressIndicator(
-                              value: null,
-                              strokeWidth: 7.0,
+                      Tab(
+                        text: translation(context).allTime,
+                      ),
+                    ],
+                  ),
+                ),
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    isDataLoading
+                        ? const Center(
+                            child: SizedBox(
+                              height: 50.0,
+                              width: 50.0,
+                              child: CircularProgressIndicator(
+                                value: null,
+                                strokeWidth: 7.0,
+                              ),
                             ),
-                          ),
-                        )
-                            : Container(
+                          )
+                        : Container(
                             color: secondaryBackgroundColor,
                             child: ListView.builder(
                                 itemCount: dailyWinsList.length,
@@ -610,18 +610,18 @@ class _LeaderboardState extends State<Leaderboard>
                                       dailyWinsList[index].profileImageLink,
                                       dailyWinsList[index].wins);
                                 })),
-                        isDataLoading
-                            ? const Center(
-                          child: SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: CircularProgressIndicator(
-                              value: null,
-                              strokeWidth: 7.0,
+                    isDataLoading
+                        ? const Center(
+                            child: SizedBox(
+                              height: 50.0,
+                              width: 50.0,
+                              child: CircularProgressIndicator(
+                                value: null,
+                                strokeWidth: 7.0,
+                              ),
                             ),
-                          ),
-                        )
-                            : Container(
+                          )
+                        : Container(
                             color: secondaryBackgroundColor,
                             child: ListView.builder(
                                 itemCount: monthlyWinsList.length,
@@ -633,18 +633,18 @@ class _LeaderboardState extends State<Leaderboard>
                                       monthlyWinsList[index].profileImageLink,
                                       monthlyWinsList[index].wins);
                                 })),
-                        isDataLoading
-                            ? const Center(
-                          child: SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: CircularProgressIndicator(
-                              value: null,
-                              strokeWidth: 7.0,
+                    isDataLoading
+                        ? const Center(
+                            child: SizedBox(
+                              height: 50.0,
+                              width: 50.0,
+                              child: CircularProgressIndicator(
+                                value: null,
+                                strokeWidth: 7.0,
+                              ),
                             ),
-                          ),
-                        )
-                            : Container(
+                          )
+                        : Container(
                             color: secondaryBackgroundColor,
                             child: ListView.builder(
                                 itemCount: allTimeWinsList.length,
@@ -656,10 +656,10 @@ class _LeaderboardState extends State<Leaderboard>
                                       allTimeWinsList[index].profileImageLink,
                                       allTimeWinsList[index].wins);
                                 })),
-                      ],
-                    ),
-                  ),
-                )),
+                  ],
+                ),
+              ),
+            )),
           ]));
     });
   }
@@ -676,42 +676,44 @@ class _LeaderboardState extends State<Leaderboard>
             children: [
               Expanded(
                 flex: 2,
-                child: index>3?Text(
-                  "#$index",
-                  style: const TextStyle(fontSize: 18, color: defaultColor),
-                ):getRankImage(index),
+                child: index > 3
+                    ? Text(
+                        "#$index",
+                        style:
+                            const TextStyle(fontSize: 18, color: defaultColor),
+                      )
+                    : getRankImage(index),
               ),
               Expanded(
                 flex: 9,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Image.network(profileImageLink,
-                        fit: BoxFit.cover, loadingBuilder:
-                            (BuildContext context, Widget child,
+                    Image.network(profileImageLink, fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child,
                             loadingProgress) {
-                          if (loadingProgress == null) {
-                            return CircleAvatar(
-                                backgroundImage: NetworkImage(profileImageLink));
-                          }
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                child: const Icon(
-                                  Icons.account_circle,
-                                  size: 40,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const CircularProgressIndicator(
-                                valueColor:
-                                AlwaysStoppedAnimation<Color>(
-                                    Colors.black45),
-                              ),
-                            ],
-                          );
-                        }),            // CircleAvatar(
+                      if (loadingProgress == null) {
+                        return CircleAvatar(
+                            backgroundColor: thirdColor,
+                            backgroundImage: NetworkImage(profileImageLink));
+                      }
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            child: const Icon(
+                              Icons.account_circle,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.black45),
+                          ),
+                        ],
+                      );
+                    }), // CircleAvatar(
                     //   backgroundImage: NetworkImage(profileImageLink),
                     // ),
                     const SizedBox(
@@ -724,7 +726,8 @@ class _LeaderboardState extends State<Leaderboard>
                           name,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 18, color: defaultColor.withOpacity(0.5),
+                            fontSize: 18,
+                            color: defaultColor.withOpacity(0.5),
                           ),
                         ),
                       ),
@@ -753,26 +756,28 @@ class _LeaderboardState extends State<Leaderboard>
     );
   }
 
-  Widget getRankImage(index){
-    if(index==1){
-      return Row(
-          children: [
-            Image.asset("images/gold_medal.png", width: 30,),
-          ]
-      );
-    }else if(index == 2){
-      return Row(
-          children: [
-            Image.asset("images/silver_medal.png", width: 30,)
-          ]
-      );
-
-    }else{
-      return Row(
-          children: [
-            Image.asset("images/bronze_medal.png", width: 30,)
-          ]
-      );
+  Widget getRankImage(index) {
+    if (index == 1) {
+      return Row(children: [
+        Image.asset(
+          "images/gold_medal.png",
+          width: 30,
+        ),
+      ]);
+    } else if (index == 2) {
+      return Row(children: [
+        Image.asset(
+          "images/silver_medal.png",
+          width: 30,
+        )
+      ]);
+    } else {
+      return Row(children: [
+        Image.asset(
+          "images/bronze_medal.png",
+          width: 30,
+        )
+      ]);
     }
   }
 
@@ -788,7 +793,6 @@ class _LeaderboardState extends State<Leaderboard>
         .collection('versions/v2/users')
         .get()
         .then((users) async {
-
       setState(() {
         isDataLoading = true;
       });
@@ -800,7 +804,7 @@ class _LeaderboardState extends State<Leaderboard>
         var url = "";
         try {
           final ref =
-          FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+              FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
           url = await ref.getDownloadURL();
         } catch (e) {
           url = "";

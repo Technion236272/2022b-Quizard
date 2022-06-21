@@ -255,6 +255,7 @@ class GameModel extends ChangeNotifier {
   int currentQuestionIndex = 0;
   int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
   int _correctAnswersInRow = 0;
+  int roundsPerGame = 5;
   bool _isPrivate = true;
   bool _isLocked = false;
   bool _isOfficial = false;
@@ -534,6 +535,7 @@ class GameModel extends ChangeNotifier {
         "round_score": 0
       }
     ];
+    roundsPerGame = 5;
     currentQuestionIndex = 0;
     playerIndex = 0;
     roundScoreView = 0;
