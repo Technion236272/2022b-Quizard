@@ -21,6 +21,7 @@ class LobbyPlayer extends StatefulWidget {
 class _LobbyPlayerState extends State<LobbyPlayer> {
   bool finishedBuildAllCustomCategories = false;
   String lockText = '';
+  String numOfRounds = "5 ROUNDS";
 
   @override
   void initState() {
@@ -111,9 +112,6 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             backgroundColor: MaterialStateProperty.all<Color>(lightBlueColor)),
         onPressed: () {
           switch (text) {
-            case 'CHAT':
-              constSnackBar('Coming soon', context);
-              break;
             case 'PIN CODE':
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
               ScaffoldMessenger.of(context)
@@ -129,12 +127,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   .then((value) =>
                       ScaffoldMessenger.of(context).clearSnackBars());
               break;
-            case 'INVITE':
-              constSnackBar('Coming soon', context);
-              break;
-            case 'UNLOCKED':
-            case 'LOCKED':
-              constSnackBar('Only the admin can set lock', context);
+            default:
               break;
           }
         },
@@ -145,9 +138,18 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
 
   Row _gameSettings() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      _settingsButton('CHAT'),
       _settingsButton('PIN CODE'),
-      _settingsButton('INVITE'),
+      FittedBox(
+          child: TextButton(
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                          side: const BorderSide(color: defaultColor))),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(lightBlueColor)),
+              onPressed: null,
+              child: Text(numOfRounds))),
       FittedBox(
           child: TextButton(
               style: ButtonStyle(
@@ -421,6 +423,13 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             } else {
                               lockText =
                                   getLocalizedFieldValue("UNLOCKED", context);
+                            }
+                            if (game["rounds"] == 7) {
+                              numOfRounds = "7 ROUNDS";
+                            } else if (game["rounds"] == 3) {
+                              numOfRounds = "3 ROUNDS";
+                            } else {
+                              numOfRounds = "5 ROUNDS";
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {

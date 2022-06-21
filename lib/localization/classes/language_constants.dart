@@ -15,7 +15,6 @@ Future<Locale> setLocale(String languageCode) async {
   return _locale(languageCode);
 }
 
-
 Future<Locale> getLocale() async {
   SharedPreferences _prefs = await SharedPreferences.getInstance();
   String languageCode = _prefs.getString(LAGUAGE_CODE) ?? ENGLISH;

@@ -8,7 +8,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:quizard/localization/custom_router.dart';
 import 'package:quizard/localization/classes/language_constants.dart';
 
-
 class Language {
   final int id;
   final String flag;
@@ -16,7 +15,7 @@ class Language {
   final String languageCode;
 
   Language(this.id, this.flag, this.name, this.languageCode);
-  
+
   static List<Language> languageList() {
     return <Language>[
       Language(2, "", "English", "en"),
@@ -26,7 +25,6 @@ class Language {
   }
 }
 
-
 class Localization extends StatefulWidget {
   const Localization({Key? key}) : super(key: key);
 
@@ -34,25 +32,24 @@ class Localization extends StatefulWidget {
   State<Localization> createState() => _LocalizationState();
 
   static String setLocale(BuildContext context, Locale newLocale) {
-    _LocalizationState? state = context.findAncestorStateOfType<
-        _LocalizationState>();
+    _LocalizationState? state =
+        context.findAncestorStateOfType<_LocalizationState>();
     state?.setLocale(newLocale);
     return getLocale(context);
   }
 
   static String getLocale(BuildContext context) {
-    _LocalizationState? state = context.findAncestorStateOfType<_LocalizationState>();
-    if(state?._locale?.languageCode == "he") {
+    _LocalizationState? state =
+        context.findAncestorStateOfType<_LocalizationState>();
+    if (state?._locale?.languageCode == "he") {
       return "עברית";
     }
-    if(state?._locale?.languageCode == "ar") {
+    if (state?._locale?.languageCode == "ar") {
       return "اَلْعَرَبِيَّةُ";
     }
     return "English";
   }
-
 }
-
 
 class _LocalizationState extends State<Localization> {
   Locale? _locale;
@@ -72,6 +69,7 @@ class _LocalizationState extends State<Localization> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -80,14 +78,14 @@ class _LocalizationState extends State<Localization> {
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         onGenerateRoute: CustomRouter.generatedRoute,
-        initialRoute: FirebaseAuth.instance.currentUser != null ? loadHomePageRoute : welcomePageRoute,
+        initialRoute: FirebaseAuth.instance.currentUser != null
+            ? loadHomePageRoute
+            : welcomePageRoute,
         locale: _locale,
         theme: Theme.of(context).copyWith(
           colorScheme:
-          Theme.of(context).colorScheme.copyWith(primary: defaultColor),
+              Theme.of(context).colorScheme.copyWith(primary: defaultColor),
           scaffoldBackgroundColor: backgroundColor,
-        )
-    );
+        ));
   }
 }
-

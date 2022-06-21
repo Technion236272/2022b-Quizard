@@ -371,7 +371,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                     if (!incremented) {
                       gameModel.currentQuestionIndex++;
 
-                      if (gameModel.currentQuestionIndex >= roundsPerGame) {
+                      if (gameModel.currentQuestionIndex >=
+                          gameModel.roundsPerGame) {
                         _delayNavigator = Timer(
                             const Duration(seconds: delayScoreResult), () {
                           Navigator.pushReplacement<void, void>(
