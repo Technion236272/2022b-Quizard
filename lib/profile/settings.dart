@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:yaml/yaml.dart';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -195,11 +196,11 @@ class ChangeEmailForm extends StatelessWidget {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Email can't be empty";
+                  return translation(context).snackBar23;
                 }
                 if (!RegExp("^[a-zA-Z0-9+_.~]+@[a-zA-Z0-9.-]+.[a-z]")
                     .hasMatch(value)) {
-                  return "Email must be valid";
+                  return translation(context).snackBar24;
                 }
                 return null;
               },
@@ -229,7 +230,7 @@ class ChangeEmailForm extends StatelessWidget {
                         if (user["email"] == enteredEmail) {
                           foundUser = true;
                           Navigator.of(context).pop(true);
-                          constSnackBar("Email already exists", context);
+                          constSnackBar(translation(context).snackBar25, context);
                         }
                       }
                     });
@@ -380,11 +381,11 @@ class ChangeUsernameForm extends StatelessWidget {
               controller: _textController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Username can't be empty";
+                  return translation(context).snackBar26;
                 }
                 bool? hasShtrudel = value.contains("@");
                 if (hasShtrudel) {
-                  return "Username can't have '@' in it";
+                  return translation(context).snackBar27;
                 }
                 return null;
               },

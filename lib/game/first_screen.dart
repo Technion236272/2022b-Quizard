@@ -28,7 +28,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
@@ -54,7 +54,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   void dispose() {
     _controller.dispose();
     _timer.cancel();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -71,18 +71,17 @@ class _FirstGameScreenState extends State<FirstGameScreen>
         barrierDismissible: false, // user must tap button
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Game Exited'),
+            title: Text(translation(context).gameExited),
             content: SingleChildScrollView(
               child: ListBody(
-                children: const [
-                  Text('You were kicked from the game because'
-                      ' your app has been paused.'),
+                children: [
+                  Text(translation(context).kickReason),
                 ],
               ),
             ),
             actions: [
               TextButton(
-                child: const Text('OK'),
+                child: Text(translation(context).ok),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -172,7 +171,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
       return Consumer<GameModel>(builder: (context, gameModel, child) {
         Future<Text> _scoreFuture() async {
           return await gameRef.get().then((game) {
-            return Text("Score: ${game["player$i"]["score"]}",
+            return Text(translation(context).score + "${game["player$i"]["score"]}",
                 style: const TextStyle(fontSize: 24));
           });
         }
@@ -268,7 +267,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        .addPostFrameCallback((_) => Navigator.pushReplacement(
+                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
                               context,
                               PageRouteBuilder(
                                 pageBuilder:

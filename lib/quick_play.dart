@@ -165,7 +165,7 @@ class _QuickPlayState extends State<QuickPlay> {
                                 gameModel.updateOfficial(
                                     game, loginModel.username);
                                 WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
+                                    ?.addPostFrameCallback((_) {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(

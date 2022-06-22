@@ -48,6 +48,11 @@
   "snackBar20": "Usernames should contain 1-12 characters",
   "snackBar21": "Usernames shouldn't contain '@'",
   "snackBar22": "There should be at least 2 players",
+  "snackBar23": "Email can't be empty",
+  "snackBar24": "Email must be valid",
+  "snackBar25": "Email already exists",
+  "snackBar26": "Username can't be empty",
+  "snackBar27": "Username can't have '@' in it",
   "passwordChanged": "Changed password successfully",
   "somethingIsWrong": "Something went wrong",
   "selectAvatar": "Select your avatar by clicking the photo below",
@@ -141,5 +146,10 @@
   "rounds5": "5 ROUNDS",
   "rounds7": "7 ROUNDS",
   "game": " Game ",
-  "players1": " Players)"
+  "players1": " Players)",
+  "gameExited": "Game Exited",
+  "kickReason": "You were kicked from the game because\n your app has been paused.",
+  "ok": "OK",
+  "bonus": "Bonus!",
+  "correct": "Correct!"
 }
