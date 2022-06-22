@@ -3,10 +3,11 @@ import 'package:confetti/confetti.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../consts.dart';
 import '../home.dart';
 import '../providers.dart';
+import 'package:quizard/localization/classes/language_constants.dart';
+
 
 class ScoreBoard extends StatefulWidget {
   const ScoreBoard({Key? key}) : super(key: key);
@@ -192,7 +193,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
                             primary: defaultColor,
                             minimumSize:
                                 const Size.fromHeight(50)), // max width
-                        child: const Text('End Game', // TODO: Translate
+                        child: Text(translation(context).endGame,
                             style: TextStyle(fontSize: 18)),
                         onPressed: () {
                           gameModel.resetData();

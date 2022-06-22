@@ -13,6 +13,8 @@
   "players": "שחקנים",
   "questions": "שאלות",
   "question": "שאלה",
+  "questions1": "שאלות",
+  "question1": "שאלה",
   "answer": "תשובה",
   "settings": "הגדרות",
   "addQuestionsCustom": "הוסף שאלות למשחקים בהתאמה אישית.",
@@ -45,6 +47,7 @@
   "snackBar18": "אירעה שגיאה בכניסה דרך פייסבוק. אנא נסה שוב.",
   "snackBar20": "השם משתמש חייב להיות בין 1-12 תווים",
   "snackBar21": "השם משתמש לא יכול לכלול '@'",
+  "snackBar22": "There should be at least 2 players",
   "passwordChanged": "סיסמתך שונתה בהצלחה!",
   "somethingIsWrong": "משהו השתבש.",
   "selectAvatar": "בחר את תמונת הפרופיל שלך על ידי לחיצה על האייקון למטה.",
@@ -130,5 +133,13 @@
   "gameIsFull": "המשחק מלא",
   "noPublicGames": "לא מצאנו משחקים פנויים",
   "waitForPlayers": "המתן לשחקנים אחרים...",
-  "gameWillStartSoon": "המשחק מיד מתחיל."
+  "gameWillStartSoon": "המשחק מיד מתחיל.",
+  "endGame": "סיום",
+  "copied": "העתקת ",
+  "toClipboard": " ללוח",
+  "rounds3": "3 סיבובים",
+  "rounds5": "5 סיבובים",
+  "rounds7": "7 סיבובים",
+  "game": " משחק ",
+  "players1": " שחקנים)"
 }

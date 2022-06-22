@@ -31,7 +31,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
@@ -41,7 +41,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   void dispose() {
     _controller.dispose();
     _delayNavigator?.cancel();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 

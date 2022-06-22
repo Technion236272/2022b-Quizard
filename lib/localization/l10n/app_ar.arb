@@ -14,6 +14,8 @@
   "questions": "الاسئلة",
   "question": "سؤال",
   "answer": "اجابة",
+  "questions1": "اسئلة",
+  "question1": "سؤال",
   "settings": "الاعدادات",
   "addQuestionsCustom": "قم باضافة اسئلة للالعاب المخصصة.",
   "addYourQuestion": "اضف سؤالًا",
@@ -45,6 +47,7 @@
   "snackBar18": "حصل خطأ ما. حاول مرة اخرى.",
   "snackBar20": "على الاسم الشخصي ان يكون بين 1-12 منازل",
   "snackBar21": "على الاسم الشخصي الا يحتوي على'@'",
+  "snackBar22": "There should be at least 2 players",
   "passwordChanged": "قمت بتغيير كلمة السر بنجاح",
   "somethingIsWrong": "حدث خطأ ما",
   "selectAvatar": "انقر على الايقونة لاختيار صورة جديدة",
@@ -130,5 +133,13 @@
   "gameIsFull": "امتلأت اللعبة",
   "noPublicGames": "لم نجد اي العاب متوفرة",
   "waitForPlayers": "انتظر باقي اللاعبين...",
-  "gameWillStartSoon": "اللعبة ستبدأ في أي وقت الان."
+  "gameWillStartSoon": "اللعبة ستبدأ في أي وقت الان.",
+  "endGame": "خروج",
+  "copied": "نسخ ",
+  "toClipboard": " للشاشة",
+  "rounds3": "3 جولات",
+  "rounds5": "5 جولات",
+  "rounds7": "7 جولات",
+  "game": " اللعبة ",
+  "players1": " اللاعبون)"
 }
