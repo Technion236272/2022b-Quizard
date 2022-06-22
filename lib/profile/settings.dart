@@ -309,7 +309,7 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                   child: Container(
                     child: Row(children: [
                       Container(
-                        width: 100,
+                        width: 95,
                         child: value == null
                             ? Text(Localization.getLocale(context),
                         style: TextStyle(fontSize: 17)) : Text(value!.name,
