@@ -31,7 +31,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
@@ -41,7 +41,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   void dispose() {
     _controller.dispose();
     _delayNavigator?.cancel();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -58,18 +58,17 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         barrierDismissible: false, // user must tap button
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Game Exited'),
+            title: Text(translation(context).gameExited),
             content: SingleChildScrollView(
               child: ListBody(
-                children: const [
-                  Text('You were kicked from the game because'
-                      ' your app has been paused.'),
+                children: [
+                  Text(translation(context).kickReason),
                 ],
               ),
             ),
             actions: [
               TextButton(
-                child: const Text('OK'),
+                child: Text(translation(context).ok),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -195,7 +194,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                      "Score: ${gameModel.players[i]["score"]}",
+                                      translation(context).score + "${gameModel.players[i]["score"]}",
                                       style: const TextStyle(fontSize: 24)),
                                   Row(children: [
                                     const Icon(
@@ -284,7 +283,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         if (gameModel.roundScoreView >= 0) {
           Text bonusText = const Text("");
           if (_bonus > 0) {
-            bonusText = Text("+$_bonus Bonus!",
+            bonusText = Text("+$_bonus " + translation(context).bonus,
                 style: const TextStyle(
                   fontSize: 20,
                   color: bonusColor,
@@ -338,7 +337,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
               child: ShowUp(
                   delay: 100,
                   child: Column(children: [
-                    Text("+${gameModel.roundScoreView} Correct!",
+                    Text("+${gameModel.roundScoreView} " + translation(context).correct,
                         style: const TextStyle(
                           fontSize: 24,
                           color: greenColor,

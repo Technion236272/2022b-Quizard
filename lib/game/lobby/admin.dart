@@ -141,10 +141,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                   String optionText;
                   if (option[2] == 1) {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} question";
+                        "${option[0]}, by ${option[1]}, ${option[2]} " + translation(context).question1;
                   } else {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} questions";
+                        "${option[0]}, by ${option[1]}, ${option[2]} " + translation(context).questions1;
                   }
                   return GestureDetector(
                     onTap: () {
@@ -248,6 +248,24 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Consumer<GameModel> _settingsButton(String text) {
+    String getLocalizedFieldValue(String field, BuildContext context) {
+      switch (field) {
+        case "PIN CODE":
+          return translation(context).pinCode;
+        case "UNLOCKED":
+          return translation(context).unlocked;
+        case "LOCKED":
+          return translation(context).locked;
+        case "3 ROUNDS":
+          return translation(context).rounds3;
+        case "5 ROUNDS":
+          return translation(context).rounds5;
+        case "7 ROUNDS":
+          return translation(context).rounds7;
+      }
+
+      return "";
+    }
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final gameRef = FirebaseFirestore.instance
           .collection('$firestoreMainPath/${gameModel.gamePath}')
@@ -268,7 +286,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(
                           content:
-                              Text('Copied ${gameModel.pinCode} to clipboard'),
+                              Text(translation(context).copied + "${gameModel.pinCode}" + translation(context).toClipboard),
                           duration: const Duration(days: 365),
                           action: SnackBarAction(
                             label: translation(context).dismiss,
@@ -306,9 +324,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     break;
                 }
               },
-              child: Text(text)
-              // TODO: Fix translation
-              //child: Text(getLocalizedFieldValue(text, context)),
+              child: Text(getLocalizedFieldValue(text, context))
               ));
     });
   }
@@ -336,7 +352,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           child: Column(
             children: [
               Text(
-                '$privacy Game ($numOfPlayers/$maxPlayers Players)',
+                '$privacy' + translation(context).game + '($numOfPlayers/$maxPlayers' + translation(context).players1,
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
@@ -602,7 +618,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       int playerIndex = gameModel.getPlayerIndexByUsername(loginModel.username);
       gameModel.playerIndex = playerIndex;
       if (gameModel.getNumOfPlayers() < 2) {
-        constSnackBar("There should be at least 2 players", context);
+        constSnackBar(translation(context).snackBar22, context);
       } else if (!(await _buildQuestions())) {
         constSnackBar(translation(context).snackBar6, context);
       } else {
