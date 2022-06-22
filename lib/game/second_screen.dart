@@ -194,7 +194,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                      translation(context).score + "${gameModel.players[i]["score"]}",
+                                      translation(context).score +
+                                          "${gameModel.players[i]["score"]}",
                                       style: const TextStyle(fontSize: 24)),
                                   Row(children: [
                                     const Icon(
@@ -280,7 +281,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           _calculatedFinalScores = true;
         }
 
-        if (gameModel.roundScoreView >= 0) {
+        if (gameModel.roundScoreView > 0) {
           Text bonusText = const Text("");
           if (_bonus > 0) {
             bonusText = Text("+$_bonus " + translation(context).bonus,
@@ -337,7 +338,9 @@ class _SecondGameScreenState extends State<SecondGameScreen>
               child: ShowUp(
                   delay: 100,
                   child: Column(children: [
-                    Text("+${gameModel.roundScoreView} " + translation(context).correct,
+                    Text(
+                        "+${gameModel.roundScoreView} " +
+                            translation(context).correct,
                         style: const TextStyle(
                           fontSize: 24,
                           color: greenColor,
