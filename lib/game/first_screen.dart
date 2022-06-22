@@ -24,11 +24,12 @@ class _FirstGameScreenState extends State<FirstGameScreen>
   late AnimationController _controller;
   late Timer _timer;
   bool _enableSubmitAnswer = true;
+  late Countdown timerView; // used to show time only
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
@@ -48,13 +49,18 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     gameModel.resetFalseAnswers();
     gameModel.resetSelectedAnswers();
     gameModel.falseAnswerController.text = '';
+    timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(_controller));
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _timer.cancel();
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -116,6 +122,12 @@ class _FirstGameScreenState extends State<FirstGameScreen>
       }
     });
 
+    var timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(_controller));
+
     Future<void> _submitFalseAnswer() async {
       FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
 
@@ -131,12 +143,11 @@ class _FirstGameScreenState extends State<FirstGameScreen>
 
       // act only if their is a concrete input, or if time is over
       if (gameModel.falseAnswerController.text.replaceAll(" ", "") != "" ||
-          gameModel.timeOut) {
+          timerView.animation.value == 0) {
         setState(() {
           _enableSubmitAnswer = false;
         });
         gameModel.selectedCorrectAnswer = false;
-        gameModel.timeOut = false;
         String submittedFalseAnswer = gameModel.falseAnswerController.text;
         int currentScore = 0;
         // smoother on dismiss keyboard and submit with this delay
@@ -155,23 +166,17 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     _timer = Timer(const Duration(seconds: timePerScreen), () {
       // if time out, submit
       if (_enableSubmitAnswer == true) {
-        gameModel.timeOut = true;
         gameModel.falseAnswerController.text = " ";
         _submitFalseAnswer();
       }
     });
 
-    var timerView = Countdown(
-        animation: StepTween(
-      begin: timePerScreen,
-      end: 0,
-    ).animate(_controller));
-
     Consumer<GameModel> _firstScreenBody() {
       return Consumer<GameModel>(builder: (context, gameModel, child) {
         Future<Text> _scoreFuture() async {
           return await gameRef.get().then((game) {
-            return Text(translation(context).score + "${game["player$i"]["score"]}",
+            return Text(
+                translation(context).score + "${game["player$i"]["score"]}",
                 style: const TextStyle(fontSize: 24));
           });
         }
@@ -267,7 +272,7 @@ class _FirstGameScreenState extends State<FirstGameScreen>
                   if (!falseAnswers.contains("")) {
                     // if all submitted
                     WidgetsBinding.instance
-                        ?.addPostFrameCallback((_) => Navigator.pushReplacement(
+                        .addPostFrameCallback((_) => Navigator.pushReplacement(
                               context,
                               PageRouteBuilder(
                                 pageBuilder:

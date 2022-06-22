@@ -98,10 +98,6 @@ class _AnswerState extends State<Answer> with TickerProviderStateMixin {
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       _timer = Timer(const Duration(seconds: timePerScreen), () async {
         if (mounted) {
-          // if time out
-          if (gameModel.timeOut) {
-            gameModel.timeOut = false;
-          }
           // if didn't select answer - select demi
           if (gameModel.selectedAnswer.isEmpty &&
               gameModel.players[i]["selected_answer"].isEmpty) {

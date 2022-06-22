@@ -261,7 +261,6 @@ class GameModel extends ChangeNotifier {
   bool _isOfficial = false;
   bool _selectedCorrectAnswer = false;
   String _selectedAnswer = "";
-  bool _timeOut = false;
   String _pinCode = 'null';
   String _gamePath = "custom_games";
   int playerIndex = 0; // Starts from 0 for admin
@@ -281,7 +280,6 @@ class GameModel extends ChangeNotifier {
   bool get isOfficial => _isOfficial;
   bool get selectedCorrectAnswer => _selectedCorrectAnswer;
   String get selectedAnswer => _selectedAnswer;
-  bool get timeOut => _timeOut;
   String get pinCode => _pinCode;
   String get gamePath => _gamePath;
   List<String> get officialCategories => _officialCategories; // For admin
@@ -299,11 +297,6 @@ class GameModel extends ChangeNotifier {
 
   set players(List<Map<String, dynamic>> players) {
     _playersMaps = players;
-    notifyListeners();
-  }
-
-  set timeOut(bool value) {
-    _timeOut = value;
     notifyListeners();
   }
 

@@ -39,3 +39,93 @@ void constSnackBar(String text, BuildContext context) {
       .closed
       .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
 }
+
+// Shadows
+const wrongShadows = <Shadow>[
+  Shadow(
+    offset: Offset(-1.0, 1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(1.0, -1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(-1.0, -1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(1.0, 1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+];
+
+const correctShadows = <Shadow>[
+  Shadow(
+    offset: Offset(-1.0, 1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(1.0, -1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(-1.0, -1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+  Shadow(
+    offset: Offset(1.0, 1.0),
+    blurRadius: 8.0,
+    color: defaultColor,
+  ),
+];
+
+const bonusShadows = <Shadow>[
+  Shadow(
+    offset: Offset(2.0, -2.0),
+    blurRadius: 3.0,
+    color: secondaryColor,
+  ),
+  Shadow(
+    offset: Offset(-2.0, 2.0),
+    blurRadius: 3.0,
+    color: secondaryColor,
+  ),
+  Shadow(
+    offset: Offset(-2.0, -2.0),
+    blurRadius: 3.0,
+    color: secondaryColor,
+  ),
+  Shadow(
+    offset: Offset(2.0, 2.0),
+    blurRadius: 3.0,
+    color: secondaryColor,
+  ),
+  Shadow(
+    offset: Offset(-2.0, 2.0),
+    blurRadius: 8.0,
+    color: lightBlueColor,
+  ),
+  Shadow(
+    offset: Offset(2.0, -2.0),
+    blurRadius: 8.0,
+    color: lightBlueColor,
+  ),
+  Shadow(
+    offset: Offset(-2.0, -2.0),
+    blurRadius: 8.0,
+    color: lightBlueColor,
+  ),
+  Shadow(
+    offset: Offset(2.0, 2.0),
+    blurRadius: 8.0,
+    color: lightBlueColor,
+  ),
+];

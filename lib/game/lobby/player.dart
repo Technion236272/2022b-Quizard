@@ -116,7 +116,9 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               Clipboard.setData(ClipboardData(text: gameModel.pinCode));
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(
-                    content: Text(translation(context).copied + "${gameModel.pinCode}" + translation(context).toClipboard),
+                    content: Text(translation(context).copied +
+                        "${gameModel.pinCode}" +
+                        translation(context).toClipboard),
                     duration: const Duration(days: 365),
                     action: SnackBarAction(
                       label: translation(context).dismiss,
@@ -407,11 +409,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance?.addPostFrameCallback(
+                            WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => _dialogGameClosed(),
                               );
                             }
@@ -436,11 +438,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance?.addPostFrameCallback(
+                                WidgetsBinding.instance.addPostFrameCallback(
                                   (_) => _dialogKickedByAdmin(),
                                 );
                               }
@@ -452,7 +454,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                                   gameModel.getPlayerIndexByUsername(
                                       loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance?.addPostFrameCallback((_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
