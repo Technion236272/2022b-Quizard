@@ -40,7 +40,7 @@ class Rules extends StatelessWidget {
                               Navigator.of(context).pop();
                             })
                       ]),
-                  const Padding(padding: EdgeInsets.all(20)),
+                  const Padding(padding: EdgeInsets.all(10)),
                   const Image(image: AssetImage('images/titles/rules.png')),
                   const Padding(padding: EdgeInsets.all(10)),
                   Container(
@@ -54,12 +54,12 @@ class Rules extends StatelessWidget {
                           Text(translation(context).players,
                               textAlign: TextAlign.left,
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                                  fontSize: 17, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(2)),
                           const Text(
                             '2-5',
                             style:
-                                TextStyle(color: darkGreyColor, fontSize: 16),
+                                TextStyle(color: darkGreyColor, fontSize: 15),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -76,12 +76,12 @@ class Rules extends StatelessWidget {
                           Text(translation(context).goal,
                               textAlign: TextAlign.left,
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                                  fontSize: 17, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(2)),
                           Text(
                             translation(context).infoText1,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -97,30 +97,30 @@ class Rules extends StatelessWidget {
                         children: [
                           Text(translation(context).roundGameplay,
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                                  fontSize: 17, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(3)),
                           Text(
                             translation(context).infoText2,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText3,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText4,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText5,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -130,25 +130,30 @@ class Rules extends StatelessWidget {
                     decoration: const BoxDecoration(
                         color: secondaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 150,
+                    height: 170,
                     width: 350,
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(translation(context).bonuses,
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                                  fontSize: 17, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(3)),
                           Text(
-                            translation(context).infoText6,
+                            translation(context).infoText8,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
-                            translation(context).infoText7,
+                            translation(context).infoText9,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 16),
+                                color: darkGreyColor, fontSize: 15),
+                          ),
+                          Text(
+                            translation(context).infoText10,
+                            style: const TextStyle(
+                                color: darkGreyColor, fontSize: 15),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
