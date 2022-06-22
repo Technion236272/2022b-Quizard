@@ -21,8 +21,9 @@ class Rules extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            color: backgroundColor,
+        backgroundColor: backgroundColor,
+        body: SingleChildScrollView(
+            reverse: true,
             child: Padding(
                 padding: const EdgeInsets.all(appbarPadding),
                 child:
@@ -40,7 +41,7 @@ class Rules extends StatelessWidget {
                               Navigator.of(context).pop();
                             })
                       ]),
-                  const Padding(padding: EdgeInsets.all(10)),
+                  const Padding(padding: EdgeInsets.all(20)),
                   const Image(image: AssetImage('images/titles/rules.png')),
                   const Padding(padding: EdgeInsets.all(10)),
                   Container(
@@ -54,12 +55,12 @@ class Rules extends StatelessWidget {
                           Text(translation(context).players,
                               textAlign: TextAlign.left,
                               style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold)),
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(2)),
                           const Text(
                             '2-5',
                             style:
-                                TextStyle(color: darkGreyColor, fontSize: 15),
+                                TextStyle(color: darkGreyColor, fontSize: 17),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -76,12 +77,12 @@ class Rules extends StatelessWidget {
                           Text(translation(context).goal,
                               textAlign: TextAlign.left,
                               style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold)),
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(2)),
                           Text(
                             translation(context).infoText1,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -97,30 +98,30 @@ class Rules extends StatelessWidget {
                         children: [
                           Text(translation(context).roundGameplay,
                               style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold)),
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(3)),
                           Text(
                             translation(context).infoText2,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText3,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText4,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText5,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
@@ -130,30 +131,58 @@ class Rules extends StatelessWidget {
                     decoration: const BoxDecoration(
                         color: secondaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(10))),
-                    height: 170,
                     width: 350,
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(translation(context).bonuses,
+                              textAlign: TextAlign.left,
                               style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold)),
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const Padding(padding: EdgeInsets.all(3)),
+                          Text(
+                            translation(context).infoText6,
+                            style: const TextStyle(
+                                color: darkGreyColor, fontSize: 17),
+                          ),
+                          const Padding(padding: EdgeInsets.all(4)),
+                          Text(
+                            translation(context).infoText7,
+                            style: const TextStyle(
+                                color: darkGreyColor, fontSize: 17),
+                          ),
+                        ]),
+                    padding: const EdgeInsets.all(10),
+                  ),
+                  const Padding(padding: EdgeInsets.all(5)),
+                  Container(
+                    decoration: const BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    width: 350,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(translation(context).calcPoints,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                           const Padding(padding: EdgeInsets.all(3)),
                           Text(
                             translation(context).infoText8,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                           const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText9,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
+                          const Padding(padding: EdgeInsets.all(4)),
                           Text(
                             translation(context).infoText10,
                             style: const TextStyle(
-                                color: darkGreyColor, fontSize: 15),
+                                color: darkGreyColor, fontSize: 17),
                           ),
                         ]),
                     padding: const EdgeInsets.all(10),
