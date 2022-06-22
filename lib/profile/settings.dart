@@ -305,15 +305,19 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                     BoxShadow(color: darkGreyColor, blurRadius: 1)
                   ]),
               child: Padding(
-                  padding: EdgeInsets.only(left: 30, right: 30),
+                  padding: EdgeInsets.only(left: 10, right: 10),
                   child: Container(
                     child: Row(children: [
-                      value == null
-                          ? Text(Localization.getLocale(context))
-                          : Text(value!.name),
+                      Container(
+                        width: 100,
+                        child: value == null
+                            ? Text(Localization.getLocale(context),
+                        style: TextStyle(fontSize: 17)) : Text(value!.name,
+                            style: TextStyle(fontSize: 17)),),
                       DropdownButton<Language>(
                           icon: Icon(Icons.arrow_drop_down),
-                          underline: Container(),
+                          underline: Container(
+                          ),
                           style: TextStyle(fontSize: 18, color: Colors.black),
                           items: Language.languageList()
                               .map(
