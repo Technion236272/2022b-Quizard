@@ -27,21 +27,27 @@ class _SecondGameScreenState extends State<SecondGameScreen>
   Timer? _delayNavigator;
   bool _calculatedFinalScores = false;
   int _bonus = 0;
+  late Countdown timerView; // used to show time only
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
+    timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(_controller));
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _delayNavigator?.cancel();
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -169,13 +175,6 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     }
 
     Consumer<GameModel> _secondScreenBody() {
-      // used to show time only
-      Countdown timerView = Countdown(
-          animation: StepTween(
-        begin: timePerScreen,
-        end: 0,
-      ).animate(_controller));
-
       return Consumer<GameModel>(builder: (context, gameModel, child) {
         return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -194,7 +193,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                      translation(context).score + "${gameModel.players[i]["score"]}",
+                                      translation(context).score +
+                                          "${gameModel.players[i]["score"]}",
                                       style: const TextStyle(fontSize: 24)),
                                   Row(children: [
                                     const Icon(
@@ -280,112 +280,58 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           _calculatedFinalScores = true;
         }
 
-        if (gameModel.roundScoreView >= 0) {
+        if (gameModel.roundScoreView > 0) {
           Text bonusText = const Text("");
           if (_bonus > 0) {
             bonusText = Text("+$_bonus " + translation(context).bonus,
                 style: const TextStyle(
-                  fontSize: 20,
-                  color: bonusColor,
-                  fontWeight: FontWeight.bold,
-                  shadows: <Shadow>[
-                    Shadow(
-                      offset: Offset(2.0, -2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                    Shadow(
-                      offset: Offset(-2.0, 2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                    Shadow(
-                      offset: Offset(-2.0, -2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                    Shadow(
-                      offset: Offset(2.0, 2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                    Shadow(
-                      offset: Offset(-2.0, 2.0),
-                      blurRadius: 8.0,
-                      color: lightBlueColor,
-                    ),
-                    Shadow(
-                      offset: Offset(2.0, -2.0),
-                      blurRadius: 8.0,
-                      color: lightBlueColor,
-                    ),
-                    Shadow(
-                      offset: Offset(-2.0, -2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                    Shadow(
-                      offset: Offset(2.0, 2.0),
-                      blurRadius: 3.0,
-                      color: secondaryColor,
-                    ),
-                  ],
-                ));
+                    fontSize: 20,
+                    color: bonusColor,
+                    fontWeight: FontWeight.bold,
+                    shadows: bonusShadows));
           }
           return Padding(
               padding: const EdgeInsets.only(top: 30),
               child: ShowUp(
                   delay: 100,
                   child: Column(children: [
-                    Text("+${gameModel.roundScoreView} " + translation(context).correct,
+                    Text(
+                        "+${gameModel.roundScoreView} " +
+                            translation(context).correct,
                         style: const TextStyle(
                           fontSize: 24,
                           color: greenColor,
                           fontWeight: FontWeight.bold,
-                          shadows: <Shadow>[
-                            Shadow(
-                              offset: Offset(-1.0, 1.0),
-                              blurRadius: 8.0,
-                              color: defaultColor,
-                            ),
-                            Shadow(
-                              offset: Offset(1.0, -1.0),
-                              blurRadius: 8.0,
-                              color: defaultColor,
-                            ),
-                            Shadow(
-                              offset: Offset(-1.0, -1.0),
-                              blurRadius: 8.0,
-                              color: defaultColor,
-                            ),
-                            Shadow(
-                              offset: Offset(1.0, 1.0),
-                              blurRadius: 8.0,
-                              color: defaultColor,
-                            ),
-                          ],
+                          shadows: correctShadows,
                         )),
                     bonusText
                   ])));
         } else {
-          // else show in red color
-          return const Padding(
-              padding: EdgeInsets.only(top: 30),
-              child: ShowUp(
-                  delay: 100,
-                  child: Text("+0",
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: redColor,
-                        fontWeight: FontWeight.bold,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(2.0, 2.0),
-                            blurRadius: 8.0,
-                            color: defaultColor,
-                          ),
-                        ],
-                      ))));
+          // if time out
+          if (timerView.animation.value == 0) {
+            return const Padding(
+                padding: EdgeInsets.only(top: 30),
+                child: ShowUp(
+                    delay: 100,
+                    child: Text("Time Out",
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: redColor,
+                            fontWeight: FontWeight.bold,
+                            shadows: wrongShadows))));
+          } else {
+            // else wrong answer
+            return const Padding(
+                padding: EdgeInsets.only(top: 30),
+                child: ShowUp(
+                    delay: 100,
+                    child: Text("Wrong",
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: redColor,
+                            fontWeight: FontWeight.bold,
+                            shadows: wrongShadows))));
+          }
         }
       });
     }
