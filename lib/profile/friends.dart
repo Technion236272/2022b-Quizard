@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../consts.dart';
@@ -88,8 +89,8 @@ class _FindFriendPageState extends State<FindFriendPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: const Text('Not Found'),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
+          content: Text(translation(context).notFound),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context).ok))],
         );
       },
     );
@@ -100,8 +101,8 @@ class _FindFriendPageState extends State<FindFriendPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: const Text('Already A Friend'),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
+          content: Text(translation(context).alreadyAFriend),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context).ok))],
         );
       },
     );
@@ -209,7 +210,7 @@ class _FindFriendPageState extends State<FindFriendPage> {
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
       return Scaffold(
         backgroundColor: secondaryColor,
-        appBar: AppBar(title: const Text('Find friend')),
+        appBar: AppBar(title: Text(translation(context).findFriend)),
         body: isSearching
             ? const Center(child: CircularProgressIndicator())
             : ListView(
@@ -218,15 +219,15 @@ class _FindFriendPageState extends State<FindFriendPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0, top: 16.0),
               child: TextField(
-                decoration: const InputDecoration(border: OutlineInputBorder(), labelText: "Friend's email or username"),
+                decoration: InputDecoration(border: OutlineInputBorder(), labelText: translation(context).friendsEmailOrUsername),
                 onChanged: (val) => setState(() => email = val),
               ),
             ),
             ElevatedButton(
               onPressed: findUser,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: Text('Find'),
+                child: Text(translation(context).find),
               ),
             ),
             Padding(
@@ -247,9 +248,9 @@ class _FindFriendPageState extends State<FindFriendPage> {
                     child: ListTile(
                       title: foundFriend == false ? null : ElevatedButton(
                         onPressed: addFriend,
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(),
-                          child: Text('Add Friend'),
+                          child: Text(translation(context).addFriend),
                         ),),),),]
                 ,),),],),);
     });
@@ -276,8 +277,8 @@ class _FriendsState extends State<Friends> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(translation(context).deleteQuestion),
-            content: Text(translation(context).confirmDeletion),
+            title: Text(translation(context).deleteFriend),
+            content: Text(translation(context).confirmDeletion2),
             actions: <Widget>[
               TextButton(
                   onPressed: () async {
@@ -354,7 +355,7 @@ class _FriendsState extends State<Friends> {
                 onLongPress: () {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                    content: Text(translation(context).snackBar7),
+                    content: Text(translation(context).snackBar28),
                   ))
                       .closed
                       .then((value) =>
@@ -366,7 +367,7 @@ class _FriendsState extends State<Friends> {
                         screenHeight,
                         friendsList[i].name,
                         friendsList[i].profileImageLink,
-                        "wins: ${friendsList[i].wins}")))));
+                        translation(context).wins1 + "${friendsList[i].wins}")))));
       }
 
     return trivia;
@@ -417,7 +418,7 @@ class _FriendsState extends State<Friends> {
                         padding: const EdgeInsets.all(10),
                         child: Center(
                             child: Text(
-                              translation(context).addQuestionsCustom,
+                              translation(context).addFriendsHere,
                               style: const TextStyle(fontSize: 22),
                               textAlign: TextAlign.center,
                             )));
