@@ -378,14 +378,11 @@ class _FriendsState extends State<Friends> {
                       .then((value) =>
                           ScaffoldMessenger.of(context).clearSnackBars());
                 },
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: friendsListItemWidget(
-                        screenHeight,
-                        friendsList[i].name,
-                        friendsList[i].profileImageLink,
-                        translation(context).wins1 +
-                            "${friendsList[i].wins}")))));
+                child: friendsListItemWidget(
+                    screenHeight,
+                    friendsList[i].name,
+                    friendsList[i].profileImageLink,
+                    translation(context).wins1 + "${friendsList[i].wins}"))));
       }
       return friends;
     }
