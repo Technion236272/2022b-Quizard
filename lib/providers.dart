@@ -261,6 +261,8 @@ class GameModel extends ChangeNotifier {
   ];
   int currentQuestionIndex = 0;
   int roundScoreView = 0; // "+num" in end game screen 2 for correct answer
+  int _correctAnswersInRow = 0;
+  int roundsPerGame = 5;
   bool _isPrivate = true;
   bool _isLocked = false;
   bool _isOfficial = false;
@@ -279,6 +281,7 @@ class GameModel extends ChangeNotifier {
   List<Widget> currentQuizOptions = [];
   final _falseAnswerController = TextEditingController();
 
+  int get correctAnswersInRow => _correctAnswersInRow;
   List<Map<String, dynamic>> get players => _playersMaps;
   bool get isPrivate => _isPrivate;
   bool get isLocked => _isLocked;
@@ -295,6 +298,11 @@ class GameModel extends ChangeNotifier {
   List<String> get gameAnswers => _gameAnswers;
   List<String> get gameCategories => _gameCategories;
   TextEditingController get falseAnswerController => _falseAnswerController;
+
+  set correctAnswersInRow(int value) {
+    _correctAnswersInRow = value;
+    notifyListeners();
+  }
 
   set players(List<Map<String, dynamic>> players) {
     _playersMaps = players;
@@ -534,9 +542,11 @@ class GameModel extends ChangeNotifier {
         "round_score": 0
       }
     ];
+    roundsPerGame = 5;
     currentQuestionIndex = 0;
     playerIndex = 0;
     roundScoreView = 0;
+    _correctAnswersInRow = 0;
     _isPrivate = true;
     _isLocked = false;
     _isOfficial = false;

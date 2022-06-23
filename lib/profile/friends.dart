@@ -2,12 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../consts.dart';
 import '../localization/classes/language_constants.dart';
 import '../providers.dart';
+
+class FriendsListModel{
+  String id;
+  String name;
+  String profileImageLink;
+  int wins;
+
+  FriendsListModel(this.id, this.name,this.profileImageLink, this.wins);
+
+}
+
+
+
 
 class FindFriendPage extends StatefulWidget {
 
@@ -33,13 +45,15 @@ class _FindFriendPageState extends State<FindFriendPage> {
         .get()
         .then((value) {
       List friends = value["friends"];
-      friends.add(friendName);
+      friends.add(friendId);
+
       FirebaseFirestore.instance
           .collection('$firestoreMainPath/users')
           .doc(loginModel.userId)
           .update({
         "friends": friends,
       });
+
       Provider.of<LoginModel>(context, listen: false)
           .notifyAddedFriend();
     });
@@ -50,20 +64,21 @@ class _FindFriendPageState extends State<FindFriendPage> {
         .get()
         .then((value) {
       List friends = value["friends"];
-      friends.add(loginModel.username);
+      friends.add(loginModel.userId);
       FirebaseFirestore.instance
           .collection('$firestoreMainPath/users')
           .doc(friendId)
           .update({
         "friends": friends,
       });
+
       Provider.of<LoginModel>(context, listen: false)
           .notifyAddedFriend();
+
       setState(() {
         foundFriend = false;
       });
     });
-
 
   }
 
@@ -92,7 +107,7 @@ class _FindFriendPageState extends State<FindFriendPage> {
     );
   }
 
-  void _friend(String username, String userId, int j) {
+  void _friend(String username, String userId) {
     Future<NetworkImage?> _getUserImage() async {
       final ref =
       FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
@@ -117,10 +132,7 @@ class _FindFriendPageState extends State<FindFriendPage> {
                 radius: 25);
           });
     }
-
-    friendName = username;
     friendImage = _getAvatarImage();
-    friendId = userId;
   }
 
   Future<void> findUser() async {
@@ -144,42 +156,50 @@ class _FindFriendPageState extends State<FindFriendPage> {
         return;
       }
     }
-    String username = '';
+
     await FirebaseFirestore.instance
         .collection('$firestoreMainPath/users')
         .get()
         .then((users) async {
       for (var user in users.docs) {
         if (user['email'] == email || user['username'] == email) {
-          username = user['username'];
+          friendName = user['username'];
           break;
         }
       }
     });
+
+    if (resultForEmail.docs.isEmpty) {
+      friendId = resultForName.docs.first.id;
+    }
+
+    else {
+      friendId = resultForEmail.docs.first.id;
+    }
+
     await FirebaseFirestore.instance
         .collection('$firestoreMainPath/users')
         .doc(loginModel.userId)
         .get()
         .then((value) {
       List friends = value["friends"];
-      for(var name in friends)
+      for (var id in friends)
         {
-          if (username == name) {
-            alreadyFriendDialog();
-            setState(() => isSearching = false);
-            return;
+          if (id == friendId) {
+              alreadyFriendDialog();
+              setState(() => isSearching = false);
+              friendId = '';
+              friendName = '';
+              return;
           }
         }
+
       setState(() {
         foundFriend = true;
         isSearching = false;
       });
-      if(resultForEmail.docs.isEmpty) {
-        _friend(username, resultForName.docs.first.id, 10);
-      }
-      else {
-        _friend(username, resultForEmail.docs.first.id, 10);
-      }
+
+      _friend(friendName, friendId);
     });
   }
 
@@ -245,57 +265,13 @@ class Friends extends StatefulWidget {
 
 
 class _FriendsState extends State<Friends> {
-  List friendsAvatars = [];
-  List friendsWins = [];
+  bool isDataLoading = false;
+  List<FriendsListModel> friendsList = [];
+  String userId = "null";
+  String username = "null";
 
-  Future<NetworkImage?> _getImage(String id) async {
-    final ref =
-    FirebaseStorage.instance.ref('images/profiles/$id.jpg');
-    final url = await ref.getDownloadURL();
-    return NetworkImage(url);
-  }
-  Future<int> getWins(String id) async {
-    int wins = 3;
-    return wins;
-  }
-
-  FutureBuilder<NetworkImage?> _getAvatar(String id) {
-    return FutureBuilder<NetworkImage?>(
-        future: _getImage(id),
-        builder: (context, snapshot) {
-          if (snapshot.hasData &&
-              snapshot.connectionState != ConnectionState.waiting) {
-            return CircleAvatar(
-                backgroundImage: snapshot.data,
-                backgroundColor: thirdColor,
-                radius: 25);
-          }
-          return const CircleAvatar(
-              backgroundImage: AssetImage('images/avatar.png'),
-              backgroundColor: thirdColor,
-              radius: 25);
-        });
-  }
-
-  Future<void> getFriendsAvatars(List friends) async {
-    for(int i=0; i<friends.length; i++) {
-      String currentFriendName = friends[i];
-      QuerySnapshot<Map<String, dynamic>> result =
-          await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: currentFriendName).get();
-      friendsAvatars.add(_getAvatar(result.docs.first.id));
-    }
-  }
-  Future<void> getFriendsWins(List friends) async {
-    for(int i=0; i<friends.length; i++) {
-      String currentFriendName = friends[i];
-      QuerySnapshot<Map<String, dynamic>> result =
-      await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: currentFriendName).get();
-      friendsWins.add(getWins(result.docs.first.id));
-    }
-  }
-
-  Future<bool?> _removeFriendDialog(
-      String userId, String username, String friend) {
+  Future<bool?> _removeFriendDialog(String userId, String username,
+      String friendId) {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -305,6 +281,11 @@ class _FriendsState extends State<Friends> {
             actions: <Widget>[
               TextButton(
                   onPressed: () async {
+                    for(int i = 0; i < friendsList.length; i++) {
+                      if(friendsList[i].id == friendId) {
+                        friendsList.removeAt(i);
+                      }
+                    }
                     await FirebaseFirestore.instance
                         .collection('$firestoreMainPath/users')
                         .doc(userId)
@@ -312,7 +293,7 @@ class _FriendsState extends State<Friends> {
                         .then((value) {
                       List friends = value["friends"];
                       for (int i = 0; i < friends.length; i++) {
-                        if (friends[i] == friend) {
+                        if (friends[i] == friendId) {
                           friends.removeAt(i);
                           break;
                         }
@@ -322,30 +303,26 @@ class _FriendsState extends State<Friends> {
                           .doc(userId)
                           .update({
                         "friends": friends,
-                      }).then((_) {
-                        Navigator.of(context).pop(true);
                       });
                     });
 
-                    QuerySnapshot<Map<String, dynamic>> result =
-                    await FirebaseFirestore.instance.collection('$firestoreMainPath/users').where('username', isEqualTo: friend).get();
-
                     await FirebaseFirestore.instance
                         .collection('$firestoreMainPath/users')
-                        .doc(result.docs.first.id)
+                        .doc(friendId)
                         .get()
                         .then((value) {
                       List friends = value["friends"];
-                      friends.remove(username);
+                      friends.remove(userId);
                       FirebaseFirestore.instance
                           .collection('$firestoreMainPath/users')
-                          .doc(result.docs.first.id)
+                          .doc(friendId)
                           .update({
                         "friends": friends,
                       }).then((_) {
                         Navigator.of(context).pop(true);
                       });
                     });
+
                   },
                   child: Text(translation(context).delete)),
               TextButton(
@@ -357,22 +334,14 @@ class _FriendsState extends State<Friends> {
   }
 
   Future<List<Dismissible>> _friendsListWidget(
-      BuildContext context, String userId, String username) async {
+      BuildContext context, loginModel,  double screenHeight, String userId, String username) async {
     List<Dismissible> trivia = <Dismissible>[];
-    await FirebaseFirestore.instance
-        .collection('$firestoreMainPath/users')
-        .doc(userId)
-        .get()
-        .then((value) async {
-      List friends = value["friends"];
-      await getFriendsAvatars(friends);
-      await getFriendsWins(friends);
-      for (int i = 0; i < friends.length; i++) {
+      for (int i = 0; i < friendsList.length; i++) {
         trivia.add(Dismissible(
             key: UniqueKey(),
             confirmDismiss: (DismissDirection direction) {
                 return _removeFriendDialog(
-                    userId, username, friends[i]);
+                    userId, username, friendsList[i].id);
             },
             background: Container(
               padding: const EdgeInsets.all(20),
@@ -380,7 +349,7 @@ class _FriendsState extends State<Friends> {
               child: const Icon(Icons.delete),
               alignment: AlignmentDirectional.centerStart,
             ),
-            //direction: DismissDirection.startToEnd,
+            direction: DismissDirection.endToStart,
             child: GestureDetector(
                 onLongPress: () {
                   ScaffoldMessenger.of(context)
@@ -391,59 +360,28 @@ class _FriendsState extends State<Friends> {
                       .then((value) =>
                       ScaffoldMessenger.of(context).clearSnackBars());
                 },
-                child: Column(
-            children: [
-            Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: MediaQuery.of(context).size.width * 0.1),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 9,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                       friendsAvatars[i],
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    Text(
-                      friends[i],
-                      style: TextStyle(
-                          fontSize: 18, color: defaultColor.withOpacity(0.5)),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                  flex: 1,
-                  child: Text(
-                    "3",
-                    style: TextStyle(fontSize: 18, color: defaultColor),
-                  )),
-            ],
-          ),
-        ),
-          Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.05),
-              child: Container(
-                height: 1,
-                color: Colors.grey.withOpacity(0.5),
-                width: MediaQuery.of(context).size.width,
-              ))
-          ],
-        ))));
+                child:  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: friendsListItemWidget(
+                        screenHeight,
+                        friendsList[i].name,
+                        friendsList[i].profileImageLink,
+                        "wins: ${friendsList[i].wins}")))));
       }
-    });
+
     return trivia;
   }
 
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height - 114;
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      if (userId == "null") {
+        userId = loginModel.userId;
+        username = loginModel.username;
+        getWinsData(userId, loginModel);
+      }
       return Scaffold(
           resizeToAvoidBottomInset: false,
           floatingActionButton: FloatingActionButton(
@@ -451,26 +389,27 @@ class _FriendsState extends State<Friends> {
               child: const Icon(Icons.person_add_alt_1_rounded),
               onPressed: () {
                 showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const FindFriendPage();
-                    }
-                ).then((value) =>
-                    SystemChrome.setEnabledSystemUIMode(
-                        SystemUiMode.manual,
-                        overlays: []));
+                context: context,
+                builder: (BuildContext context) {
+                  return const FindFriendPage();
+                }
+                ).then((value) {
+                getWinsData(userId, loginModel);
+                SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.manual,
+                overlays: []);});
               }),
           backgroundColor: secondaryBackgroundColor,
           body: FutureBuilder(
               future: _friendsListWidget(
-                  context,
+                  context, loginModel,
+                  screenHeight,
                   loginModel.userId.isEmpty
                       ? "${FirebaseAuth.instance.currentUser?.uid}"
-                      : loginModel.userId, loginModel.username),
+                      : loginModel.userId, username),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
                   loginModel.cachedFriendsList = snapshot.data;
-
                   if (snapshot.data.isNotEmpty) {
                     return ListView(children: loginModel.cachedFriendsList);
                   } else {
@@ -490,7 +429,159 @@ class _FriendsState extends State<Friends> {
                     return ListView(children: loginModel.cachedFriendsList);
                   }
                 }
-              }));
+                }
+              ));
     });
   }
+
+  Widget friendsListItemWidget(
+      screenHeight, name, profileImageLink, wins) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: MediaQuery.of(context).size.width * 0.1),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 9,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Image.network(profileImageLink, fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child,
+                            loadingProgress) {
+                          if (loadingProgress == null) {
+                            return CircleAvatar(
+                                backgroundColor: thirdColor,
+                                backgroundImage: NetworkImage(profileImageLink));
+                          }
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                child: const Icon(
+                                  Icons.account_circle,
+                                  size: 40,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const CircularProgressIndicator(
+                                valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.black45),
+                              ),
+                            ],
+                          );
+                        }), // CircleAvatar(
+                    //   backgroundImage: NetworkImage(profileImageLink),
+                    // ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.only(right: 13.0),
+                        child: Text(
+                          name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: defaultColor.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                  flex: 3,
+                  child: Text(
+                    wins,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: defaultColor.withOpacity(0.5),
+                    ),
+                  )),
+            ],
+          ),
+        ),
+        Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.05),
+            child: Container(
+              height: 1,
+              color: Colors.grey.withOpacity(0.5),
+              width: MediaQuery.of(context).size.width,
+            ))
+      ],
+    );
+  }
+
+  void getWinsData(userId, loginModel) {
+    FirebaseFirestore.instance
+        .collection('$firestoreMainPath/users')
+        .doc(loginModel.userId)
+        .get()
+        .then((value) async {
+      List friends = value["friends"];
+
+      FirebaseFirestore.instance
+          .collection('versions/v2/users')
+          .get()
+          .then((users) async {
+        setState(() {
+          isDataLoading = true;
+        });
+
+        List<FriendsListModel> tempfriendsList = [];
+
+
+        for (var user in users.docs) {
+          for(var friendId in friends) {
+            if(user.id == friendId) {
+            var url = "";
+            try {
+              final ref =
+              FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
+              url = await ref.getDownloadURL();
+            } catch (e) {
+              url = "";
+              debugPrint("No image found");
+            }
+
+            if (url == "") {
+              try {
+                url = user["photoLink"];
+              } catch (e) {
+                debugPrint("PhotoLink not present");
+              }
+            }
+
+            tempfriendsList.add(
+                FriendsListModel(user.id, user["username"], url, user["wins"]));
+            break;
+          }}}
+
+          setState(() {
+            tempfriendsList.sort((a, b) => a.wins.compareTo(b.wins));
+
+            friendsList.clear();
+            friendsList.addAll(tempfriendsList.reversed.toList());
+
+            isDataLoading = false;
+          });
+        }).onError((error, stackTrace) {
+          setState(() {
+            isDataLoading = false;
+          });
+      });
+    });
+  }
+
+
+
+
 }
+

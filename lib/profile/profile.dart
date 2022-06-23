@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/profile/friends.dart';
 
 import '../consts.dart';
 import '../localization/classes/language_constants.dart';
 import '../providers.dart';
-import 'friends.dart';
 import 'questions.dart';
 import 'settings.dart';
 
@@ -37,7 +37,8 @@ class Profile extends StatelessWidget {
                           backgroundImage: loginModel.getUserImage(),
                           backgroundColor: thirdColor,
                           radius: 35)),
-                  Column(
+                  Flexible(
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
@@ -65,7 +66,7 @@ class Profile extends StatelessWidget {
                         ),
                       )
                     ],
-                  )
+                  ))
                 ]),
                 Expanded(
                     child: DefaultTabController(

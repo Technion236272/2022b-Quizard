@@ -75,12 +75,25 @@ class LoadHomePage extends StatelessWidget {
     Future<bool> _prepHomePage() async {
       final loginModel = Provider.of<LoginModel>(context, listen: false);
       final currentUser = AuthModel.instance().user!;
+      final gamesRef = FirebaseFirestore.instance
+          .collection("$firestoreMainPath/official_games");
       return await FirebaseFirestore.instance
           .collection("$firestoreMainPath/users")
           .get()
           .then((users) async {
         for (var user in users.docs) {
           if (currentUser.uid == user.id) {
+            await gamesRef.get().then((games) {
+              for (var game in games.docs) {
+                if (!game["is_locked"]) {
+                  for (int i = 0; i < maxPlayers; i++) {
+                    if (game["player$i"]["username"] == user["username"]) {
+                      game.reference.update({"player$i.username": ""});
+                    }
+                  }
+                }
+              }
+            });
             loginModel.setUserId(user.id);
             loginModel.setEmail(user["email"]);
             loginModel.setUsername(user["username"]);
@@ -161,7 +174,7 @@ class _WelcomePageState extends State<WelcomePage> {
       final url = await ref.getDownloadURL();
       loginModel.setUserImageUrl(url);
       loginModel.logIn();
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (context) => const HomePage()));
       loginModel.toggleLogging();
     }
@@ -365,7 +378,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     users.doc(value.uid).set(userToAdd);
                                     login(
                                         "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                    Navigator.of(context).push(
+                                    Navigator.of(context).pushReplacement(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
                                                 const HomePage()));
@@ -391,7 +404,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                      Navigator.of(context).push(
+                                      Navigator.of(context).pushReplacement(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
                                                   const HomePage()));
@@ -454,7 +467,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                     users.doc(value?.uid).set(user);
                                     login(
                                         "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                    Navigator.of(context).push(
+                                    Navigator.of(context).pushReplacement(
                                         MaterialPageRoute<void>(
                                             builder: (context) =>
                                                 const HomePage()));
@@ -465,7 +478,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            translation(context).snackBar11,
+                                                translation(context).snackBar11,
                                           ),
                                         );
                                       } else {
@@ -473,14 +486,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                             .showSnackBar(
                                           customSnackBar(
                                             content:
-                                            translation(context).snackBar10,
+                                                translation(context).snackBar10,
                                           ),
                                         );
                                       }
                                     } else {
                                       login(
                                           "${FirebaseAuth.instance.currentUser?.photoURL}");
-                                      Navigator.of(context).push(
+                                      Navigator.of(context).pushReplacement(
                                           MaterialPageRoute<void>(
                                               builder: (context) =>
                                                   const HomePage()));
@@ -539,8 +552,7 @@ class _WelcomePageState extends State<WelcomePage> {
         if (e.code == 'account-exists-with-different-credential') {
           ScaffoldMessenger.of(context).showSnackBar(
             customSnackBar(
-              content:
-              translation(context).snackBar13,
+              content: translation(context).snackBar13,
             ),
           );
         } else if (e.code == 'invalid-credential') {
