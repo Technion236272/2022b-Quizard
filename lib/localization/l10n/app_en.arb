@@ -53,6 +53,7 @@
   "snackBar25": "Email already exists",
   "snackBar26": "Username can't be empty",
   "snackBar27": "Username can't have '@' in it",
+  "snackBar28": "swipe right to delete",
   "passwordChanged": "Changed password successfully",
   "somethingIsWrong": "Something went wrong",
   "selectAvatar": "Select your avatar by clicking the photo below",
@@ -150,8 +151,18 @@
   "game": " Game ",
   "players1": " Players)",
   "gameExited": "Game Exited",
-  "kickReason": "You were kicked from the game because\n your app has been paused.",
+  "kickReason": "You were kicked from the game because\nyour app has been paused.",
   "ok": "OK",
   "bonus": "Bonus!",
-  "correct": "Correct!"
+  "correct": "Correct!",
+  "notFound": "Not Found",
+  "alreadyAFriend": "Already A Friend",
+  "find": "Find",
+  "addFriend": "Add Friend",
+  "wins1": "wins: ",
+  "findFriend": "Find Friend",
+  "friendsEmailOrUsername": "Friend's name or email",
+  "deleteFriend": "Delete Friend",
+  "confirmDeletion2": "Are you sure you wish to delete this friend?",
+  "addFriendsHere": "Add Friends Here."
 }
