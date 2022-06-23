@@ -230,7 +230,8 @@ class ChangeEmailForm extends StatelessWidget {
                         if (user["email"] == enteredEmail) {
                           foundUser = true;
                           Navigator.of(context).pop(true);
-                          constSnackBar(translation(context).snackBar25, context);
+                          constSnackBar(
+                              translation(context).snackBar25, context);
                         }
                       }
                     });
@@ -313,12 +314,12 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                         width: 95,
                         child: value == null
                             ? Text(Localization.getLocale(context),
-                        style: TextStyle(fontSize: 17)) : Text(value!.name,
-                            style: TextStyle(fontSize: 17)),),
+                                style: TextStyle(fontSize: 17))
+                            : Text(value!.name, style: TextStyle(fontSize: 17)),
+                      ),
                       DropdownButton<Language>(
                           icon: Icon(Icons.arrow_drop_down),
-                          underline: Container(
-                          ),
+                          underline: Container(),
                           style: TextStyle(fontSize: 18, color: Colors.black),
                           items: Language.languageList()
                               .map(
@@ -500,16 +501,16 @@ class Settings extends StatelessWidget {
                 if (result != null) {
                   Uint8List? fileBytes = result.files.first.bytes;
                   await ref.putData(fileBytes!);
+                  final url = await ref.getDownloadURL();
+                  loginModel.setUserImageUrl(url);
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(
+                        content: Text(translation(context).changedAvatar),
+                      ))
+                      .closed
+                      .then((value) =>
+                          ScaffoldMessenger.of(context).clearSnackBars());
                 }
-                final url = await ref.getDownloadURL();
-                loginModel.setUserImageUrl(url);
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(
-                      content: Text(translation(context).changedAvatar),
-                    ))
-                    .closed
-                    .then((value) =>
-                        ScaffoldMessenger.of(context).clearSnackBars());
                 break;
               case _changeUsernameText:
                 showDialog(
@@ -553,7 +554,10 @@ class Settings extends StatelessWidget {
                 String version = pubspecMap["version"];
                 showAboutDialog(
                     context: context,
-                    applicationIcon: Image.asset("images/AboutDialogIcon.png", width: 50,),
+                    applicationIcon: Image.asset(
+                      "images/AboutDialogIcon.png",
+                      width: 50,
+                    ),
                     applicationName: 'Quizard',
                     applicationVersion: version.split('+')[0],
                     applicationLegalese:
