@@ -194,13 +194,12 @@ class _JoinGameState extends State<JoinGame> {
                       "player${gameModel.playerIndex}.username":
                           loginModel.username
                     });
-                    debugPrint("DEBUG: gameDoc successfully updated");
                     WidgetsBinding.instance.addPostFrameCallback((_) =>
                         Navigator.of(context).push(MaterialPageRoute<void>(
                             builder: (context) => const LobbyPlayer())));
                   },
                   onError: (e) {
-                    debugPrint("ERROR: can't update gameDoc. \n$e");
+                    debugPrint("$e");
                   },
                 );
               }

@@ -47,7 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Future<void> setAvatar() async {
       final userId = loginModel.userId;
       Reference ref =
-      FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
+          FirebaseStorage.instance.ref('images/profiles/$userId.jpg');
       await ref.putData(loginModel.initAvatarBlock);
     }
 
@@ -93,8 +93,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               user["username"] == userNameController.text.trim()) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(
-              content: Text(translation(context).snackBar1),
-            ))
+                  content: Text(translation(context).snackBar1),
+                ))
                 .closed
                 .then(
                     (value) => ScaffoldMessenger.of(context).clearSnackBars());
@@ -117,27 +117,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
           secondPasswordController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar2)))
+                SnackBar(content: Text(translation(context).snackBar2)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
         return;
       }
 
-      if (userNameController.text.trim().length < 1 || userNameController.text.trim().length > 12 ) {
+      if (userNameController.text.trim().length < 1 ||
+          userNameController.text.trim().length > 12) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar20)))
+                SnackBar(content: Text(translation(context).snackBar20)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
         return;
       }
 
-      if(userNameController.text.contains('@')) {
+      if (userNameController.text.contains('@')) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar21)))
+                SnackBar(content: Text(translation(context).snackBar21)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -148,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .hasMatch(emailController.text.trim())) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar3)))
+                SnackBar(content: Text(translation(context).snackBar3)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -158,7 +159,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (passwordController.text != secondPasswordController.text) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar4)))
+                SnackBar(content: Text(translation(context).snackBar4)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -167,7 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (passwordController.text.trim().length < 6) {
         ScaffoldMessenger.of(context)
             .showSnackBar(
-            SnackBar(content: Text(translation(context).snackBar5)))
+                SnackBar(content: Text(translation(context).snackBar5)))
             .closed
             .then((value) => ScaffoldMessenger.of(context).clearSnackBars());
         loginModel.toggleLogging();
@@ -199,7 +200,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Image(
                             image:
-                            AssetImage('images/titles/almost_there.png'))),
+                                AssetImage('images/titles/almost_there.png'))),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(

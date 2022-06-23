@@ -23,7 +23,6 @@ class Rules extends StatelessWidget {
     return Scaffold(
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(
-            reverse: true,
             child: Padding(
                 padding: const EdgeInsets.all(appbarPadding),
                 child:

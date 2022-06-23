@@ -115,6 +115,9 @@ class LoadHomePage extends StatelessWidget {
             return true;
           }
         }
+        // from here, user was not found. so sign out
+        loginModel.logOut();
+        AuthModel.instance().signOut();
         return false;
       });
     }
@@ -127,6 +130,9 @@ class LoadHomePage extends StatelessWidget {
               if (snapshot.hasData && snapshot.data != null) {
                 if (snapshot.data == true) {
                   return const HomePage();
+                }
+                if (snapshot.data == false) {
+                  return const WelcomePage();
                 }
               }
               return const Center(child: CircularProgressIndicator());

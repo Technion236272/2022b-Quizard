@@ -23,8 +23,8 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   late Timer _timer;
-  bool _enableSubmitAnswer = true;
   late Countdown timerView; // used to show time only
+  bool _enableSubmitAnswer = true;
 
   @override
   void initState() {
@@ -33,6 +33,11 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
+    timerView = Countdown(
+        animation: StepTween(
+      begin: timePerScreen,
+      end: 0,
+    ).animate(_controller));
 
     final gameModel = Provider.of<GameModel>(context, listen: false);
     final gameRef = FirebaseFirestore.instance
@@ -49,11 +54,6 @@ class _FirstGameScreenState extends State<FirstGameScreen>
     gameModel.resetFalseAnswers();
     gameModel.resetSelectedAnswers();
     gameModel.falseAnswerController.text = '';
-    timerView = Countdown(
-        animation: StepTween(
-      begin: timePerScreen,
-      end: 0,
-    ).animate(_controller));
   }
 
   @override

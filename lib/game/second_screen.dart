@@ -36,7 +36,6 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     _controller = AnimationController(
         vsync: this, duration: const Duration(seconds: timePerScreen));
     _controller.forward();
-    final gameModel = Provider.of<GameModel>(context, listen: false);
     timerView = Countdown(
         animation: StepTween(
       begin: timePerScreen,
