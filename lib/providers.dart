@@ -49,6 +49,7 @@ class AuthModel with ChangeNotifier {
       "categories": [],
       "email": email,
       "questions": [],
+      "friends": [],
       "username": userName,
       "wins": 0,
       "DailyWins": 0,
@@ -104,6 +105,7 @@ class LoginModel extends ChangeNotifier {
   int _monthlyWins = 0;
   String _userImageUrl = '';
   List<Dismissible> cachedQuestionsList = [];
+  List<Dismissible> cachedFriendsList = [];
   late Uint8List initAvatarBlock;
 
   final _emailOrUsernameController = TextEditingController();
@@ -138,6 +140,7 @@ class LoginModel extends ChangeNotifier {
     _monthlyWins = 0;
     _userImageUrl = '';
     cachedQuestionsList = [];
+    cachedFriendsList = [];
     notifyListeners();
   }
 
@@ -196,6 +199,10 @@ class LoginModel extends ChangeNotifier {
   }
 
   void notifyAddedQuestion() {
+    notifyListeners();
+  }
+
+  void notifyAddedFriend() {
     notifyListeners();
   }
 

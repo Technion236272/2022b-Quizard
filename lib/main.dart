@@ -364,6 +364,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "categories": [],
                                       "email": value!.email,
                                       "questions": [],
+                                      "friends": [],
                                       "username": getUniqueUserName(
                                           value.email!.split("@")[0],
                                           allUsersName),
@@ -452,6 +453,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       "categories": [],
                                       "email": value?.email,
                                       "questions": [],
+                                      "friends": [],
                                       "username": getUniqueUserName(
                                           "${value?.email?.split("@")[0]}",
                                           allUsersName),

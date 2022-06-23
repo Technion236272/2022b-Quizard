@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quizard/profile/friends.dart';
 
 import '../consts.dart';
 import '../localization/classes/language_constants.dart';
@@ -104,11 +105,7 @@ class Profile extends StatelessWidget {
                             child: const Questions()),
                         Container(
                             color: secondaryBackgroundColor,
-                            child: const Center(
-                                child: Text(
-                              "Coming soon.",
-                              style: TextStyle(fontSize: 20),
-                            ))),
+                            child: const Friends()),
                         Container(
                             color: secondaryBackgroundColor,
                             child: const Settings()),
