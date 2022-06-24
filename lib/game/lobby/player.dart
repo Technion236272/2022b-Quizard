@@ -95,7 +95,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _categoriesTitle(
-                  'Selected Categories', 'Only the admin can set categories'),
+                  translation(context).selectedCategories, translation(context).onlyAdmin),
               _selectedCategoriesChips()
             ]));
   }
@@ -138,6 +138,23 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
     });
   }
 
+  String getLocalizedFieldValue2(String field, BuildContext context) {
+    switch (field) {
+      case "7 ROUNDS":
+        return translation(context).rounds7;
+      case "3 ROUNDS":
+        return translation(context).rounds3;
+      case "5 ROUNDS":
+        return translation(context).rounds5;
+      case "LOCKED":
+        return translation(context).locked;
+      case "UNLOCKED":
+        return translation(context).unlocked;
+    }
+    return "";
+  }
+
+
   Row _gameSettings() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       _settingsButton('PIN CODE'),
@@ -151,7 +168,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   backgroundColor:
                       MaterialStateProperty.all<Color>(lightBlueColor)),
               onPressed: null,
-              child: Text(numOfRounds))),
+              child: Text(getLocalizedFieldValue2(numOfRounds,context)))),
       FittedBox(
           child: TextButton(
               style: ButtonStyle(
@@ -162,7 +179,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   backgroundColor:
                       MaterialStateProperty.all<Color>(lightBlueColor)),
               onPressed: null,
-              child: Text(lockText)))
+              child: Text(getLocalizedFieldValue2(lockText,context))))
     ]);
   }
 
@@ -173,6 +190,17 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
       if (gameModel.isPrivate) {
         privacy = 'Private';
       }
+
+      String getLocalizedFieldValue1(String field, BuildContext context) {
+        switch (field) {
+          case "Public":
+            return translation(context).public;
+          case "Private":
+            return translation(context).private;
+        }
+        return "";
+      }
+
       return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
@@ -180,7 +208,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           child: Column(
             children: [
               Text(
-                '$privacy Game (${gameModel.getNumOfPlayers()}/$maxPlayers Players)',
+              getLocalizedFieldValue1(privacy, context) + ' (${gameModel.getNumOfPlayers()}/$maxPlayers' + translation(context).players1,
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
@@ -409,11 +437,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance.addPostFrameCallback(
+                            WidgetsBinding.instance?.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance.addPostFrameCallback(
+                              WidgetsBinding.instance?.addPostFrameCallback(
                                 (_) => _dialogGameClosed(),
                               );
                             }
@@ -438,11 +466,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance.addPostFrameCallback(
+                              WidgetsBinding.instance?.addPostFrameCallback(
                                 (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance.addPostFrameCallback(
+                                WidgetsBinding.instance?.addPostFrameCallback(
                                   (_) => _dialogKickedByAdmin(),
                                 );
                               }
@@ -454,7 +482,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                                   gameModel.getPlayerIndexByUsername(
                                       loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                              WidgetsBinding.instance?.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

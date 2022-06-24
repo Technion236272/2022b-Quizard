@@ -95,7 +95,7 @@
   "goodLuck": "بالنجاح",
   "about": "اقرأ المزيد",
   "profile": "الصفحة الشخصية",
-  "play": "  الألعاب",
+  "play": "الألعاب",
   "leaderboard": "قائمة المتصدرين",
   "waitForOthers": "انتظر اللاعبين الاخرين...",
   "enterPin": "ادخل رمز PIN من فضلك",
@@ -163,5 +163,9 @@
   "friendsEmailOrUsername": "الاسم الشخصي او البريد الالكتروني",
   "deleteFriend": "محو صديق",
   "confirmDeletion2": "اانت متاكد من محو الصديق؟",
-  "addFriendsHere": "قم باضافة الاصدقاء."
+  "addFriendsHere": "قم باضافة الاصدقاء.",
+  "public": "لعبة عامة",
+  "private": "لعبة خاصة",
+  "selectedCategories": "الفئات المختارة",
+  "onlyAdmin": "فقط المسؤول يستطيع اختيار الفئات"
 }

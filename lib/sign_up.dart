@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home.dart';
+import 'localization/classes/language.dart';
 import 'localization/classes/language_constants.dart';
 import 'providers.dart';
 import 'consts.dart';
@@ -178,6 +179,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      var local = Localization.getLocale(context);
+      String assetImage = 'images/titles/almost_there.png';
+      if(local == "עברית")
+      {
+        assetImage = 'images/titles/almost_there_he.png';
+      }
+      if(local == "اَلْعَرَبِيَّةُ")
+      {
+        assetImage = 'images/titles/almost_there_ar.png';
+      }
       return Scaffold(
           body: SingleChildScrollView(
               reverse: true, // Helps to see the whole form
@@ -196,11 +207,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             })
                       ],
                     ),
-                    const Padding(
+                    Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Image(
-                            image:
-                                AssetImage('images/titles/almost_there.png'))),
+                            image: AssetImage(assetImage))),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(

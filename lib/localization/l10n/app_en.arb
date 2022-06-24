@@ -96,7 +96,7 @@
   "goodLuck": "Good luck,",
   "about": "About",
   "profile": "Profile",
-  "play": "  Play",
+  "play": "Play",
   "leaderboard": "Leaderboard",
   "waitForOthers": "Waiting for other players...",
   "enterPin": "Please enter a PIN Code",
@@ -164,5 +164,9 @@
   "friendsEmailOrUsername": "Friend's name or email",
   "deleteFriend": "Delete Friend",
   "confirmDeletion2": "Are you sure you wish to delete this friend?",
-  "addFriendsHere": "Add Friends Here."
+  "addFriendsHere": "Add Friends Here.",
+  "public": "Public game",
+  "private": "Private game",
+  "selectedCategories": "Selected Categories",
+  "onlyAdmin": "Only the admin can set categories"
 }

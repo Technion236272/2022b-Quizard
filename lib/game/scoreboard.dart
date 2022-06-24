@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../consts.dart';
 import '../home.dart';
+import '../localization/classes/language.dart';
 import '../providers.dart';
 import 'package:quizard/localization/classes/language_constants.dart';
 
@@ -155,11 +156,22 @@ class _ScoreBoardState extends State<ScoreBoard> {
               children: players);
         }
 
+        var local = Localization.getLocale(context);
+        String assetImage = 'images/titles/winner.png';
+        if(local == "עברית")
+        {
+          assetImage = 'images/titles/winner_he.png';
+        }
+        if(local == "اَلْعَرَبِيَّةُ")
+        {
+          assetImage = 'images/titles/winner_ar.png';
+        }
+
         return Center(
             child: Column(children: [
-          const Padding(
+          Padding(
               padding: EdgeInsets.symmetric(vertical: 50),
-              child: Image(image: AssetImage('images/titles/winner.png'))),
+              child: Image(image: AssetImage(assetImage))),
           FutureBuilder(
               future: _getUsersIdsOnce(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
