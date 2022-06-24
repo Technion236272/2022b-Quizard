@@ -262,6 +262,10 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           return translation(context).rounds5;
         case "7 ROUNDS":
           return translation(context).rounds7;
+        case "Public":
+          return translation(context).public;
+        case "Private":
+          return translation(context).private;
       }
 
       return "";
@@ -338,6 +342,15 @@ class _LobbyAdminState extends State<LobbyAdmin> {
   }
 
   Consumer<GameModel> _lobbyTitle() {
+    String getLocalizedFieldValue1(String field, BuildContext context) {
+      switch (field) {
+        case "Public":
+          return translation(context).public;
+        case "Private":
+          return translation(context).private;
+      }
+      return "";
+    }
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       String privacy = 'Public';
       final gameModel = Provider.of<GameModel>(context, listen: false);
@@ -352,7 +365,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           child: Column(
             children: [
               Text(
-                '$privacy' + translation(context).game + '($numOfPlayers/$maxPlayers' + translation(context).players1,
+                getLocalizedFieldValue1(privacy, context) + ' ($numOfPlayers/$maxPlayers' + translation(context).players1,
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,

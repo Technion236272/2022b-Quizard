@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
 
 import 'join_game.dart';
+import 'localization/classes/language.dart';
 import 'quick_play.dart';
 import 'ModelClasses/leader_board_model.dart';
 import 'game/lobby/admin.dart';
@@ -20,6 +21,16 @@ class Rules extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var local = Localization.getLocale(context);
+    String assetImage = 'images/titles/rules.png';
+    if(local == "עברית")
+    {
+      assetImage = 'images/titles/rules_he.png';
+    }
+    if(local == "اَلْعَرَبِيَّةُ")
+    {
+      assetImage = 'images/titles/rules_ar.png';
+    }
     return Scaffold(
         backgroundColor: backgroundColor,
         body: SingleChildScrollView(
@@ -40,7 +51,7 @@ class Rules extends StatelessWidget {
                               Navigator.of(context).pop();
                             })
                       ]),
-                  const Image(image: AssetImage('images/titles/rules.png')),
+                  Image(image: AssetImage(assetImage)),
                   const Padding(padding: EdgeInsets.all(10)),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -440,6 +451,44 @@ class _PlayState extends State<Play> {
     }
 
     return Consumer<LoginModel>(builder: (context, loginModel, child) {
+      var local = Localization.getLocale(context);
+      late InkWell playOptionButton1;
+      late InkWell playOptionButton2;
+      late InkWell playOptionButton3;
+      late InkWell playOptionButton4;
+
+      if (local == 'English') {
+        playOptionButton1 = _playOptionButton('images/titles/quick_play.png');
+        playOptionButton2 =
+            _playOptionButton('images/titles/create_public.png');
+        playOptionButton3 =
+            _playOptionButton('images/titles/join_existing.png');
+        playOptionButton4 =
+            _playOptionButton('images/titles/create_private.png');
+      }
+
+      if (local == 'עברית') {
+        playOptionButton1 =
+            _playOptionButton('images/titles/quick_play_he.png');
+        playOptionButton2 =
+            _playOptionButton('images/titles/create_public_he.png');
+        playOptionButton3 =
+            _playOptionButton('images/titles/join_existing_he.png');
+        playOptionButton4 =
+            _playOptionButton('images/titles/create_private_he.png');
+      }
+
+      if (local == 'اَلْعَرَبِيَّةُ') {
+        playOptionButton1 =
+            _playOptionButton('images/titles/quick_play_ar.png');
+        playOptionButton2 =
+            _playOptionButton('images/titles/create_public_ar.png');
+        playOptionButton3 =
+            _playOptionButton('images/titles/join_existing_ar.png');
+        playOptionButton4 =
+            _playOptionButton('images/titles/create_private_ar.png');
+      }
+
       return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -458,24 +507,16 @@ class _PlayState extends State<Play> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                            child: _playOptionButton(
-                                'images/titles/quick_play.png')),
-                        Expanded(
-                            child: _playOptionButton(
-                                'images/titles/create_public.png')),
+                        Expanded(child: playOptionButton1),
+                        Expanded(child: playOptionButton2),
                       ],
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                            child: _playOptionButton(
-                                'images/titles/join_existing.png')),
-                        Expanded(
-                            child: _playOptionButton(
-                                'images/titles/create_private.png')),
+                        Expanded(child: playOptionButton3),
+                        Expanded(child: playOptionButton4),
                       ],
                     ),
                   ],
