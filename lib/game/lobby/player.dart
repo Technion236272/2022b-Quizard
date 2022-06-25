@@ -451,7 +451,6 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                           } else {
                             gameModel.update(game);
-                            debugPrint(gameModel.players.toString());
                             if (game["is_locked"]) {
                               lockText = "LOCKED";
                             } else {

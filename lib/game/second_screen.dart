@@ -308,7 +308,8 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                   ])));
         } else {
           // if time out
-          if (timerView.animation.value == 0) {
+          if (timerView.animation.value == 0 &&
+              gameModel.selectedAnswer == " ") {
             return const Padding(
                 padding: EdgeInsets.only(top: 30),
                 child: ShowUp(

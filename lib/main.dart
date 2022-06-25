@@ -175,7 +175,6 @@ class _WelcomePageState extends State<WelcomePage> {
 
     Future<void> _goToHomePage() async {
       final uid = loginModel.userId;
-      //TODO: Support also .png files
       final ref = FirebaseStorage.instance.ref('images/profiles/$uid.jpg');
       final url = await ref.getDownloadURL();
       loginModel.setUserImageUrl(url);
@@ -524,7 +523,8 @@ class _WelcomePageState extends State<WelcomePage> {
                         Text(translation(context).noAccount),
                         InkWell(
                             child: Text(translation(context).signUp,
-                            style: const TextStyle(color: facebookBlueColor)),
+                                style:
+                                    const TextStyle(color: facebookBlueColor)),
                             onTap: () => _signUpPrep())
                       ])
                 ]),
