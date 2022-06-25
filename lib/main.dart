@@ -106,11 +106,12 @@ class LoadHomePage extends StatelessWidget {
             }
             if (currentUser.photoURL != null) {
               loginModel.setUserImageUrl(currentUser.photoURL!);
+            } else {
+              final ref = FirebaseStorage.instance
+                  .ref('images/profiles/${user.id}.jpg');
+              final url = await ref.getDownloadURL();
+              loginModel.setUserImageUrl(url);
             }
-            final ref =
-                FirebaseStorage.instance.ref('images/profiles/${user.id}.jpg');
-            final url = await ref.getDownloadURL();
-            loginModel.setUserImageUrl(url);
             loginModel.logIn();
             return true;
           }
