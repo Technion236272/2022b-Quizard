@@ -10,6 +10,7 @@ const secondaryBackgroundColor = Color.fromRGBO(248, 248, 248, 1);
 const redColor = Color.fromRGBO(230, 124, 117, 1);
 const greenColor = Color.fromRGBO(124, 220, 117, 1);
 const blueColor = Colors.blue;
+const facebookBlueColor = Color.fromRGBO(66, 103, 178, 1);
 const darkBlueColor = Color.fromARGB(125, 0, 0, 255);
 const orangeColor = Colors.orange;
 const lightBlueColor = Color(0xFFECEFF1);
