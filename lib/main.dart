@@ -523,7 +523,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       children: <Widget>[
                         Text(translation(context).noAccount),
                         InkWell(
-                            child: Text(translation(context).signUp),
+                            child: Text(translation(context).signUp,
+                            style: const TextStyle(color: facebookBlueColor)),
                             onTap: () => _signUpPrep())
                       ])
                 ]),

@@ -448,11 +448,9 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                           } else {
                             gameModel.update(game);
                             if (game["is_locked"]) {
-                              lockText =
-                                  getLocalizedFieldValue("LOCKED", context);
+                              lockText = "LOCKED";
                             } else {
-                              lockText =
-                                  getLocalizedFieldValue("UNLOCKED", context);
+                              lockText ="UNLOCKED";
                             }
                             if (game["rounds"] == 7) {
                               numOfRounds = "7 ROUNDS";
