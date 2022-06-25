@@ -94,8 +94,8 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _categoriesTitle(
-                  translation(context).selectedCategories, translation(context).onlyAdmin),
+              _categoriesTitle(translation(context).selectedCategories,
+                  translation(context).onlyAdmin),
               _selectedCategoriesChips()
             ]));
   }
@@ -117,7 +117,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(
                     content: Text(translation(context).copied +
-                        "${gameModel.pinCode}" +
+                        gameModel.pinCode +
                         translation(context).toClipboard),
                     duration: const Duration(days: 365),
                     action: SnackBarAction(
@@ -154,7 +154,6 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
     return "";
   }
 
-
   Row _gameSettings() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       _settingsButton('PIN CODE'),
@@ -168,7 +167,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   backgroundColor:
                       MaterialStateProperty.all<Color>(lightBlueColor)),
               onPressed: null,
-              child: Text(getLocalizedFieldValue2(numOfRounds,context)))),
+              child: Text(getLocalizedFieldValue2(numOfRounds, context)))),
       FittedBox(
           child: TextButton(
               style: ButtonStyle(
@@ -179,7 +178,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                   backgroundColor:
                       MaterialStateProperty.all<Color>(lightBlueColor)),
               onPressed: null,
-              child: Text(getLocalizedFieldValue2(lockText,context))))
+              child: Text(getLocalizedFieldValue2(lockText, context))))
     ]);
   }
 
@@ -208,7 +207,9 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
           child: Column(
             children: [
               Text(
-              getLocalizedFieldValue1(privacy, context) + ' (${gameModel.getNumOfPlayers()}/$maxPlayers' + translation(context).players1,
+                getLocalizedFieldValue1(privacy, context) +
+                    ' (${gameModel.getNumOfPlayers()}/$maxPlayers' +
+                    translation(context).players1,
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
@@ -315,9 +316,12 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
         final participantsList = [
           _participant(gameModel.players[0]["username"], true)
         ];
-        for (int i = 1; i < gameModel.getNumOfPlayers(); i++) {
-          participantsList
-              .add(_participant(gameModel.players[i]["username"], false));
+        for (int i = 1; i < maxPlayers; i++) {
+          String currUsername = gameModel.players[i]["username"];
+          if (currUsername != "") {
+            participantsList
+                .add(_participant(gameModel.players[i]["username"], false));
+          }
         }
         return ListView(
             physics: const NeverScrollableScrollPhysics(),
@@ -437,20 +441,21 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                         if (snapshot.hasData) {
                           var game = snapshot.data!;
                           if (!game.exists) {
-                            WidgetsBinding.instance?.addPostFrameCallback(
+                            WidgetsBinding.instance.addPostFrameCallback(
                               (_) => Navigator.of(context).pop(),
                             );
                             if (gameModel.pinCode != 'null') {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => _dialogGameClosed(),
                               );
                             }
                           } else {
                             gameModel.update(game);
+                            debugPrint(gameModel.players.toString());
                             if (game["is_locked"]) {
                               lockText = "LOCKED";
                             } else {
-                              lockText ="UNLOCKED";
+                              lockText = "UNLOCKED";
                             }
                             if (game["rounds"] == 7) {
                               numOfRounds = "7 ROUNDS";
@@ -464,11 +469,11 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                             }
                             if (!gameModel
                                 .doesUsernameExist(loginModel.username)) {
-                              WidgetsBinding.instance?.addPostFrameCallback(
+                              WidgetsBinding.instance.addPostFrameCallback(
                                 (_) => Navigator.of(context).pop(),
                               );
                               if (gameModel.pinCode != 'null') {
-                                WidgetsBinding.instance?.addPostFrameCallback(
+                                WidgetsBinding.instance.addPostFrameCallback(
                                   (_) => _dialogKickedByAdmin(),
                                 );
                               }
@@ -480,7 +485,7 @@ class _LobbyPlayerState extends State<LobbyPlayer> {
                                   gameModel.getPlayerIndexByUsername(
                                       loginModel.username);
                               gameModel.playerIndex = participantIndex;
-                              WidgetsBinding.instance?.addPostFrameCallback((_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

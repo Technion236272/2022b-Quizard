@@ -141,10 +141,12 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                   String optionText;
                   if (option[2] == 1) {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} " + translation(context).question1;
+                        "${option[0]}, by ${option[1]}, ${option[2]} " +
+                            translation(context).question1;
                   } else {
                     optionText =
-                        "${option[0]}, by ${option[1]}, ${option[2]} " + translation(context).questions1;
+                        "${option[0]}, by ${option[1]}, ${option[2]} " +
+                            translation(context).questions1;
                   }
                   return GestureDetector(
                     onTap: () {
@@ -270,6 +272,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
 
       return "";
     }
+
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       final gameRef = FirebaseFirestore.instance
           .collection('$firestoreMainPath/${gameModel.gamePath}')
@@ -289,8 +292,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     Clipboard.setData(ClipboardData(text: gameModel.pinCode));
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(
-                          content:
-                              Text(translation(context).copied + "${gameModel.pinCode}" + translation(context).toClipboard),
+                          content: Text(translation(context).copied +
+                              gameModel.pinCode +
+                              translation(context).toClipboard),
                           duration: const Duration(days: 365),
                           action: SnackBarAction(
                             label: translation(context).dismiss,
@@ -328,8 +332,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
                     break;
                 }
               },
-              child: Text(getLocalizedFieldValue(text, context))
-              ));
+              child: Text(getLocalizedFieldValue(text, context))));
     });
   }
 
@@ -351,6 +354,7 @@ class _LobbyAdminState extends State<LobbyAdmin> {
       }
       return "";
     }
+
     return Consumer<GameModel>(builder: (context, gameModel, child) {
       String privacy = 'Public';
       final gameModel = Provider.of<GameModel>(context, listen: false);
@@ -365,7 +369,9 @@ class _LobbyAdminState extends State<LobbyAdmin> {
           child: Column(
             children: [
               Text(
-                getLocalizedFieldValue1(privacy, context) + ' ($numOfPlayers/$maxPlayers' + translation(context).players1,
+                getLocalizedFieldValue1(privacy, context) +
+                    ' ($numOfPlayers/$maxPlayers' +
+                    translation(context).players1,
                 style: const TextStyle(
                     fontSize: 18,
                     color: defaultColor,
