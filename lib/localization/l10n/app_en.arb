@@ -68,7 +68,6 @@
   "infoText8": "-You will get a number of points equal to the seconds in your timer for every correct answer.",
   "infoText9": "-If someone chose your answer, you will get a number of points equal to the seconds in their timer.",
   "infoText10": "-If you answer correctly multiple times in a row, you will get 10 points multiplied by the same number of the times in a row you answered correctly.",
-  "infoText11": "-The faster",
   "roundGameplay": "Round Gameplay",
   "bonuses": "Bonuses",
   "calcPoints": "Game Score Calculator",

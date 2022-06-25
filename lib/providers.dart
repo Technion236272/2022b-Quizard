@@ -535,6 +535,7 @@ class GameModel extends ChangeNotifier {
         "round_score": 0
       }
     ];
+    _gamePath = "custom_games";
     roundsPerGame = 5;
     currentQuestionIndex = 0;
     playerIndex = 0;
