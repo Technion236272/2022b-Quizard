@@ -31,67 +31,6 @@
           }
         },
         {
-          "client_id": "510806764101-tou8gseb2q5l0g1em4qqtht4q1aev0p2.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.technion.quizard",
-            "certificate_hash": "3a0e96a489cb8a8ab87a2dca87addc0f648be395"
-          }
-        },
-        {
-          "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAWSIGP48jsqdswame9s_Aar9eHqK8BQSE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:510806764101:android:ac1ed969e7434aced0512c",
-        "android_client_info": {
-          "package_name": "com.technion.quizard1"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "510806764101-02i597bol08f8vm1q5nhd731hn050tv8.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.technion.quizard1",
-            "certificate_hash": "3a0e96a489cb8a8ab87a2dca87addc0f648be395"
-          }
-        },
-        {
-          "client_id": "510806764101-g33l7794gq68s45b3c4vl5fjof5r8c8q.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.technion.quizard1",
-            "certificate_hash": "4904b3215921dc9e7a86e6e37f99f53863c8b9b5"
-          }
-        },
-        {
-          "client_id": "510806764101-pvuhcj6024n1ql7j93gsqc7asdui195o.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.technion.quizard1",
-            "certificate_hash": "9bceae82f3ed7e463336ae363d230b8ee2bd16a5"
-          }
-        },
-        {
           "client_id": "510806764101-9gd55c9irln268o86bg73haamveki7cb.apps.googleusercontent.com",
           "client_type": 3
         }
