@@ -27,7 +27,7 @@ class Rules extends StatelessWidget {
     {
       assetImage = 'images/titles/rules_he.png';
     }
-    if(local == "اَلْعَرَبِيَّةُ")
+    if(local == "العربية")
     {
       assetImage = 'images/titles/rules_ar.png';
     }
@@ -478,7 +478,7 @@ class _PlayState extends State<Play> {
             _playOptionButton('images/titles/create_private_he.png');
       }
 
-      if (local == 'اَلْعَرَبِيَّةُ') {
+      if (local == "العربية") {
         playOptionButton1 =
             _playOptionButton('images/titles/quick_play_ar.png');
         playOptionButton2 =

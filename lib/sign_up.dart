@@ -185,7 +185,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       {
         assetImage = 'images/titles/almost_there_he.png';
       }
-      if(local == "اَلْعَرَبِيَّةُ")
+      if(local == "العربية")
       {
         assetImage = 'images/titles/almost_there_ar.png';
       }
