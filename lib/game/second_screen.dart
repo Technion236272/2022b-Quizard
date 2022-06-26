@@ -124,11 +124,25 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     Consumer<GameModel> _quizBody(List<Map<String, dynamic>> players) {
       List<String> _getFalseAnswers() {
         List<String> falseAnswers = [];
+        int flag=0;
         for (int i = 0; i < maxPlayers; i++) {
-          if (players[i]["username"] != "" &&
-              !falseAnswers.contains(players[i]["false_answer"])) {
-            falseAnswers.add(players[i]["false_answer"]);
+          String tmp = players[i]["false_answer"];
+          if(tmp != "") {
+            tmp=tmp.toLowerCase();
           }
+          if (players[i]["username"] != "") {
+           for(int j=0 ; j< falseAnswers.length ; j++){
+            String tmpExisting= falseAnswers[j];
+            tmpExisting=tmpExisting.toLowerCase();
+            if (tmpExisting==tmp) {
+              flag=1;
+            }
+          }
+           if(flag==0){
+               falseAnswers.add(players[i]["false_answer"]);
+           }
+           flag=0;
+        }
         }
         return falseAnswers;
       }
