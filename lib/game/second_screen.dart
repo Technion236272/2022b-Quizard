@@ -128,12 +128,12 @@ class _SecondGameScreenState extends State<SecondGameScreen>
         for (int i = 0; i < maxPlayers; i++) {
           String tmp = players[i]["false_answer"];
           if(tmp != "") {
-            tmp=tmp.toLowerCase();
+            tmp=tmp.toLowerCase().trim();
           }
           if (players[i]["username"] != "") {
            for(int j=0 ; j< falseAnswers.length ; j++){
             String tmpExisting= falseAnswers[j];
-            tmpExisting=tmpExisting.toLowerCase();
+            tmpExisting=tmpExisting.toLowerCase().trim();
             if (tmpExisting==tmp) {
               flag=1;
             }
