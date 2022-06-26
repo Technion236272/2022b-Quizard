@@ -65,9 +65,14 @@ class _FindFriendPageState extends State<FindFriendPage> {
           .update({
         "friends": friends,
       });
-
       Provider.of<LoginModel>(context, listen: false).notifyAddedFriend();
-
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(
+        content: Text(translation(context).snackBar29),
+      ))
+          .closed
+          .then(
+              (value) => ScaffoldMessenger.of(context).clearSnackBars());
       setState(() {
         foundFriend = false;
       });

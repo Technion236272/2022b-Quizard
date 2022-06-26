@@ -329,11 +329,10 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceAround,
                                       children: <Widget>[
-                                        Text(
-                                          e.flag,
-                                          style: const TextStyle(fontSize: 30),
-                                        ),
-                                        Text(e.name)
+                                            FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Text(e.name),
+                                          ),
                                       ],
                                     )),
                               )

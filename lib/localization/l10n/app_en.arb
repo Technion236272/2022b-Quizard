@@ -54,6 +54,7 @@
   "snackBar26": "Username can't be empty",
   "snackBar27": "Username can't have '@' in it",
   "snackBar28": "swipe right to delete",
+  "snackBar29": "Friend was added successfully",
   "passwordChanged": "Changed password successfully",
   "somethingIsWrong": "Something went wrong",
   "selectAvatar": "Select your avatar by clicking the photo below",
@@ -167,5 +168,7 @@
   "public": "Public game",
   "private": "Private game",
   "selectedCategories": "Selected Categories",
-  "onlyAdmin": "Only the admin can set categories"
+  "onlyAdmin": "Only the admin can set categories",
+  "timeOut": "Time Out",
+  "wrong": "Wrong"
 }
