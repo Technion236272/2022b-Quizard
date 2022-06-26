@@ -317,7 +317,10 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                                 style: TextStyle(fontSize: 17))
                             : Text(value!.name, style: TextStyle(fontSize: 17)),
                       ),
-                      DropdownButton<Language>(
+                    Container(
+                        width: 100.0,
+                        child:
+                        DropdownButton<Language>(
                           icon: Icon(Icons.arrow_drop_down),
                           underline: Container(),
                           style: TextStyle(fontSize: 18, color: Colors.black),
@@ -346,7 +349,7 @@ class _ChangeLanguageFormState extends State<ChangeLanguageForm> {
                                   await setLocale(language.languageCode);
                               Localization.setLocale(context, _locale);
                             }
-                          })
+                          }))
                     ]),
                   )))
         ],
