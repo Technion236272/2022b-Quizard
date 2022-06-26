@@ -20,7 +20,7 @@ class Language {
     return <Language>[
       Language(2, "", "English", "en"),
       Language(4, "", "עברית", "he"),
-      Language(3, "", "اَلْعَرَبِيَّةُ", "ar"),
+      Language(3, "", "العربية", "ar"),
     ];
   }
 }
@@ -45,7 +45,7 @@ class Localization extends StatefulWidget {
       return "עברית";
     }
     if (state?._locale?.languageCode == "ar") {
-      return "اَلْعَرَبِيَّةُ";
+      return "العربية";
     }
     return "English";
   }

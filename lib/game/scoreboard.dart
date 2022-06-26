@@ -162,7 +162,7 @@ class _ScoreBoardState extends State<ScoreBoard> {
         {
           assetImage = 'images/titles/winner_he.png';
         }
-        if(local == "اَلْعَرَبِيَّةُ")
+        if(local == "العربية")
         {
           assetImage = 'images/titles/winner_ar.png';
         }
