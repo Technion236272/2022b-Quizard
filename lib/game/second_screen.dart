@@ -38,9 +38,9 @@ class _SecondGameScreenState extends State<SecondGameScreen>
     _controller.forward();
     timerView = Countdown(
         animation: StepTween(
-      begin: timePerScreen,
-      end: 0,
-    ).animate(_controller));
+          begin: timePerScreen,
+          end: 0,
+        ).animate(_controller));
   }
 
   @override
@@ -96,18 +96,18 @@ class _SecondGameScreenState extends State<SecondGameScreen>
 
     // someone-is-exited handler
     Future.delayed(Duration(seconds: timePerScreen + 4 + gameModel.playerIndex),
-        () {
-      if (mounted) {
-        gameRef.get().then((game) {
-          for (int i = 0; i < maxPlayers; i++) {
-            if (game["player$i.selected_answer"] == "" &&
-                game["player$i.username"] != "") {
-              gameRef.update({"player$i.selected_answer": " "});
-            }
+            () {
+          if (mounted) {
+            gameRef.get().then((game) {
+              for (int i = 0; i < maxPlayers; i++) {
+                if (game["player$i.selected_answer"] == "" &&
+                    game["player$i.username"] != "") {
+                  gameRef.update({"player$i.selected_answer": " "});
+                }
+              }
+            });
           }
         });
-      }
-    });
 
     Stream<List<Map<String, dynamic>>> _streamPlayers() async* {
       final game = gameRef.snapshots();
@@ -139,7 +139,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
             _quizBodyWidgets.isEmpty) {
           List<String> falseAnswers = _getFalseAnswers();
           String correctAnswer =
-              gameModel.gameAnswers[gameModel.currentQuestionIndex];
+          gameModel.gameAnswers[gameModel.currentQuestionIndex];
           List<String> currentAnswers = [correctAnswer] + falseAnswers;
           if (_quizBodyWidgets.isEmpty) {
             // Add correct answer
@@ -187,10 +187,10 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                         child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration:
-                                const BoxDecoration(color: playOptionColor),
+                            const BoxDecoration(color: playOptionColor),
                             child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                       translation(context).score +
@@ -250,7 +250,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
 
           // calculate correct answers rewards
           String correctAnswer =
-              gameModel.gameAnswers[gameModel.currentQuestionIndex - 1];
+          gameModel.gameAnswers[gameModel.currentQuestionIndex - 1];
           for (int j = 0; j < maxPlayers; j++) {
             int jReward = 0;
             if (players[j]["username"] != "") {
@@ -310,24 +310,24 @@ class _SecondGameScreenState extends State<SecondGameScreen>
           // if time out
           if (timerView.animation.value == 0 &&
               gameModel.selectedAnswer == " ") {
-            return const Padding(
+            return Padding(
                 padding: EdgeInsets.only(top: 30),
                 child: ShowUp(
                     delay: 100,
-                    child: Text("Time Out",
-                        style: TextStyle(
+                    child: Text(translation(context).timeOut,
+                        style: const TextStyle(
                             fontSize: 24,
                             color: redColor,
                             fontWeight: FontWeight.bold,
                             shadows: wrongShadows))));
           } else {
             // else wrong answer
-            return const Padding(
+            return Padding(
                 padding: EdgeInsets.only(top: 30),
                 child: ShowUp(
                     delay: 100,
-                    child: Text("Wrong",
-                        style: TextStyle(
+                    child: Text(translation(context).wrong,
+                        style: const TextStyle(
                             fontSize: 24,
                             color: redColor,
                             fontWeight: FontWeight.bold,
@@ -374,7 +374,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                               context,
                               MaterialPageRoute<void>(
                                   builder: (BuildContext context) =>
-                                      const ScoreBoard()));
+                                  const ScoreBoard()));
                         });
                       } else {
                         _delayNavigator = Timer(
@@ -383,7 +383,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
                             context,
                             PageRouteBuilder(
                               pageBuilder: (context, animation1, animation2) =>
-                                  const FirstGameScreen(),
+                              const FirstGameScreen(),
                               transitionDuration: Duration.zero,
                               reverseTransitionDuration: Duration.zero,
                             ),
@@ -420,7 +420,7 @@ class _SecondGameScreenState extends State<SecondGameScreen>
             backgroundColor: backgroundColor,
             body: SingleChildScrollView(
                 child:
-                    Column(children: [_secondScreenBody(), _statusMessage()]))),
+                Column(children: [_secondScreenBody(), _statusMessage()]))),
         // won't let pop
         onWillPop: () => Future<bool>.value(false));
   }

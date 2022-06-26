@@ -167,5 +167,7 @@
   "public": "Public game",
   "private": "Private game",
   "selectedCategories": "Selected Categories",
-  "onlyAdmin": "Only the admin can set categories"
+  "onlyAdmin": "Only the admin can set categories",
+  "timeOut": "Time Out",
+  "wrong": "Wrong"
 }
