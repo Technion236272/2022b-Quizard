@@ -4,7 +4,6 @@
 
 * Android Studio IDE (Easy , Git friendly , quick fixes)
 * GitHub GUI(for easy use)
-* 
 -----------------------------------------------------------------------------------------------------------
 
 
@@ -13,8 +12,8 @@
 * After downloading the IDE, please use "clone project" to clone the project to your pc.
 * Open a new branch , checkout the main branch to it .
 * Now you can view/edit/delete/add code to the project.
---
-* We made sure to name every screen page accordingly to its use so here you can find multiple screen such as : 
+
+We made sure to name every screen page accordingly to its use so here you can find multiple screen such as : 
 * main.dart : for the start screen
 * sign_up.dart : for the signup screen
 * profile.dart : Player's profile screen
