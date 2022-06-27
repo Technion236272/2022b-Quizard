@@ -18,7 +18,6 @@ In the modern time, many peaople attracted to habbits which don't contribute to 
 
 * [ ] Signup and login with Google and Facebook.
 * [ ] Participants leaderboard.
-* [ ] Group chat.
 * [ ] Game room settings(Appearance, Language, etc..).
 ----
 ## Table of Contents 

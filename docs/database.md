@@ -8,7 +8,8 @@
 
 * As asked we put the whole structure in a Versions folder which contains V1 folder which is our Sprint 1 work 
 * We are going to make other Folder name V2 for the second sprint which will be the final result of our project
-* The Database inside V1 is understandable and easy to use since we dont have a large DB, 
+* The Database inside V2 is understandable and easy to use since we dont have a large DB,
+* We are using official_questions from V1 .
 * We have Three Collections :
 * custom_games
 * official_questions
