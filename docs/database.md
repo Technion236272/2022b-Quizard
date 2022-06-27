@@ -1,6 +1,6 @@
 # Database:
 
-* You will need access to our firebase project 
+* You will need access to our firebase project -- We are using V2 collection in firebase as our final collection
 -----------------------------------------------------------------------------------------------------------
 
 
