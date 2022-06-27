@@ -19,8 +19,9 @@ In the modern time, many peaople attracted to habbits which don't contribute to 
 ## Complementary features
 
 * [ ] Signup and login with Google and Facebook.
-* [ ] Participants leaderboard.
-* [ ] Game room settings(Appearance, Language, etc..).
+* [ ] Participants leaderboard for Quick Play mode.
+* [ ] Game room settings(Number of rounds, Lock room, etc..).
+* [ ] Choose app language: English, hebrew or Arabic
 ----
 ## Table of Contents 
 [ Database ](https://github.com/Technion236272/2022b-Quizard/blob/develop/docs/database.md)<br>
